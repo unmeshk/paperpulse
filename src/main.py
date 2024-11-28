@@ -3,7 +3,7 @@ import openai
 
 import urllib.request as libreq
 import time
-from datetime import date, timedelta
+from datetime import datetime, date, timedelta, timezone
 import xml.etree.ElementTree as ET
 
 # Initialize lists to store paper information and URLs
@@ -41,60 +41,77 @@ def identify_important_papers(paper_info_list):
 
     return important_paper_titles
 
-def process_data(data):
+def process_data(entry):
     """Parses the retrieved data, extracts information, and populates the lists."""
     
-    root = ET.fromstring(data)
-    entries = root.findall('{http://www.w3.org/2005/Atom}entry')
-    for entry in entries:
-        title = entry.find('{http://www.w3.org/2005/Atom}title').text
-        authors = [author.find('{http://www.w3.org/2005/Atom}name').text 
-                   for author in entry.findall('{http://www.w3.org/2005/Atom}author')]
-        summary = entry.find('{http://www.w3.org/2005/Atom}summary').text
-        url = entry.find('{http://www.w3.org/2005/Atom}id').text
+    title = entry.find('{http://www.w3.org/2005/Atom}title').text
+    authors = [author.find('{http://www.w3.org/2005/Atom}name').text 
+                for author in entry.findall('{http://www.w3.org/2005/Atom}author')]
+    summary = entry.find('{http://www.w3.org/2005/Atom}summary').text
+    url = entry.find('{http://www.w3.org/2005/Atom}id').text
 
-        combined_info = f"**Title:** {title}\n**Authors:** {', '.join(authors)}\n**Summary:** {summary}\n"
-        paper_info_list.append(combined_info)
-        paper_url_list.append(url)
+    combined_info = f"**Title:** {title}\n**Authors:** {', '.join(authors)}\n**Summary:** {summary}\n"
+    paper_info_list.append(combined_info)
+    paper_url_list.append(url)
 
 
-def fetch_arxiv_data(search_query, sort_by, sort_order, start, max_results):
-    """Fetches data from the arXiv API."""
-    url = f'http://export.arxiv.org/api/query?search_query={search_query}&sortBy={sort_by}&sortOrder={sort_order}&start={start}&max_results={max_results}'
-    print(url)
-    with libreq.urlopen(url) as response:
-        data = response.read()
-    return data
 
-def parse_total_results(data):
-    """Parses the XML data to extract the total number of results."""
-    root = ET.fromstring(data)
-    return int(root.find('{http://a9.com/-/spec/opensearch/1.1/}totalResults').text)
+def retrieve_weekly_results(search_query, sort_by, sort_order):
+    """
+    Retrieves all result for the last week.
+    Retrieves results 10 at a time, starting from a week ago and continuing
+    till the latest paper is retrieved. 
+    """
 
-def retrieve_daily_results(search_query, sort_by, sort_order, current_date):
-    """Retrieves all results for a given day."""
+    # Define the desired timezone - using UTC for consistency
+    desired_timezone = timezone.utc 
+
+    # Calculate the date one week ago in the desired timezone
+    one_week_ago = datetime.now(desired_timezone) - timedelta(days=7)
+
     start = 0
     max_results = 10  # You can adjust this if needed, but stay within API limits
-    data = fetch_arxiv_data(search_query, sort_by, sort_order, start, max_results)
-    total_results = parse_total_results(data)
-    print(f'Total results: {total_results}')
-    while start < total_results:
-        data = fetch_arxiv_data(search_query, sort_by, sort_order, start, max_results)
-        process_data(data)
+
+    while True:
+        url = f'http://export.arxiv.org/api/query?search_query={search_query}&sortBy={sort_by}&sortOrder={sort_order}&start={start}&max_results={max_results}'
+        print(url)
+        
+        with libreq.urlopen(url) as response:
+            data = response.read()
+            root = ET.fromstring(data)
+
+            # Check if any entries were returned
+            if len(root.findall('{http://www.w3.org/2005/Atom}entry')) == 0:
+                break
+
+            for entry in root.findall('{http://www.w3.org/2005/Atom}entry'):
+                updated_date_str = entry.find('{http://www.w3.org/2005/Atom}updated').text
+                updated_date = datetime.strptime(updated_date_str, '%Y-%m-%dT%H:%M:%S%z')
+
+                # Make sure updated_date is in the desired timezone
+                updated_date = updated_date.astimezone(desired_timezone) 
+
+
+                if updated_date >= one_week_ago:
+                    process_data(entry)
+                else:
+                    # Stop processing since entries are sorted by last updated date
+                    break
+
+        # Increment start index for the next batch
         start += max_results
-        time.sleep(3)  # Wait to avoid overloading the API
+        print(f'latest date: {updated_date}')
+        time.sleep(5)
+        if start>400:
+            break
+    
 
 def main():
     """Main function to orchestrate the retrieval process."""
-    today = date.today()
-    one_week_ago = today - timedelta(days=7)
-    current_date = one_week_ago
-    while current_date <= today:
-        print(f'Retrieving papers from {current_date}')
-        retrieve_daily_results(SEARCH_QUERY, SORT_BY, SORT_ORDER, current_date)
-        current_date += timedelta(days=1)
+    
+    retrieve_weekly_results(SEARCH_QUERY, SORT_BY, SORT_ORDER)
 
-    print(paper_info_list)
+    print(f'Number retrieved: {len(paper_info_list)}')
 
     
 
