@@ -1,0 +1,15 @@
+FROM jekyll/jekyll:4
+
+WORKDIR /srv/jekyll
+
+COPY blog/Gemfile* ./
+RUN bundle install && \
+    chown -R jekyll:jekyll /srv/jekyll
+
+USER jekyll
+
+EXPOSE 4000
+
+ENTRYPOINT ["bundle", "exec"]
+CMD ["jekyll", "serve", "--host", "0.0.0.0", "--force_polling"]
+
