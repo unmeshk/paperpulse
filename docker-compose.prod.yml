@@ -1,0 +1,29 @@
+services:
+  blog:
+    image: jekyll/jekyll:4
+    expose:
+      - "4000"
+    volumes:
+      - ./blog:/srv/jekyll
+    environment:
+      - JEKYLL_ENV=production
+    command: jekyll serve
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./blog/_site:/usr/share/nginx/html/blog
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    depends_on:
+      - blog
+
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
