@@ -2,6 +2,7 @@ import os
 import openai
 import pickle
 import re
+import logging
 
 import urllib
 import urllib.request as libreq
@@ -15,10 +16,15 @@ from utils import (
     extract_images_from_pdf_base64,
     download_pdf
     )
+from webs import create_blogpost
 from agent import summarize_paper
 
 # Load the .env file
 load_dotenv()
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(filename='myapp.log', level=logging.INFO)
+
 
 # Initialize lists to store paper information and URLs
 papers = []
@@ -168,7 +174,7 @@ def retrieve_daily_results(search_query, sort_by, sort_order):
     one_day_ago = None
 
     start = 0
-    max_results = 10  # You can adjust this if needed, but stay within API limits
+    max_results = 10  
 
     while True:
         url = f'http://export.arxiv.org/api/query?search_query={search_query}&sortBy={sort_by}&sortOrder={sort_order}&start={start}&max_results={max_results}'
@@ -184,6 +190,7 @@ def retrieve_daily_results(search_query, sort_by, sort_order):
 
             for entry in root.findall('{http://www.w3.org/2005/Atom}entry'):
                 updated_date_str = entry.find('{http://www.w3.org/2005/Atom}updated').text
+                #print(updated_date_str)
                 updated_date = datetime.strptime(updated_date_str, '%Y-%m-%dT%H:%M:%S%z')
 
                 # Make sure updated_date is in the desired timezone
@@ -294,13 +301,13 @@ def get_pdf_url(arxiv_url):
 
 
     except urllib.error.URLError as e:
-        print(f"Error: Could not retrieve data from the API. {e}")
+        logger.error(f"Error: Could not retrieve data from the API. {e}")
         return None
     except ET.ParseError as e:
-        print(f"Error: Could not parse the XML data. {e}")
+        logger.error(f"Error: Could not parse the XML data. {e}")
         return None
     except Exception as e:
-        print(f"An unexpected error occurred {e}")
+        logger.error(f"An unexpected error occurred {e}")
         return None
 
 
@@ -310,32 +317,31 @@ def main():
     """
     Main function to orchestrate the retrieval process.
     """
-    
-    papers = retrieve_daily_results(SEARCH_QUERY, SORT_BY, SORT_ORDER)
+    logger.info('Retrieving daily results')
+    #papers = retrieve_daily_results(SEARCH_QUERY, SORT_BY, SORT_ORDER)
     
     # write the retrieved stuff to file temporarily to 
     # reuse so that we don't call the API frequently. 
-    with open("papers.pkl", "wb") as file:  
-        pickle.dump(papers, file)
-    #with open('papers.pkl', 'rb') as file:  # Open in read-binary mode
-    #    papers = pickle.load(file)
+    #with open("papers.pkl", "wb") as file:  
+    #    pickle.dump(papers, file)
+    with open('papers.pkl', 'rb') as file:  # Open in read-binary mode
+        papers = pickle.load(file)
     
-    print(f'Number retrieved: {len(papers)}')
+    logger.info(f'Retrieved: {len(papers)} papers')
 
-    summary,top5 = identify_important_papers(papers)
-    print(summary)
-    print(top5)
+    #summary,top5 = identify_important_papers(papers)
+    #logger.info(f'Identified the following top 5\n{top5}')
     
 
     # write the res and paps files
-    with open("summary.txt", "w") as file:  
-        file.write(summary)
-    with open("top5papers.txt", "w") as file:  
-        file.write(top5)
-    with open("top5paper-urls.txt", "w") as file:  
-        file.write(top5)
-    #with open("summaries.txt", "r") as file:  
-    #    summary = file.read()
+    #with open("summary.txt", "w") as file:  
+    #    file.write(summary)
+    #with open("top5papers.txt", "w") as file:  
+    #    file.write(top5)
+    #with open("top5paper-urls.txt", "w") as file:  
+    #    file.write(top5)
+    with open("summary.txt", "r") as file:  
+        summary = file.read()
     #with open("papers.txt", "r") as file:  
     #    top5 = file.read()
 
@@ -343,25 +349,24 @@ def main():
     #print(top5)
 
     # map the top5 papers back to the dicts
-    top5_titles = extract_titles(top5)
-    print(top5_titles)
+    #top5_titles = extract_titles(top5)
+    #logger.info(f'Extracted the following titles: {top5_titles}')
 
     # download the entirety of these top5 papers
     #top5_dicts = filter_dicts_by_titles(papers,top5_titles)
-    #pdf_url = top5_dicts[0]['url'].replace("/abs/", "/pdf/")
-    #pdf_file = download_pdf(pdf_url,'pdf_file1.pdf')
-    pdf_file = '/tmp/pdf_file1.pdf'
-    
-    # use chatgpt to summarize the paper including why it is important, quick summary of the results, and highlight the important papers.
-    #paper_summary = summarize_paper(pdf_file)
+    #for paper in top5_dicts:
+        #pdf_url = top5_dicts[0]['url'].replace("/abs/", "/pdf/")
+        #pdf_file = download_pdf(pdf_url,'pdf_file1.pdf')
+        #pdf_file = '/tmp/pdf_file1.pdf'
+        
+        # use chatgpt to summarize the paper including why it is important, quick summary of the results, and highlight the important papers.
+        #paper_summary = summarize_paper(pdf_file)
     #with open("file1_narrative.txt", "w") as file:  
     #    file.write(paper_summary)
 
-    # Put in backend such that it runs daily and updates a website
-    
+    # write the smummary to a web page based on the day when the papers were retrieved
+    create_blogpost(summary, len(papers))
 
-    # Future: Send out a daily email digest with this info in a nice format
-    
 
 if __name__ == "__main__":
     main()
