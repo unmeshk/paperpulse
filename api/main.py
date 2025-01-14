@@ -318,18 +318,18 @@ def main():
     Main function to orchestrate the retrieval process.
     """
     logger.info('Retrieving daily results')
-    #papers = retrieve_daily_results(SEARCH_QUERY, SORT_BY, SORT_ORDER)
+    papers = retrieve_daily_results(SEARCH_QUERY, SORT_BY, SORT_ORDER)
     
     # write the retrieved stuff to file temporarily to 
     # reuse so that we don't call the API frequently. 
     #with open("papers.pkl", "wb") as file:  
     #    pickle.dump(papers, file)
-    with open('papers.pkl', 'rb') as file:  # Open in read-binary mode
-        papers = pickle.load(file)
+    #with open('papers.pkl', 'rb') as file:  # Open in read-binary mode
+    #    papers = pickle.load(file)
     
     logger.info(f'Retrieved: {len(papers)} papers')
 
-    #summary,top5 = identify_important_papers(papers)
+    summary,top5 = identify_important_papers(papers)
     #logger.info(f'Identified the following top 5\n{top5}')
     
 
@@ -340,8 +340,8 @@ def main():
     #    file.write(top5)
     #with open("top5paper-urls.txt", "w") as file:  
     #    file.write(top5)
-    with open("summary.txt", "r") as file:  
-        summary = file.read()
+    #with open("summary.txt", "r") as file:  
+    #    summary = file.read()
     #with open("papers.txt", "r") as file:  
     #    top5 = file.read()
 
