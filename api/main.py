@@ -198,7 +198,7 @@ def retrieve_daily_results(search_query, sort_by, sort_order):
 
                 if not one_day_ago:
                     one_day_ago = updated_date - timedelta(days=1)
-                    print(f'Retrieving papers for: {one_day_ago}')
+                    print(f'Retrieving new/updated papers till : {one_day_ago}')
                 
                 if updated_date > one_day_ago:
                     papers.append(process_data(entry))
@@ -212,7 +212,9 @@ def retrieve_daily_results(search_query, sort_by, sort_order):
         print(f'latest date: {updated_date}')
         time.sleep(5)
         if start>400: # never retrieve more than 400 results
-            break
+            return papers
+    
+    return papers
 
     
     
@@ -317,19 +319,28 @@ def main():
     """
     Main function to orchestrate the retrieval process.
     """
-    logger.info('Retrieving daily results')
-    papers = retrieve_daily_results(SEARCH_QUERY, SORT_BY, SORT_ORDER)
-    
-    # write the retrieved stuff to file temporarily to 
-    # reuse so that we don't call the API frequently. 
-    #with open("papers.pkl", "wb") as file:  
-    #    pickle.dump(papers, file)
-    #with open('papers.pkl', 'rb') as file:  # Open in read-binary mode
-    #    papers = pickle.load(file)
-    
-    logger.info(f'Retrieved: {len(papers)} papers')
 
-    summary,top5 = identify_important_papers(papers)
+    try:
+        logger.info('Retrieving daily results')
+        papers = retrieve_daily_results(SEARCH_QUERY, SORT_BY, SORT_ORDER)
+        
+        # write the retrieved stuff to file temporarily to 
+        # reuse so that we don't call the API frequently. 
+        #with open("papers.pkl", "wb") as file:  
+        #    pickle.dump(papers, file)
+        #with open('papers.pkl', 'rb') as file:  # Open in read-binary mode
+        #    papers = pickle.load(file)
+        
+        if not papers:
+            print('No papers retrieved')
+            return
+        
+        logger.info(f'Retrieved: {len(papers)} papers')
+
+        summary,top5 = identify_important_papers(papers)
+    except Exception as e:
+        print(f'Exception: {e.message}')
+
     #logger.info(f'Identified the following top 5\n{top5}')
     
 
