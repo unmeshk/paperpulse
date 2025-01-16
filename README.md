@@ -1,2 +1,2 @@
 # arxivsum
-Weekly summaries of Arxiv papers
+Daily summaries of Arxiv papers in ML (cs.LG)
