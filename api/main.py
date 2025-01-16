@@ -16,6 +16,7 @@ from utils import (
     extract_images_from_pdf_base64,
     download_pdf
     )
+from settings import SUMMARY_PROMPT, TOP5_PAPERS_PROMPT
 from webs import create_blogpost
 from agent import summarize_paper
 
@@ -61,21 +62,7 @@ def identify_important_papers(papers):
     combined_paper_info = "\n".join(combine_paper_info(p) for p in papers)
       
     # Construct the prompt
-    prompt_summary = (
-        """
-        You are a research scientist and professor with a PhD in machine learning. 
-        You are also an educator skilled in explaining complex scientific concepts to
-        the average technology professional. Your summaries and explanations of concepts
-        and papers in machine learning and artificial intelligence are like
-        how Neil Degrasse Tyson and Carl Sagan explain astronomy and cosmology concepts. 
-        Read through the titles and abstracts of these machine learning papers and write a 1000 to 5000 word 
-        summary of the important findings from these papers. Separate these findings into themes, 
-        group the papers as appropriate into these themes to make it easier to read. 
-        \n\n
-        PAPERS AND SUMMARIES \n
-        """
-        + combined_paper_info
-    )
+    prompt_summary = SUMMARY_PROMPT + combined_paper_info
 
     # get summaries
     messages = [
@@ -96,17 +83,7 @@ def identify_important_papers(papers):
     summaries = response.choices[0].message.content
 
     # Get the top 5 most important papers in this list
-    prompt_papers = (
-        """
-        You are a research scientist and professor with a PhD in machine learning. 
-        You are skilled at identifying important advancements in AI and machine learning.
-        Read through the titles and abstracts of these machine learning papers and identify the 5 most important 
-        papers in terms of contributions to the field of AI and machine learning.
-        \n\n
-        PAPERS AND SUMMARIES \n
-        """
-        + combined_paper_info
-    )
+    prompt_papers = TOP5_PAPERS_PROMPT + combined_paper_info
 
     # get papers
     messages = [
@@ -212,8 +189,10 @@ def retrieve_daily_results(search_query, sort_by, sort_order):
         print(f'latest date: {updated_date}')
         time.sleep(5)
         if start>400: # never retrieve more than 400 results
+            print('Found more than 400 papers')
             return papers
     
+    print('Returning from somewhere it shouldnt have')
     return papers
 
     
@@ -326,8 +305,8 @@ def main():
         
         # write the retrieved stuff to file temporarily to 
         # reuse so that we don't call the API frequently. 
-        #with open("papers.pkl", "wb") as file:  
-        #    pickle.dump(papers, file)
+        with open("papers.pkl", "wb") as file:  
+            pickle.dump(papers, file)
         #with open('papers.pkl', 'rb') as file:  # Open in read-binary mode
         #    papers = pickle.load(file)
         
@@ -345,8 +324,8 @@ def main():
     
 
     # write the res and paps files
-    #with open("summary.txt", "w") as file:  
-    #    file.write(summary)
+    with open("summary.txt", "w") as file:  
+        file.write(summary)
     #with open("top5papers.txt", "w") as file:  
     #    file.write(top5)
     #with open("top5paper-urls.txt", "w") as file:  
