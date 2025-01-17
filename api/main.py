@@ -14,7 +14,8 @@ from dotenv import load_dotenv
 from utils import (
     extract_text_from_pdf, 
     extract_images_from_pdf_base64,
-    download_pdf
+    download_pdf,
+    add_markdown_links
     )
 from settings import SUMMARY_PROMPT, TOP5_PAPERS_PROMPT
 from webs import create_blogpost
@@ -137,7 +138,7 @@ def retrieve_daily_results(search_query, sort_by, sort_order):
         sort_order (string): descending or ascending
 
     Returns:
-        list: containing dicts of parsed information about papers.
+        list: list of dicts (title, authors, summary, url) of parsed information about papers.
     """
     papers = []
     # Define the desired timezone - using UTC for consistency
@@ -305,8 +306,8 @@ def main():
         
         # write the retrieved stuff to file temporarily to 
         # reuse so that we don't call the API frequently. 
-        with open("papers.pkl", "wb") as file:  
-            pickle.dump(papers, file)
+        #with open("papers.pkl", "wb") as file:  
+        #    pickle.dump(papers, file)
         #with open('papers.pkl', 'rb') as file:  # Open in read-binary mode
         #    papers = pickle.load(file)
         
@@ -324,8 +325,8 @@ def main():
     
 
     # write the res and paps files
-    with open("summary.txt", "w") as file:  
-        file.write(summary)
+    #with open("summary.txt", "w") as file:  
+    #    file.write(summary)
     #with open("top5papers.txt", "w") as file:  
     #    file.write(top5)
     #with open("top5paper-urls.txt", "w") as file:  
@@ -354,8 +355,9 @@ def main():
     #with open("file1_narrative.txt", "w") as file:  
     #    file.write(paper_summary)
 
+    summary_linked = add_markdown_links(summary, papers)
     # write the smummary to a web page based on the day when the papers were retrieved
-    create_blogpost(summary, len(papers))
+    create_blogpost(summary_linked, len(papers))
 
 
 if __name__ == "__main__":

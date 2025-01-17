@@ -82,3 +82,33 @@ def download_pdf(pdf_url, filename):
           print(f"An unexpected error occurred during PDF download: {e}")
           return None
 
+
+def add_markdown_links(text, paper_list):
+    """
+    Replace occurrences of strings from text_list with markdown hyperlinks using corresponding urls
+    
+    Args:
+        text (str): The source markdown text
+        paper_list (list): List of dicts containing info about papers
+    
+    Returns:
+        str: Modified text with markdown hyperlinks added
+    """
+    text_list = [p['title'] for p in paper_list]
+    url_list = [p['url'] for p in paper_list]
+
+    if len(text_list) != len(url_list):
+        raise ValueError("text_list and url_list must have the same length")
+        
+    # Sort text_list and url_list by length of text (longest first)
+    # This prevents shorter strings from matching inside longer ones
+    pairs = sorted(zip(text_list, url_list), key=lambda x: len(x[0]), reverse=True)
+    
+    result = text
+    for find_text, url in pairs:
+        # Create markdown link format
+        markdown_link = f'[{find_text}]({url})'
+        # Replace all occurrences of the text with the markdown link
+        result = result.replace(find_text, markdown_link)
+        
+    return result
