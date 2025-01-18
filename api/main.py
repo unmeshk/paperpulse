@@ -11,15 +11,15 @@ from datetime import datetime, date, timedelta, timezone
 import xml.etree.ElementTree as ET
 
 from dotenv import load_dotenv
-from utils import (
+from api.utils import (
     extract_text_from_pdf, 
     extract_images_from_pdf_base64,
     download_pdf,
     add_markdown_links
     )
-from settings import SUMMARY_PROMPT, TOP5_PAPERS_PROMPT
-from webs import create_blogpost
-from agent import summarize_paper
+from api.settings import SUMMARY_PROMPT, TOP5_PAPERS_PROMPT
+from api.webs import create_blogpost
+from api.agent import summarize_paper
 
 # Load the .env file
 load_dotenv()
@@ -117,10 +117,15 @@ def process_data(entry):
     Returns:
         dict: containing the parsed values
     """
+    affiliations = []
     paper = {}
     paper['title'] = entry.find('{http://www.w3.org/2005/Atom}title').text
     paper['authors'] = [author.find('{http://www.w3.org/2005/Atom}name').text 
                 for author in entry.findall('{http://www.w3.org/2005/Atom}author')]
+    for author in entry.findall('{http://www.w3.org/2005/Atom}author'):
+        affiliation_element = author.find('{http://arxiv.org/schemas/atom}affiliation')
+        if affiliation_element is not None:
+            affiliations.append(affiliation_element.text)
     paper['summary'] = entry.find('{http://www.w3.org/2005/Atom}summary').text
     paper['url'] = entry.find('{http://www.w3.org/2005/Atom}id').text
 
