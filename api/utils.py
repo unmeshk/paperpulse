@@ -83,32 +83,139 @@ def download_pdf(pdf_url, filename):
           return None
 
 
+# def add_markdown_links(text, paper_list):
+#     """
+#     Replace occurrences of strings from text_list with markdown hyperlinks using corresponding urls
+    
+#     Args:
+#         text (str): The source markdown text
+#         paper_list (list): List of dicts containing info about papers
+    
+#     Returns:
+#         str: Modified text with markdown hyperlinks added
+#     """
+#     text_list = [p['title'] for p in paper_list]
+#     url_list = [p['url'] for p in paper_list]
+
+#     if len(text_list) != len(url_list):
+#         raise ValueError("text_list and url_list must have the same length")
+        
+#     # Sort text_list and url_list by length of text (longest first)
+#     # This prevents shorter strings from matching inside longer ones
+#     pairs = sorted(zip(text_list, url_list), key=lambda x: len(x[0]), reverse=True)
+    
+#     result = text
+#     for find_text, url in pairs:
+#         # Create markdown link format
+#         markdown_link = f'[{find_text}]({url})'
+#         # Replace all occurrences of the text with the markdown link
+#         result = result.replace(find_text, markdown_link)
+        
+#     return result
+
+def extract_year_from_url(url):
+    """
+    Extract year from arXiv URL or return None if not found
+    """
+    import re
+    # ArXiv URLs typically contain year in format YYMM
+    match = re.search(r'/(\d{2})(\d{2})\.\d+', url)
+    if match:
+        year = '20' + match.group(1)  # Convert YY to 20YY
+        return year
+    return None
+
+def get_last_names(authors_list):
+    """
+    Extract last names from list of author names
+    """
+    last_names = []
+    for author in authors_list:
+        # Split on spaces and take the last part as the last name
+        parts = author.strip().split()
+        if parts:
+            last_names.append(parts[-1])
+    return last_names
+
+def find_author_citations(text):
+    """
+    Find author citations in text in format "Author et al. (YEAR)"
+    or "Author and Author (YEAR)" or "Author (YEAR)"
+    """
+    import re
+    # Pattern matches:
+    # 1. Single author: "Smith (2023)"
+    # 2. Two authors: "Smith and Jones (2023)"
+    # 3. Multiple authors: "Smith et al. (2023)"
+    patterns = [
+        r'([A-Z][a-z]+)\s+et\s+al\.\s*\((\d{4})\)',  # Smith et al. (2023)
+        r'([A-Z][a-z]+)\s+and\s+([A-Z][a-z]+)\s*\((\d{4})\)',  # Smith and Jones (2023)
+        r'([A-Z][a-z]+)\s*\((\d{4})\)'  # Smith (2023)
+    ]
+    
+    citations = []
+    for pattern in patterns:
+        matches = re.finditer(pattern, text)
+        for match in matches:
+            if 'et al.' in match.group():
+                citations.append((match.group(1), match.group(2), match.group()))  # (author, year, full_citation)
+            elif 'and' in match.group():
+                citations.append((f"{match.group(1)} and {match.group(2)}", match.group(3), match.group()))
+            else:
+                citations.append((match.group(1), match.group(2), match.group()))
+    return citations
+
 def add_markdown_links(text, paper_list):
     """
-    Replace occurrences of strings from text_list with markdown hyperlinks using corresponding urls
+    Replace occurrences of paper titles and author citations with markdown hyperlinks
     
     Args:
         text (str): The source markdown text
-        paper_list (list): List of dicts containing info about papers
+        paper_list (list): List of dicts containing paper info with keys: 'title', 'authors', 'url'
     
     Returns:
         str: Modified text with markdown hyperlinks added
     """
-    text_list = [p['title'] for p in paper_list]
-    url_list = [p['url'] for p in paper_list]
-
-    if len(text_list) != len(url_list):
-        raise ValueError("text_list and url_list must have the same length")
-        
-    # Sort text_list and url_list by length of text (longest first)
-    # This prevents shorter strings from matching inside longer ones
-    pairs = sorted(zip(text_list, url_list), key=lambda x: len(x[0]), reverse=True)
-    
     result = text
-    for find_text, url in pairs:
-        # Create markdown link format
-        markdown_link = f'[{find_text}]({url})'
-        # Replace all occurrences of the text with the markdown link
-        result = result.replace(find_text, markdown_link)
+    
+    # First handle exact title matches (as before)
+    # Sort by length to prevent shorter titles matching within longer ones
+    title_pairs = sorted([(p['title'], p['url']) for p in paper_list], 
+                        key=lambda x: len(x[0]), 
+                        reverse=True)
+    
+    for title, url in title_pairs:
+        markdown_link = f'[{title}]({url})'
+        result = result.replace(title, markdown_link)
+    
+    # Then handle author citations
+    citations = find_author_citations(result)
+    
+    for author, year, full_citation in citations:
+        matching_papers = []
         
+        # For each paper, check if it matches the author and year
+        for paper in paper_list:
+            paper_year = extract_year_from_url(paper['url'])
+            if not paper_year:
+                continue
+                
+            last_names = get_last_names(paper['authors'])
+            
+            # For "Author1 and Author2 (YEAR)" citations
+            if ' and ' in author:
+                author1, author2 = author.split(' and ')
+                if (author1 in last_names and author2 in last_names and 
+                    year == paper_year):
+                    matching_papers.append(paper)
+            # For single author or "et al." citations
+            elif author in last_names and year == paper_year:
+                matching_papers.append(paper)
+        
+        # Only add link if there's exactly one matching paper
+        if len(matching_papers) == 1:
+            paper = matching_papers[0]
+            markdown_link = f'[{full_citation}]({paper["url"]})'
+            result = result.replace(full_citation, markdown_link)
+    
     return result

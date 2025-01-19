@@ -169,6 +169,7 @@ def retrieve_daily_results(search_query, sort_by, sort_order):
 
             # Check if any entries were returned
             if len(root.findall('{http://www.w3.org/2005/Atom}entry')) == 0:
+                print("No data in returned XML")
                 break
 
             for entry in root.findall('{http://www.w3.org/2005/Atom}entry'):
@@ -188,7 +189,7 @@ def retrieve_daily_results(search_query, sort_by, sort_order):
                 else:
                     # Stop processing since entries are sorted by last updated date
                     print(f'Current: {updated_date}. Up to: {one_day_ago}')
-                    return papers
+                    break
 
         # Increment start index for the next batch
         start += max_results
@@ -196,9 +197,8 @@ def retrieve_daily_results(search_query, sort_by, sort_order):
         time.sleep(5)
         if start>400: # never retrieve more than 400 results
             print('Found more than 400 papers')
-            return papers
+            break
     
-    print('Returning from somewhere it shouldnt have')
     return papers
 
     
@@ -311,8 +311,8 @@ def main():
         
         # write the retrieved stuff to file temporarily to 
         # reuse so that we don't call the API frequently. 
-        #with open("papers.pkl", "wb") as file:  
-        #    pickle.dump(papers, file)
+        with open("papers.pkl", "wb") as file:  
+            pickle.dump(papers, file)
         #with open('papers.pkl', 'rb') as file:  # Open in read-binary mode
         #    papers = pickle.load(file)
         
@@ -330,8 +330,8 @@ def main():
     
 
     # write the res and paps files
-    #with open("summary.txt", "w") as file:  
-    #    file.write(summary)
+    with open("summary.txt", "w") as file:  
+        file.write(summary)
     #with open("top5papers.txt", "w") as file:  
     #    file.write(top5)
     #with open("top5paper-urls.txt", "w") as file:  
