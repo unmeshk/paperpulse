@@ -194,7 +194,7 @@ def retrieve_daily_results(search_query, sort_by, sort_order):
         # Increment start index for the next batch
         start += max_results
         print(f'latest date: {updated_date}')
-        time.sleep(5)
+        time.sleep(10)
         if start>400: # never retrieve more than 400 results
             print('Found more than 400 papers')
             break
@@ -311,8 +311,8 @@ def main():
         
         # write the retrieved stuff to file temporarily to 
         # reuse so that we don't call the API frequently. 
-        with open("papers.pkl", "wb") as file:  
-            pickle.dump(papers, file)
+        #with open("papers.pkl", "wb") as file:  
+        #    pickle.dump(papers, file)
         #with open('papers.pkl', 'rb') as file:  # Open in read-binary mode
         #    papers = pickle.load(file)
         
@@ -330,8 +330,8 @@ def main():
     
 
     # write the res and paps files
-    with open("summary.txt", "w") as file:  
-        file.write(summary)
+    #with open("summary.txt", "w") as file:  
+    #    file.write(summary)
     #with open("top5papers.txt", "w") as file:  
     #    file.write(top5)
     #with open("top5paper-urls.txt", "w") as file:  

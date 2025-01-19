@@ -113,17 +113,36 @@ def download_pdf(pdf_url, filename):
         
 #     return result
 
-def extract_year_from_url(url):
+def normalize_text(text):
     """
-    Extract year from arXiv URL or return None if not found
+    Normalize text by removing punctuation, extra spaces, and converting to lowercase
     """
     import re
-    # ArXiv URLs typically contain year in format YYMM
-    match = re.search(r'/(\d{2})(\d{2})\.\d+', url)
-    if match:
-        year = '20' + match.group(1)  # Convert YY to 20YY
-        return year
-    return None
+    # Convert to lowercase and replace newlines with spaces
+    text = text.lower().replace('\n', ' ')
+    # Remove punctuation except hyphens between words
+    text = re.sub(r'[^\w\s-]', ' ', text)
+    # Replace multiple spaces with single space
+    text = re.sub(r'\s+', ' ', text)
+    # Remove spaces around hyphens
+    text = re.sub(r'\s*-\s*', '-', text)
+    return text.strip()
+
+def find_title_in_text(normalized_text, normalized_title):
+    """
+    Find if a normalized title exists in normalized text
+    Args:
+        normalized_text (str): The normalized text to search in
+        normalized_title (str): The normalized title to search for
+    Returns:
+        bool: True if the title is found, False otherwise
+    """
+    import re
+    # Create a pattern that allows for flexible whitespace between words
+    words = normalized_title.split()
+    pattern = r'\b' + r'\s+'.join(re.escape(word) for word in words) + r'\b'
+    match = re.search(pattern, normalized_text)
+    return match is not None
 
 def get_last_names(authors_list):
     """
@@ -178,15 +197,30 @@ def add_markdown_links(text, paper_list):
     """
     result = text
     
-    # First handle exact title matches (as before)
-    # Sort by length to prevent shorter titles matching within longer ones
-    title_pairs = sorted([(p['title'], p['url']) for p in paper_list], 
-                        key=lambda x: len(x[0]), 
-                        reverse=True)
+    # First handle title matches with normalization
+    # Create normalized version of the input text
+    normalized_result = normalize_text(result)
     
-    for title, url in title_pairs:
-        markdown_link = f'[{title}]({url})'
-        result = result.replace(title, markdown_link)
+    # Create title pairs with normalized versions
+    title_pairs = []
+    for paper in paper_list:
+        original_title = paper['title']
+        normalized_title = normalize_text(original_title)
+        title_pairs.append((original_title, normalized_title, paper['url']))
+    
+    # Sort by normalized title length
+    title_pairs.sort(key=lambda x: len(x[1]), reverse=True)
+    
+    for original_title, normalized_title, url in title_pairs:
+        # Check if normalized title exists in normalized text
+        if find_title_in_text(normalized_result, normalized_title):
+            # Create markdown link with original title
+            markdown_link = f'[{original_title}]({url})'
+            # Find and replace the original text that matched
+            # We use word boundaries to ensure we match complete words
+            import re
+            pattern = re.compile(re.escape(original_title).replace(r'\ ', r'\s+'), re.IGNORECASE)
+            result = pattern.sub(markdown_link, result)
     
     # Then handle author citations
     citations = find_author_citations(result)
