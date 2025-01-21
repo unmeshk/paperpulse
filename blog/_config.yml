@@ -18,7 +18,7 @@
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
 
-title: ArXivSum
+title: Paperpulse
 tagline: Your daily summary of ML papers on ArXiV
 description: >- # this means to ignore newlines until "baseurl:"
   Your daily summary of ML papers on ArXiV

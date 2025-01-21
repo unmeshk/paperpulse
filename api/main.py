@@ -32,7 +32,7 @@ logging.basicConfig(filename='myapp.log', level=logging.INFO)
 papers = []
 
 # Define the search query and sorting parameters
-SEARCH_QUERY = 'cat:cs.LG'
+SEARCH_QUERY = 'cat:cs.LG+OR+cat:cs.AI+OR+cat:cs.CL+OR+cat:cs.CV'
 SORT_BY = 'lastUpdatedDate'
 SORT_ORDER = 'descending'
 
@@ -157,7 +157,7 @@ def retrieve_daily_results(search_query, sort_by, sort_order):
     one_day_ago = None
 
     start = 0
-    max_results = 10  
+    max_results = 50  
 
     while True:
         url = f'http://export.arxiv.org/api/query?search_query={search_query}&sortBy={sort_by}&sortOrder={sort_order}&start={start}&max_results={max_results}'
@@ -170,6 +170,8 @@ def retrieve_daily_results(search_query, sort_by, sort_order):
             # Check if any entries were returned
             if len(root.findall('{http://www.w3.org/2005/Atom}entry')) == 0:
                 print("No data in returned XML")
+                xml_str = ET.tostring(root, encoding='unicode', method='xml')
+                print(f'Full xml = {xml_str}')
                 break
 
             for entry in root.findall('{http://www.w3.org/2005/Atom}entry'):
@@ -195,8 +197,8 @@ def retrieve_daily_results(search_query, sort_by, sort_order):
         start += max_results
         print(f'latest date: {updated_date}')
         time.sleep(10)
-        if start>400: # never retrieve more than 400 results
-            print('Found more than 400 papers')
+        if start>1200: # never retrieve more than 400 results
+            print('Found more than 1200 papers')
             break
     
     return papers
@@ -296,8 +298,6 @@ def get_pdf_url(arxiv_url):
     except Exception as e:
         logger.error(f"An unexpected error occurred {e}")
         return None
-
-
 
 
 def main():

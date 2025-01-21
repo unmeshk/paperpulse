@@ -29,17 +29,17 @@ For each theme:
 
 Write about each theme starting directly with "Theme 1:". Do not include any introductory text before Theme 1.
 
-Format:
-Theme 1: [Theme Name]
+Format: <br>
+Theme 1: [Theme Name] <br>
 [Content about theme 1 papers]
 
-Theme 2: [Theme Name]
-[Content about theme 2 papers]
+Theme 2: [Theme Name] <br>
+[Content about theme 2 papers] <br>
 
 And so on...
 
 List of Papers and Abstracts:
 
-
+<hr>
 (c) Unmesh Kurup
 2025
