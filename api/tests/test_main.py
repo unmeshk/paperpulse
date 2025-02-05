@@ -100,9 +100,8 @@ def test_identify_important_papers(mock_openai):
         }
     ]
     
-    summary, top5 = identify_important_papers(papers)
+    summary = identify_important_papers(papers)
     assert summary == "Summary content\n\nTop 5 papers content"
-    assert top5 == "Summary content\n\nTop 5 papers content"
 
 # Tests for get_pdf_url
 @patch('urllib.request.urlopen')
@@ -156,7 +155,7 @@ def test_add_markdown_links():
         {'title': 'Paper Two', 'url': 'http://example.com/2'}
     ]
     result = add_markdown_links(text, paper_list)
-    expected = "Check out [Paper One](http://example.com/1) and [Paper Two](http://example.com/2)"
+    expected = 'Check out <a href="http://example.com/1" target="_blank">Paper One</a> and <a href="http://example.com/2" target="_blank">Paper Two</a>'
     assert result == expected
 
 # Tests for download_pdf

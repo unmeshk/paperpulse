@@ -24,8 +24,11 @@ from api.agent import summarize_paper
 # Load the .env file
 load_dotenv()
 
+CURRENT_ENV=os.getenv("PROJECT_ENV")
+
 logger = logging.getLogger(__name__)
 logging.basicConfig(filename='myapp.log', level=logging.INFO)
+logger.setLevel(logging.INFO)
 
 
 # Initialize lists to store paper information and URLs
@@ -48,63 +51,134 @@ def combine_paper_info(paper):
     """
     return f"**Title:** {paper['title']}\n**Authors:** {', '.join(paper['authors'])}\n**Summary:** {paper['summary']}\n"
 
-def identify_important_papers(papers):
+def batch_papers(papers, max_length, prompt_template):
     """
-    Calls the OpenAI API to identify important papers.
+    Splits papers into batches that when combined stay under max_length.
     
     Args:
-        papers (list): list of dicts each containing information about one paper
-
+        papers: List of paper dictionaries
+        max_length: Maximum allowed length for combined papers
+        prompt_template: Template text that will be added to each batch
+        
     Returns:
-        summaries (string): summary of all the papers in papers
-        papers (string): Top 10 papers from the list of papers
+        List of paper batches, where each batch is a list of paper dictionaries
     """
+    batches = []
+    current_batch = []
+    current_length = len(prompt_template)
+    
+    for paper in papers:
+        paper_info = combine_paper_info(paper)
+        paper_length = len(paper_info)
+        
+        # If adding this paper would exceed max_length, start a new batch
+        if current_length + paper_length > max_length and current_batch:
+            batches.append(current_batch)
+            current_batch = []
+            current_length = len(prompt_template)
+            
+        current_batch.append(paper)
+        current_length += paper_length
+    
+    # Add the last batch if it's not empty
+    if current_batch:
+        batches.append(current_batch)
+        
+    logger.info(f"Split {len(papers)} papers into {len(batches)} batches")
+    return batches
 
-    combined_paper_info = "\n".join(combine_paper_info(p) for p in papers)
-      
-    # Construct the prompt
-    prompt_summary = SUMMARY_PROMPT + combined_paper_info
+def call_llm(prompt, max_tokens = 5000):
+    """
+    Helper function to make LLM API calls.
+    
+    Args:
+        prompt: The prompt to send to the LLM
+        max_tokens: Maximum tokens for the response
+        
+    Returns:
+        The LLM's response text
+    
+    Raises:
+        Exception: If the API call fails
+    """
+    try:
+        messages = [
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": prompt}
+        ]
+        
+        response = openai.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=messages,
+            max_tokens=max_tokens,
+            temperature=0.1,
+            top_p=0.9
+        )
+        
+        return response.choices[0].message.content
+        
+    except Exception as e:
+        logger.error(f"LLM API call failed: {str(e)}")
+        raise
 
-    # get summaries
-    messages = [
-        {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": prompt_summary}
-    ]
+def identify_important_papers(papers):
+    """
+    Processes papers in batches and generates a combined summary using multiple LLM calls.
+    
+    Args:
+        papers: List of dictionaries containing paper information
+        
+    Returns:
+        A comprehensive summary of all papers
+        
+    Raises:
+        ValueError: If papers list is empty
+    """
+    if not papers:
+        raise ValueError("No papers provided to summarize")
+        
+    # Constants
+    MAX_LENGTH = 122000 * 4  # max len = max tokens * 4 since on average a word is ~4 tokens
+    
+    # Get paper batches
+    batches = batch_papers(papers, MAX_LENGTH, SUMMARY_PROMPT)
+    intermediate_summaries = []
+    
+    # Process each batch
+    for i, batch in enumerate(batches, 1):
+        logger.info(f"Processing batch {i} of {len(batches)}")
+        
+        # Combine papers in this batch
+        batch_info = "\n".join(combine_paper_info(p) for p in batch)
+        prompt = SUMMARY_PROMPT + batch_info
+        
+        try:
+            # Get summary for this batch
+            batch_summary = call_llm(prompt)
+            intermediate_summaries.append(batch_summary)
+            logger.info(f"Successfully processed batch {i}")
+            
+        except Exception as e:
+            logger.error(f"Failed to process batch {i}: {str(e)}")
+            continue
+    
+    # If we have multiple summaries, combine them
+    if len(intermediate_summaries) > 1:
+        combine_prompt = """You are a research scientist tasked with combining multiple research summaries 
+        into a single coherent summary. Please combine the following summaries, maintaining the thematic 
+        organization and removing any redundancy:\n\n""" + "\n\n".join(intermediate_summaries)
+        
+        try:
+            final_summary = call_llm(combine_prompt)
+        except Exception as e:
+            logger.error(f"Failed to combine summaries: {str(e)}")
+            # Fall back to concatenation if combination fails
+            final_summary = "\n\n".join(intermediate_summaries)
+    else:
+        final_summary = intermediate_summaries[0] if intermediate_summaries else ""
+    
+    return final_summary
 
-    # Call the OpenAI API
-    response = openai.chat.completions.create(
-        model="gpt-4o-mini", 
-        messages=messages,
-        max_tokens=5000, 
-        temperature=0.1,
-        top_p=0.9,  # Adjust as needed
-    )
-
-    # Extract the paper titles from the response
-    summaries = response.choices[0].message.content
-
-    # Get the top 5 most important papers in this list
-    prompt_papers = TOP5_PAPERS_PROMPT + combined_paper_info
-
-    # get papers
-    messages = [
-        {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": prompt_papers}
-    ]
-
-    # Call the OpenAI API
-    response = openai.chat.completions.create(
-        model="gpt-4o-mini", 
-        messages=messages,
-        max_tokens=5000, 
-        temperature=0.1,
-        top_p=0.9,  # Adjust as needed
-    )
-
-    # Extract the paper titles from the response
-    top5_papers = response.choices[0].message.content
-
-    return summaries, top5_papers
 
 
 def process_data(entry):
@@ -158,46 +232,65 @@ def retrieve_daily_results(search_query, sort_by, sort_order):
 
     start = 0
     max_results = 50  
+    max_retries = 3
 
     while True:
         url = f'http://export.arxiv.org/api/query?search_query={search_query}&sortBy={sort_by}&sortOrder={sort_order}&start={start}&max_results={max_results}'
-        #print(url)
         
-        with libreq.urlopen(url) as response:
-            data = response.read()
-            root = ET.fromstring(data)
+        retry_count = 0
+        while retry_count < max_retries:
+            try:
+                with libreq.urlopen(url) as response:
+                    data = response.read()
+                    root = ET.fromstring(data)
 
-            # Check if any entries were returned
-            if len(root.findall('{http://www.w3.org/2005/Atom}entry')) == 0:
-                print("No data in returned XML")
-                xml_str = ET.tostring(root, encoding='unicode', method='xml')
-                print(f'Full xml = {xml_str}')
-                break
-
-            for entry in root.findall('{http://www.w3.org/2005/Atom}entry'):
-                updated_date_str = entry.find('{http://www.w3.org/2005/Atom}updated').text
-                #print(updated_date_str)
-                updated_date = datetime.strptime(updated_date_str, '%Y-%m-%dT%H:%M:%S%z')
-
-                # Make sure updated_date is in the desired timezone
-                updated_date = updated_date.astimezone(desired_timezone) 
-
-                if not one_day_ago:
-                    one_day_ago = updated_date - timedelta(days=1)
-                    print(f'Retrieving new/updated papers till : {one_day_ago}')
-                
-                if updated_date > one_day_ago:
-                    papers.append(process_data(entry))
-                else:
-                    # Stop processing since entries are sorted by last updated date
-                    print(f'Current: {updated_date}. Up to: {one_day_ago}')
+                    # Check if any entries were returned
+                    if len(root.findall('{http://www.w3.org/2005/Atom}entry')) == 0:
+                        retry_count += 1
+                        if retry_count == max_retries:
+                            print(f"No data in returned XML after {max_retries} attempts")
+                            xml_str = ET.tostring(root, encoding='unicode', method='xml')
+                            print(f'Full xml = {xml_str}')
+                            return papers
+                        print(f"No data in returned XML, attempt {retry_count} of {max_retries}")
+                        time.sleep(5)  # Wait 5 seconds before retrying
+                        continue
+                    
+                    # If we get here, we have data, so break the retry loop
                     break
+            except Exception as e:
+                retry_count += 1
+                if retry_count == max_retries:
+                    print(f"Failed to retrieve data after {max_retries} attempts: {str(e)}")
+                    return papers
+                print(f"Error on attempt {retry_count}: {str(e)}")
+                time.sleep(5)
+                continue
+
+        for entry in root.findall('{http://www.w3.org/2005/Atom}entry'):
+            updated_date_str = entry.find('{http://www.w3.org/2005/Atom}updated').text
+            #print(updated_date_str)
+            updated_date = datetime.strptime(updated_date_str, '%Y-%m-%dT%H:%M:%S%z')
+
+            # Make sure updated_date is in the desired timezone
+            updated_date = updated_date.astimezone(desired_timezone) 
+
+            if not one_day_ago:
+                one_day_ago = updated_date - timedelta(days=1)
+                print(f'Retrieving new/updated papers till : {one_day_ago}')
+            
+            if updated_date > one_day_ago:
+                papers.append(process_data(entry))
+            else:
+                # Stop processing since entries are sorted by last updated date
+                print(f'Current: {updated_date}. Up to: {one_day_ago}')
+                return papers
 
         # Increment start index for the next batch
         start += max_results
         print(f'latest date: {updated_date}')
-        time.sleep(10)
-        if start>1200: # never retrieve more than 400 results
+        time.sleep(5)
+        if start>1200: # never retrieve more than 1600 results
             print('Found more than 1200 papers')
             break
     
@@ -306,15 +399,22 @@ def main():
     """
 
     try:
-        logger.info('Retrieving daily results')
-        papers = retrieve_daily_results(SEARCH_QUERY, SORT_BY, SORT_ORDER)
         
-        # write the retrieved stuff to file temporarily to 
-        # reuse so that we don't call the API frequently. 
-        #with open("papers.pkl", "wb") as file:  
-        #    pickle.dump(papers, file)
-        #with open('papers.pkl', 'rb') as file:  # Open in read-binary mode
-        #    papers = pickle.load(file)
+        # if papers were downloaded earlier, use that file
+        # # else, call arxiv api and then write that data to file. 
+        tdate = datetime.today().strftime('%Y-%m-%d')
+        fname = f'papers-{tdate}.pkl'
+        if os.path.isfile(fname):
+            with open(f'papers-{tdate}.pkl', 'rb') as file: 
+                papers = pickle.load(file)
+        else:
+            logger.info('Retrieving daily results')
+            papers = retrieve_daily_results(SEARCH_QUERY, SORT_BY, SORT_ORDER)
+        
+            # write to file if dev env
+            if CURRENT_ENV=='dev':
+                with open(fname, "wb") as file:  
+                    pickle.dump(papers, file)
         
         if not papers:
             print('No papers retrieved')
@@ -322,31 +422,12 @@ def main():
         
         logger.info(f'Retrieved: {len(papers)} papers')
 
-        summary,top5 = identify_important_papers(papers)
+        summary = identify_important_papers(papers)
     except Exception as e:
-        print(f'Exception: {e.message}')
+        print(f'Exception: {e}')
+        return
 
-    #logger.info(f'Identified the following top 5\n{top5}')
     
-
-    # write the res and paps files
-    #with open("summary.txt", "w") as file:  
-    #    file.write(summary)
-    #with open("top5papers.txt", "w") as file:  
-    #    file.write(top5)
-    #with open("top5paper-urls.txt", "w") as file:  
-    #    file.write(top5)
-    #with open("summary.txt", "r") as file:  
-    #    summary = file.read()
-    #with open("papers.txt", "r") as file:  
-    #    top5 = file.read()
-
-    #print(summary)
-    #print(top5)
-
-    # map the top5 papers back to the dicts
-    #top5_titles = extract_titles(top5)
-    #logger.info(f'Extracted the following titles: {top5_titles}')
 
     # download the entirety of these top5 papers
     #top5_dicts = filter_dicts_by_titles(papers,top5_titles)
@@ -368,5 +449,3 @@ def main():
 if __name__ == "__main__":
     main()
 
-    #important_titles = identify_important_papers(paper_info_list)
-    #print("Important Paper Titles:", important_titles)

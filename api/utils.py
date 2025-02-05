@@ -184,6 +184,22 @@ def find_author_citations(text):
                 citations.append((match.group(1), match.group(2), match.group()))
     return citations
 
+def extract_year_from_url(url):
+    """
+    Extract year from arXiv URL or return None if not found
+    Args:
+        url (str): The arXiv URL to extract year from
+    Returns:
+        str: Year in YYYY format, or None if not found
+    """
+    import re
+    # ArXiv URLs typically contain year in format YYMM
+    match = re.search(r'/(\d{2})(\d{2})\.\d+', url)
+    if match:
+        year = '20' + match.group(1)  # Convert YY to 20YY
+        return year
+    return None
+
 def add_markdown_links(text, paper_list):
     """
     Replace occurrences of paper titles and author citations with markdown hyperlinks
@@ -215,7 +231,7 @@ def add_markdown_links(text, paper_list):
         # Check if normalized title exists in normalized text
         if find_title_in_text(normalized_result, normalized_title):
             # Create markdown link with original title
-            markdown_link = f'[{original_title}]({url})'
+            markdown_link = f'<a href="{url}" target="_blank">{original_title}</a>'
             # Find and replace the original text that matched
             # We use word boundaries to ensure we match complete words
             import re
@@ -249,7 +265,7 @@ def add_markdown_links(text, paper_list):
         # Only add link if there's exactly one matching paper
         if len(matching_papers) == 1:
             paper = matching_papers[0]
-            markdown_link = f'[{full_citation}]({paper["url"]})'
+            markdown_link = f'<a href="{paper["url"]}" target="_blank">{full_citation}</a>'
             result = result.replace(full_citation, markdown_link)
     
     return result
