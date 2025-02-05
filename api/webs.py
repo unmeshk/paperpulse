@@ -21,7 +21,7 @@ def create_blogpost(summary, num_papers):
     # Create the header with the current date
     header = f"""---
 layout: post
-title: "ArXiV papers ML Summary "
+title: ArXiV papers Summary ({num_papers} papers summarized)
 date: {todays_date}
 categories: summary
 ---

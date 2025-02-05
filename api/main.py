@@ -284,6 +284,7 @@ def retrieve_daily_results(search_query, sort_by, sort_order):
             else:
                 # Stop processing since entries are sorted by last updated date
                 print(f'Current: {updated_date}. Up to: {one_day_ago}')
+                papers.append(process_data(entry))
                 return papers
 
         # Increment start index for the next batch
