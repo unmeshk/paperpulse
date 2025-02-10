@@ -182,8 +182,18 @@ def test_create_blogpost(mock_open):
     args = mock_open.call_args[0]
     assert args[1] == 'w'
     handle = mock_open.return_value.__enter__.return_value
-    assert "Test summary content" in handle.write.call_args[0][0]
-    assert "Number of papers summarized: 5" in handle.write.call_args[0][0]
+    written_content = handle.write.call_args[0][0]
+    
+    # Check front matter contains num_papers
+    assert "categories: summary" in written_content
+    assert "num_papers: 5" in written_content
+    
+    # Check content
+    assert "Test summary content" in written_content
+    
+    # Check YAML front matter format
+    assert written_content.startswith("---\n")
+    assert "---\n" in written_content[3:]  # Check for closing front matter delimiter
 
 
 if __name__ == '__main__':

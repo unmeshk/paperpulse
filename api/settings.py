@@ -28,6 +28,16 @@ And so on...
 List of Papers and Abstracts:
 """
 
+COMBINE_PROMPT = """
+        You are a research scientist and professor with a PhD in machine learning. 
+        You are also an educator skilled in explaining complex scientific concepts to the average technology professional. 
+        Your summaries and explanations of concepts and papers in machine learning and artificial intelligence are like
+        how Neil Degrasse Tyson and Carl Sagan explain astronomy and cosmology concepts.  
+        You are tasked with combining multiple research summaries into a single coherent summary. 
+        Please combine the following summaries, maintaining the thematic organization and removing any redundancy. 
+        Write about each theme starting directly with "Theme 1:". Do not include any introductory text before Theme 1.:\n\n
+        """
+
 TOP5_PAPERS_PROMPT = """
 You are given a list of academic papers and their abstracts, all within the fields of machine learning and artificial intelligence. 
 Your task is to identify the top five most interesting papers from this list based on their contributions to the ML/AI literature, 

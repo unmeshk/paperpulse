@@ -17,7 +17,7 @@ from api.utils import (
     download_pdf,
     add_markdown_links
     )
-from api.settings import SUMMARY_PROMPT, TOP5_PAPERS_PROMPT
+from api.settings import SUMMARY_PROMPT, COMBINE_PROMPT
 from api.webs import create_blogpost
 from api.agent import summarize_paper
 
@@ -164,9 +164,7 @@ def identify_important_papers(papers):
     
     # If we have multiple summaries, combine them
     if len(intermediate_summaries) > 1:
-        combine_prompt = """You are a research scientist tasked with combining multiple research summaries 
-        into a single coherent summary. Please combine the following summaries, maintaining the thematic 
-        organization and removing any redundancy:\n\n""" + "\n\n".join(intermediate_summaries)
+        combine_prompt = COMBINE_PROMPT + "\n\n".join(intermediate_summaries)
         
         try:
             final_summary = call_llm(combine_prompt)

@@ -21,11 +21,11 @@ def create_blogpost(summary, num_papers):
     # Create the header with the current date
     header = f"""---
 layout: post
-title: ArXiV papers Summary ({num_papers} papers summarized)
+title: ArXiV ML/AI/CV papers summary
 date: {todays_date}
 categories: summary
+num_papers: {num_papers}
 ---
-## Number of papers summarized: {num_papers}
 """
 
     # Combine header and content

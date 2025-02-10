@@ -1,0 +1,19 @@
+---
+---
+
+@import "minima";
+@import "custom";
+
+// Papers count style
+/* Make post-meta elements match and adjust spacing */
+.post-meta {
+    font-size: 14px;
+    color: #828282;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    margin-bottom: 5px;  /* Reduce bottom margin of all post-meta elements */
+}
+
+/* Target specifically the papers count post-meta */
+.post-meta:last-of-type {
+    margin-bottom: 25px;  /* Add bottom margin only to the last post-meta */
+}
