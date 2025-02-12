@@ -17,3 +17,15 @@
 .post-meta:last-of-type {
     margin-bottom: 25px;  /* Add bottom margin only to the last post-meta */
 }
+
+/* Style for papers count on home page */
+.post-list li .post-meta:nth-child(3) {
+    margin-top: -15px;
+    display: block;
+}
+
+/* Style for papers count on home page */
+.papers-count {
+    margin-top: -15px;
+    margin-bottom: 15px;
+}
