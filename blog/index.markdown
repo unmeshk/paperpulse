@@ -4,5 +4,5 @@
 
 layout: home
 subtitle: "Daily Pulse of AI/ML Papers on ArXiV"
-description: "Get the latest AI/ML research from around the world, every day. New quality papers summarized into digestible themes."
+description: "Get the latest AI/ML research from around the world, every day. 11"
 ---
