@@ -274,3 +274,90 @@ table td { border: 1px solid #e8e8e8; }
 
 .highlight .il { color: #099; }
 
+/* Remove extra padding from page content */
+.page-content {
+    padding: 20px 0;
+}
+
+/* Site subtitle (AI/ML ArXiv) */
+.site-subtitle {
+    font-size: 24px;
+    margin-bottom: 0;
+    color: #333;
+}
+
+/* Main title */
+.page-heading {
+    font-size: 28px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+}
+
+/* Description text */
+.site-description {
+    color: #666;
+    margin-bottom: 30px;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+/* Month sections */
+.month-section {
+    margin-bottom: 25px;
+}
+
+.month-section h2 {
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 10px;
+    font-weight: 500;
+}
+
+/* Date entries - tighter spacing */
+.date-entry {
+    margin-bottom: 4px;
+    line-height: 1.4;
+}
+
+.date-entry a {
+    color: #1756a9;
+    text-decoration: none;
+}
+
+.date-entry .paper-count {
+    color: #1756a9;
+    font-weight: normal;
+}
+
+/* Wave decoration at bottom */
+.wave-decoration {
+    position: relative;
+    height: 40px;
+    overflow: hidden;
+    margin-top: 30px;
+}
+
+.wave-decoration::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: repeating-linear-gradient(
+        45deg,
+        #ddd,
+        #ddd 2px,
+        transparent 2px,
+        transparent 8px
+    );
+}
+
+/* Overrides for existing styles */
+.post-list > li {
+    margin-bottom: 4px;
+}
+
+.post-link {
+    font-size: 16px;
+}
