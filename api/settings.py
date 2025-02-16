@@ -47,3 +47,7 @@ Instructions:
 Select exactly five papers that you believe represent the most significant or groundbreaking work in the field.
 List of Papers and Abstracts
 """
+
+ARXIV_SEARCH_QUERY='cat:cs.LG+OR+cat:cs.AI+OR+cat:cs.CL+OR+cat:cs.CV'
+ARXIV_SORT_BY='lastUpdatedDate'
+ARXIV_SORT_ORDER='descending'
