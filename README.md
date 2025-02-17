@@ -18,9 +18,12 @@ You can see the resulting site online at: <https://paperpulse.ukurup.com>
 - OpenAI API key
 
 ## Installation
-- Clone the repository: `git clone [repository-url]`
-- cd paperpulse
-- create a virtual env and then `pip install -r requirements.txt`
+Creating a virtual env first is recommended
+```
+git clone [repository-url]`
+cd paperpulse
+pip install -r requirements.txt 
+```
 
 ## Set up environment variables:
 Create a .env file in the root directory with the following variables:
@@ -66,15 +69,16 @@ If you want to deploy this blog in a more prod environment, you can set `PROJECT
 
 ## Project Structure
 `/api`
-- `main.py`: Core script for paper retrieval and processing
-- `arxiv_client.py`: Handles the arxiv api call
+- `main.py`: simple orchestrator
+- `arxiv_client.py`: Handles the ArXiv API call
 - `agent.py`: OpenAI API integration for paper analysis
 - `file_handler.py`: Save and load paper info from disk
 - `utils.py`: Utility functions for PDF processing and text manipulation
-- `webs.py`: Blog post generation functionality
+- `webs.py`: generated `.md` files used by Jekyll to make the blog
 - `settings.py`: Configuration and prompt templates
 - `tests/test_main.py`: Unit tests of core functionality
-`/blog`: All blog (jekyll) related functionality including the daily posts that are created by `main.py`
+
+`/blog`: Contains all blog (jekyll) related functionality including the daily posts that are created by running `python main.py`
 
 ## Contributing
 - Fork the repository
