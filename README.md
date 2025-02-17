@@ -20,7 +20,7 @@ You can see the resulting site online at: <https://paperpulse.ukurup.com>
 ## Installation
 Creating a virtual env first is recommended
 ```
-git clone [repository-url]`
+git clone [repository-url]
 cd paperpulse
 pip install -r requirements.txt 
 ```
