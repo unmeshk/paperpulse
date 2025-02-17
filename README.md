@@ -48,7 +48,7 @@ This will:
 This will:
 - start a server at localhost:4000 that shows the blog.
 
-If you want to deploy this blog in a more prod environment, you can set `PROJECT_ENV=prod` and use `docker-compose -f docker-compose.prod.yml up -d` but you will have to set up *nginx* and *ssl* first. 
+If you want to deploy this blog in a more prod environment, you can set `PROJECT_ENV=prod` and use `docker-compose -f docker-compose.prod.yml up -d` but you will have to set up *nginx* and *SSL* first. You'll also have to create a cron job that runs `python main.py` once a day.
 
 ### Tests
 `pytest api/tests/test_main.py`
@@ -65,14 +65,16 @@ If you want to deploy this blog in a more prod environment, you can set `PROJECT
 - Optimized for production deployment
 
 ## Project Structure
-- main.py: Core script for paper retrieval and processing
-- arxiv_client.py: Handles the arxiv api call
-- agent.py: OpenAI API integration for paper analysis
-- file_handler.py: Save and load paper info from disk
-- utils.py: Utility functions for PDF processing and text manipulation
-- webs.py: Blog post generation functionality
-- settings.py: Configuration and prompt templates
-- tests/test_main.py: Unit tests for core functionality
+`/api`
+- `main.py`: Core script for paper retrieval and processing
+- `arxiv_client.py`: Handles the arxiv api call
+- `agent.py`: OpenAI API integration for paper analysis
+- `file_handler.py`: Save and load paper info from disk
+- `utils.py`: Utility functions for PDF processing and text manipulation
+- `webs.py`: Blog post generation functionality
+- `settings.py`: Configuration and prompt templates
+- `tests/test_main.py`: Unit tests of core functionality
+`/blog`: All blog (jekyll) related functionality including the daily posts that are created by `main.py`
 
 ## Contributing
 - Fork the repository
