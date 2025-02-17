@@ -1,26 +1,26 @@
 # Paperpulse - A Daily ArXiv ML/AI Paper Summarizer
-This project automatically retrieves, analyzes, and summarizes the latest Machine Learning, Artificial Intelligence, Computer Vision, and Computational Linguistics papers from ArXiv. It creates daily blog posts with thematic summaries of new research, making it easier to stay up-to-date with the latest developments in these fields.
+This project automatically retrieves, analyzes, and summarizes the latest Machine Learning (**cs.LG**), Artificial Intelligence (**cs.AI**), Computer Vision (**cs.CV**), and Computation and Language (**cs.CL**) papers from ArXiv. It creates daily blog posts with thematic summaries of new research, making it easier to stay up-to-date with the latest developments in these fields.
+
+You can see the resulting site online at: <https://paperpulse.ukurup.com>
 
 ## Features
 - Daily retrieval of new papers from ArXiv in ML, AI, CV, and CL categories
 - Automatic thematic grouping and summarization of papers using OpenAI API
 - Generation of blog posts with summaries and hyperlinked references using Jekyll
 
-## TODO
+### TODO
 - Identification of top papers based on a simple recommendation engine
 - Detailed analysis of top papers including methodology and results
 
 ## Main Requirements
-Python 3.x
-Jekyll 
-OpenAI API key
+- Python 3.x
+- Jekyll 
+- OpenAI API key
 
 ## Installation
-Clone the repository: `git clone [repository-url]`
-cd paperpulse
-
-## Install the required packages:
-create a virtual env and then `pip install -r requirements.txt`
+- Clone the repository: `git clone [repository-url]`
+- cd paperpulse
+- create a virtual env and then `pip install -r requirements.txt`
 
 ## Set up environment variables:
 Create a .env file in the root directory with the following variables:
@@ -30,7 +30,7 @@ PROJECT_ENV=dev  # or 'prod' for production.
 PROJECT_DIR=[path-to-project-directory]
 ```
 
-In dev mode, the downloaded paper info is stored to a file with today's date. If run again, info from the file is used instead of pinging the ArXiv API again. 
+In `dev` mode, when `main.py` is run, the paper info retrieved via the ArXiv API is stored to the file `papers-<today's date>.pkl` in `PROJECT_DIR`. If `main.py` run again, info from this file is used instead of pinging the ArXiv API once more.
 
 ## Usage
 
@@ -47,6 +47,8 @@ This will:
 
 This will:
 - start a server at localhost:4000 that shows the blog.
+
+If you want to deploy this blog in a more prod environment, you can set `PROJECT_ENV=prod` and use `docker-compose -f docker-compose.prod.yml up -d` but you will have to set up *nginx* and *ssl* first. 
 
 ### Tests
 `pytest api/tests/test_main.py`
