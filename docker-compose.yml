@@ -1,27 +1,4 @@
 services:
-  api:
-    build: ./api
-    ports:
-      - "5001:5000"
-    volumes:
-      - ./api:/app
-    environment:
-      - FLASK_APP=app.py
-      - FLASK_ENV=development
-      - DATABASE_URL=postgresql://postgres:password@db:5432/stats_db
-    depends_on:
-      - db
-
-  db:
-    image: postgres:14
-    ports:
-      - "5434:5432"
-    environment:
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=stats_db
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
   blog:
     image: jekyll/jekyll:4
     ports:
@@ -32,6 +9,4 @@ services:
       - JEKYLL_ENV=development
     command: jekyll serve --livereload
 
-volumes:
-  postgres_data:
 
