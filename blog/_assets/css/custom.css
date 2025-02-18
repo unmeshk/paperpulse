@@ -1,0 +1,70 @@
+/* Custom styles for Paperpulse */
+
+/* Adjusting the subheading */
+.site-subtitle {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: #333;
+}
+
+/* Main title adjustments */
+.page-heading {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+/* Description text */
+.site-description {
+    color: #666;
+    margin-bottom: 2.5rem;
+}
+
+/* Month section */
+.month-section {
+    margin-bottom: 2rem;
+}
+
+.month-section h2 {
+    font-size: 1.2rem;
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+/* Date entries */
+.date-entry {
+    margin-bottom: 0.5rem;  /* Reduced spacing between entries */
+}
+
+.date-entry a {
+    color: #1756a9;
+    text-decoration: none;
+}
+
+.date-entry .paper-count {
+    color: #1756a9;
+    font-weight: normal;
+}
+
+/* Decorative wave line */
+.wave-decoration {
+    position: relative;
+    height: 2rem;
+    overflow: hidden;
+    margin-top: 2rem;
+}
+
+.wave-decoration::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: repeating-linear-gradient(
+        45deg,
+        #ccc,
+        #ccc 2px,
+        transparent 2px,
+        transparent 8px
+    );
+}

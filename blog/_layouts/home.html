@@ -1,0 +1,33 @@
+---
+layout: default
+---
+
+<div class="home">
+  <h1 class="site-subtitle">AI/ML ArXiv</h1>
+  <h2 class="page-heading">Daily Pulse of AI/ML Papers on ArXiv</h2>
+  
+  <p class="site-description">
+    Get the latest AI/ML research from around the world, every day. New quality papers summarized into digestible themes.
+  </p>
+
+  {%- if site.posts.size > 0 -%}
+    {%- assign posts_by_month = site.posts | group_by_exp:"post", "post.date | date: '%B %Y'" -%}
+    
+    {%- for month in posts_by_month -%}
+    <section class="month-section">
+      <h2>{{ month.name }}</h2>
+      
+      {%- for post in month.items -%}
+      <div class="date-entry">
+        <a href="{{ post.url | relative_url }}">
+          {%- assign date_format = "%b %d, %a" -%}
+          {{ post.date | date: date_format }}
+          <span class="paper-count">({{ post.num_papers | default: "0" }} ArXiv papers)</span>
+        </a>
+      </div>
+      {%- endfor -%}
+    </section>
+    {%- endfor -%}
+  {%- endif -%}
+  <div class="wave-decoration"></div>
+</div>

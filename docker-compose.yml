@@ -1,0 +1,12 @@
+services:
+  blog:
+    image: jekyll/jekyll:4
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./blog:/srv/jekyll
+    environment:
+      - JEKYLL_ENV=development
+    command: jekyll serve --livereload
+
+

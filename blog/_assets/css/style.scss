@@ -1,0 +1,37 @@
+---
+---
+
+@import "minima";
+
+/* Our custom styles */
+.post-list {
+    margin-left: 0;
+    list-style: none;
+}
+
+.post-list li {
+    margin-bottom: 3px !important;
+}
+
+.post-list .post-link {
+    display: block !important;
+    font-size: 0.9em !important;
+}
+
+.page-heading {
+    font-size: 2.5em;
+    margin-bottom: 0.5em;
+}
+
+.site-description {
+    font-size: 1.2em;
+    color: #666;
+    margin-bottom: 2em;
+    max-width: 800px;
+}
+
+.month-heading {
+    font-size: 2em;
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+}
