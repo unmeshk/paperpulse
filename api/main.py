@@ -36,6 +36,7 @@ def main():
 
     load_dotenv()
     dev_env=os.getenv("PROJECT_ENV")
+    logger.info(dev_env)
 
     # initalize
     arxiv_client = ArxivClient(ARXIV_SEARCH_QUERY, ARXIV_SORT_BY, ARXIV_SORT_ORDER)
@@ -46,14 +47,14 @@ def main():
     try:       
         # if in dev mode, check to see if papers were downloaded earlier
 
-        if dev_env:
+        if dev_env=='dev':
             papers = file_handler.load_papers()
         
         if not papers:        
             logger.info('Retrieving daily results')
             papers = arxiv_client.retrieve_daily_results()
         
-            if dev_env:
+            if dev_env=='dev':
                 file_handler.save_papers(papers)
                 
         if not papers:
