@@ -70,7 +70,7 @@ class ArxivClient:
 
         start = 0
         max_results = 50  
-        max_retries = 3 # sometimes the API fails, so retry 3 times and only then give up.
+        max_retries = 5 # sometimes the API fails, so retry 3 times and only then give up.
 
         while True:
             url = f'http://export.arxiv.org/api/query?search_query={self.search_query}&sortBy={self.sort_by}&sortOrder={self.sort_order}&start={start}&max_results={max_results}'
@@ -91,7 +91,7 @@ class ArxivClient:
                                 print(f'Full xml = {xml_str}')
                                 return papers
                             print(f"No data in returned XML, attempt {retry_count} of {max_retries}")
-                            time.sleep(5)  # Wait 5 seconds before retrying
+                            time.sleep(10)  # Wait 10 seconds before retrying
                             continue
                         
                         # If we get here, we have data, so break the retry loop
