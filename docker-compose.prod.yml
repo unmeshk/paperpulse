@@ -9,6 +9,7 @@ services:
       - ./blog:/srv/jekyll
     environment:
       - JEKYLL_ENV=production
+      - MIXPANEL_TOKEN=${MIXPANEL_TOKEN}
     networks:
       - web
 
