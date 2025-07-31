@@ -1,0 +1,53 @@
+<!-- Mixpanel Event Tracking -->
+<script type="text/javascript">
+  // Track outbound links
+  document.addEventListener('DOMContentLoaded', function() {
+    // Track all link clicks
+    document.body.addEventListener('click', function(e) {
+      var target = e.target;
+      
+      // Traverse up to find the closest anchor tag
+      while (target && target.tagName !== 'A') {
+        target = target.parentElement;
+      }
+      
+      // If we found an anchor tag
+      if (target && target.tagName === 'A') {
+        var href = target.getAttribute('href');
+        
+        // Only track if it's an actual link (not a javascript: or #)
+        if (href && href.indexOf('#') !== 0 && href.indexOf('javascript:') !== 0) {
+          var isExternal = href.indexOf('http') === 0 && href.indexOf(window.location.hostname) === -1;
+          
+          if (isExternal) {
+            // Track outbound link
+            mixpanel.track('Outbound Link Click', {
+              'url': href,
+              'text': target.innerText || target.textContent
+            });
+          } else {
+            // Track internal link
+            mixpanel.track('Internal Link Click', {
+              'url': href,
+              'text': target.innerText || target.textContent
+            });
+          }
+        }
+      }
+    });
+    
+    // Track time spent on page
+    var startTime = new Date();
+    window.addEventListener('beforeunload', function() {
+      var endTime = new Date();
+      var timeSpent = Math.round((endTime - startTime) / 1000); // in seconds
+      
+      mixpanel.track('Page Exit', {
+        'page': window.location.pathname,
+        'timeSpent': timeSpent,
+        'title': document.title
+      });
+    });
+  });
+</script>
+<!-- End Mixpanel Event Tracking -->
