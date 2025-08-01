@@ -205,7 +205,7 @@ def add_markdown_links(text, paper_list):
             # We use word boundaries to ensure we match complete words
             import re
             pattern = re.compile(re.escape(original_title).replace(r'\ ', r'\s+'), re.IGNORECASE)
-            result = pattern.sub(markdown_link, result)
+            result = pattern.sub(lambda m: markdown_link, result)
     
     # Then handle author citations
     citations = find_author_citations(result)
