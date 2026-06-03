@@ -2,9 +2,7 @@ name: build-and-deploy
 
 on:
   push:
-    # TEMP: feat/ci-cd-pipeline included to verify GHCR push works.
-    # Revert to [main] before merging.
-    branches: [main, feat/ci-cd-pipeline]
+    branches: [main]
   pull_request:
   workflow_dispatch:
 
@@ -45,8 +43,7 @@ jobs:
       - uses: docker/setup-buildx-action@v3
 
       - name: Log in to GHCR
-        # TEMP: feat/ci-cd-pipeline included to verify GHCR push works.
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feat/ci-cd-pipeline')
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
@@ -67,8 +64,7 @@ jobs:
         with:
           context: .
           file: api/Dockerfile
-          # TEMP: feat/ci-cd-pipeline included to verify GHCR push works.
-          push: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feat/ci-cd-pipeline') }}
+          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
           tags: ${{ steps.api-meta.outputs.tags }}
           labels: ${{ steps.api-meta.outputs.labels }}
           cache-from: type=gha
@@ -88,8 +84,7 @@ jobs:
         with:
           context: .
           file: Dockerfile.jekyll
-          # TEMP: feat/ci-cd-pipeline included to verify GHCR push works.
-          push: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feat/ci-cd-pipeline') }}
+          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
           tags: ${{ steps.blog-meta.outputs.tags }}
           labels: ${{ steps.blog-meta.outputs.labels }}
           cache-from: type=gha
