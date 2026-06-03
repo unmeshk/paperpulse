@@ -1,5 +1,4 @@
 import os
-import openai
 import pickle
 import re
 import logging

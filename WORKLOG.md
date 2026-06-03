@@ -1,5 +1,43 @@
 # Worklog
 
+## Session: 2026-06-03 (continued)
+
+### Worked on
+Cleanup, dependency hygiene, and content fixes after the RSS/Gemini migration.
+
+### Completed
+
+**Ruby gem security fixes**
+- Updated `addressable` 2.8.1 → 2.9.0 and `rexml` 3.3.9 → 3.4.4 via `bundle update` inside the Jekyll Docker container
+- Fixes Dependabot alerts #9 (REXML DoS) and #11 (Addressable ReDoS); will close when branch is merged to main
+
+**Markdown heading fix**
+- Root cause: `COMBINE_PROMPT` instructed LLM to write "Theme N:" without `##`, stripping the heading markers from the per-batch summaries
+- Fix: updated `COMBINE_PROMPT` to explicitly require `## Theme N:` format
+- Verified with re-run: headings now render as bold H2 in the blog
+
+**Removed OpenAI dependency**
+- Commented out `summarize_paper`, `_create_and_run_thread`, `_combine_paper_summaries` in `agent.py` with a TODO for full removal in a later commit
+- Removed `import openai` from `agent.py` and `main.py`
+- Added `google-genai==2.7.0` and `PyMuPDF==1.27.2.3` to `requirements.txt`
+
+**What's New page**
+- Added v1.03 entry: RSS feeds, Gemini, inline paper linking
+
+**README**
+- Updated to reflect Gemini (was OpenAI), RSS feeds (was search API), correct run commands (`PYTHONPATH=. .venv/bin/python -m api.main`), and updated env vars (`GEMINI_API_KEY`)
+
+### Decisions made
+- `summarize_paper` commented out rather than deleted — preserves the OpenAI RAG approach for potential future use with a different LLM
+
+### Next session priorities
+- Merge `refactor/oai-pmh-migration` → `main` to close all 4 Dependabot alerts
+- Delete `summarize_paper` and related OpenAI methods fully (TODO already in code)
+- Set up cron job in prod Docker config to run the pipeline daily
+- Investigate whether `MIXPANEL_TOKEN` tracking is wired up correctly for the new blog post format
+
+---
+
 ## Session: 2026-06-03
 
 ### Worked on

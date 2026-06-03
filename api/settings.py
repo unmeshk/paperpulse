@@ -36,7 +36,7 @@ COMBINE_PROMPT = """
         You are tasked with combining multiple research summaries into a single coherent summary. 
         Please combine the following summaries, maintaining the thematic organization and removing any redundancy.
         Preserve all existing markdown hyperlinks exactly as they appear — do not remove or reformat any [Title](url) links.
-        Write about each theme starting directly with "Theme 1:". Do not include any introductory text before Theme 1.:\n\n
+        Format each theme heading as "## Theme N: [Theme Name]". Do not include any introductory text before Theme 1.:\n\n
         """
 
 TOP5_PAPERS_PROMPT = """
