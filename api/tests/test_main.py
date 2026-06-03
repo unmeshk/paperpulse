@@ -191,10 +191,11 @@ def test_download_pdf(mock_urlopen):
 
 # Tests for create_blogpost
 @patch('builtins.open', create=True)
-def test_create_blogpost(mock_open):
+def test_create_blogpost(mock_open, monkeypatch):
+    monkeypatch.setenv('PROJECT_DIR', '/tmp')
     summary = "Test summary content"
     num_papers = 5
-    
+
     create_blogpost(summary, num_papers)
     
     mock_open.assert_called_once()
