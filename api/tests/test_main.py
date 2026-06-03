@@ -22,7 +22,7 @@ def arxiv_client():
 
 @pytest.fixture
 def llm_agent():
-    return Agent(openai_api_key="dummy_key")
+    return Agent(gemini_api_key="dummy_key")
 
 @pytest.fixture
 def file_handler():
@@ -40,40 +40,34 @@ def sample_paper():
 @pytest.fixture
 def sample_entry():
     xml_string = """
-    <entry xmlns="http://www.w3.org/2005/Atom">
+    <item>
         <title>Test Paper Title</title>
-        <author>
-            <name>Author One</name>
-        </author>
-        <author>
-            <name>Author Two</name>
-        </author>
-        <summary>This is a test summary</summary>
-        <id>https://arxiv.org/abs/1234.5678</id>
-        <updated>2025-01-17T12:00:00Z</updated>
-    </entry>
+        <link>https://arxiv.org/abs/1234.5678</link>
+        <description>arXiv:1234.5678v1 Announce Type: new Abstract: This is a test summary</description>
+        <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Author One, Author Two</dc:creator>
+    </item>
     """
     return ET.fromstring(xml_string)
 
 @pytest.fixture
 def mock_arxiv_response():
-    return """<?xml version="1.0" encoding="UTF-8"?>
-    <feed xmlns="http://www.w3.org/2005/Atom">
-        <entry>
-            <title>Test Paper 1</title>
-            <author><name>Author One</name></author>
-            <summary>Summary 1</summary>
-            <id>https://arxiv.org/abs/1234.5678</id>
-            <updated>2025-01-17T12:00:00Z</updated>
-        </entry>
-        <entry>
-            <title>Test Paper 2</title>
-            <author><name>Author Two</name></author>
-            <summary>Summary 2</summary>
-            <id>https://arxiv.org/abs/8765.4321</id>
-            <updated>2025-01-17T11:00:00Z</updated>
-        </entry>
-    </feed>
+    return b"""<?xml version="1.0" encoding="UTF-8"?>
+    <rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/">
+      <channel>
+        <item>
+          <title>Test Paper 1</title>
+          <link>https://arxiv.org/abs/1234.5678</link>
+          <description>arXiv:1234.5678v1 Announce Type: new Abstract: Summary 1</description>
+          <dc:creator>Author One</dc:creator>
+        </item>
+        <item>
+          <title>Test Paper 2</title>
+          <link>https://arxiv.org/abs/8765.4321</link>
+          <description>arXiv:8765.4321v1 Announce Type: new Abstract: Summary 2</description>
+          <dc:creator>Author Two</dc:creator>
+        </item>
+      </channel>
+    </rss>
     """
 
 # ArxivClient Tests
@@ -85,16 +79,18 @@ class TestArxivClient:
         assert result['summary'] == 'This is a test summary'
         assert result['url'] == 'https://arxiv.org/abs/1234.5678'
 
-    #@patch('urllib.request.urlopen')
-    #def test_retrieve_daily_results(self, mock_urlopen, arxiv_client, mock_arxiv_response):
-    #    mock_response = Mock()
-    #    mock_response.read.return_value = mock_arxiv_response.encode()
-    #    mock_urlopen.return_value.__enter__.return_value = mock_response
+    @patch('urllib.request.urlopen')
+    def test_retrieve_daily_results(self, mock_urlopen, mock_arxiv_response):
+        mock_response = Mock()
+        mock_response.read.return_value = mock_arxiv_response
+        mock_urlopen.return_value.__enter__.return_value = mock_response
 
-    #    results = arxiv_client.retrieve_daily_results()
-    #    assert len(results) == 2
-    #    assert results[0]['title'] == 'Test Paper 1'
-    #    assert results[1]['title'] == 'Test Paper 2'
+        client = ArxivClient(categories=['cs.LG'])
+        with patch('time.sleep'):
+            results = client.retrieve_daily_results()
+        assert len(results) == 2
+        assert results[0]['title'] == 'Test Paper 1'
+        assert results[1]['title'] == 'Test Paper 2'
 
     @patch('urllib.request.urlopen')
     def test_get_pdf_url(self, mock_urlopen, arxiv_client):
@@ -136,13 +132,9 @@ class TestArxivClient:
 
 # Agent Tests
 class TestAgent:
-    @patch('openai.chat.completions.create')
-    def test_identify_important_papers(self, mock_openai, llm_agent):
+    def test_identify_important_papers(self, llm_agent):
         mock_response = Mock()
-        mock_response.choices = [
-            Mock(message=Mock(content="Summary content\n\nTop 5 papers content"))
-        ]
-        mock_openai.return_value = mock_response
+        mock_response.text = "Summary content"
 
         papers = [
             {
@@ -152,13 +144,14 @@ class TestAgent:
                 'url': 'https://arxiv.org/abs/1234.5678'
             }
         ]
-        
-        summary = llm_agent.identify_important_papers(papers)
-        assert summary == "Summary content\n\nTop 5 papers content"
+
+        with patch.object(llm_agent.client.models, 'generate_content', return_value=mock_response):
+            summary = llm_agent.identify_important_papers(papers)
+        assert summary == "Summary content"
 
     def test_combine_paper_info(self, sample_paper, llm_agent):
         result = llm_agent._combine_paper_info(sample_paper)
-        expected = "**Title:** Test Paper Title\n**Authors:** Author One, Author Two\n**Summary:** This is a test summary\n"
+        expected = "**Title:** Test Paper Title\n**URL:** https://arxiv.org/abs/1234.5678\n**Authors:** Author One, Author Two\n**Summary:** This is a test summary\n"
         assert result == expected
 
 # FileHandler Tests

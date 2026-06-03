@@ -4,9 +4,10 @@ This project automatically retrieves, analyzes, and summarizes the latest Machin
 You can see the resulting site online at: <https://paperpulse.ukurup.com>
 
 ## Features
-- Daily retrieval of new papers from ArXiv in ML, AI, CV, and CL categories
-- Automatic thematic grouping and summarization of papers using OpenAI API
-- Generation of blog posts with summaries and hyperlinked references using Jekyll
+- Daily retrieval of new papers from arXiv RSS feeds (one request per category, no pagination)
+- Automatic thematic grouping and summarization using Google Gemini (`gemini-3.1-flash-lite`)
+- Blog posts with inline hyperlinks — every paper mentioned links directly to its arXiv page
+- Generation of blog posts using Jekyll
 
 ### TODO
 - Identification of top papers based on a simple recommendation engine
@@ -14,81 +15,89 @@ You can see the resulting site online at: <https://paperpulse.ukurup.com>
 
 ## Main Requirements
 - Python 3.x
-- Jekyll 
-- OpenAI API key
+- Jekyll
+- Google Gemini API key
 
 ## Installation
 Creating a virtual env first is recommended
 ```
 git clone [repository-url]
 cd paperpulse
-pip install -r requirements.txt 
+pip install -r api/requirements.txt
 ```
 
-## Set up environment variables:
-Create a .env file in the root directory with the following variables:
+## Set up environment variables
+Create a `.env` file in the `api/` directory with the following variables:
 ```
-OPENAI_API_KEY=[your-openai-api-key]
-PROJECT_ENV=dev  # or 'prod' for production. 
-PROJECT_DIR=[path-to-project-directory]
+GEMINI_API_KEY=[your-gemini-api-key]
+PROJECT_ENV=dev  # or 'prod' for production
+PROJECT_DIR=[absolute-path-to-project-root]
 ```
 
-In `dev` mode, when `main.py` is run, the paper info retrieved via the ArXiv API is stored to the file `papers-<today's date>.pkl` in `PROJECT_DIR`. If `main.py` run again, info from this file is used instead of pinging the ArXiv API once more.
+In `dev` mode, when `main.py` is run, the retrieved paper list is saved to `papers-<today's date>.pkl` in `PROJECT_DIR`. On subsequent runs the cached file is used instead of re-fetching from arXiv.
 
 ## Usage
 
-### To generate daily summaries: 
-`python main.py`
+### To generate daily summaries
+```
+PYTHONPATH=. .venv/bin/python -m api.main
+```
 
 This will:
-- Retrieve the latest paper info (title, authors, abstract) from ArXiv
-- Process and analyze this info to generate thematic summaries
-- Create a blog post in the blog/_posts directory
+- Fetch today's papers from arXiv RSS feeds (`rss.arxiv.org/rss/{category}`)
+- Batch and summarize papers using Gemini, with inline `[Title](url)` links
+- Write a blog post to `blog/_posts/YYYY-MM-DD-daily-summary.markdown`
 
-### To start the jekyll server: 
-`docker compose up --build`
+### To start the Jekyll server
+```
+docker compose up --build
+```
 
-This will:
-- start a server at localhost:4000 that shows the blog.
+This starts a server at `localhost:4000` showing the blog.
 
-If you want to deploy this blog in a more prod environment, you can set `PROJECT_ENV=prod` and use `docker-compose -f docker-compose.prod.yml up -d` but you will have to set up *nginx* and *SSL* first. You'll also have to create a cron job that runs `python main.py` once a day.
+For production, set `PROJECT_ENV=prod` and use:
+```
+docker-compose -f docker-compose.prod.yml up -d
+```
+You will need to set up *nginx* and *SSL* first, and create a cron job to run `api.main` once a day.
 
 ### Tests
-`pytest api/tests/test_main.py`
+```
+PYTHONPATH=. .venv/bin/python -m pytest api/tests/test_main.py
+```
 
 ## Development vs Production
 
-### Development mode (PROJECT_ENV=dev):
-- Saves retrieved papers to pickle files for faster development
-- Enables additional debugging output
+### Development mode (PROJECT_ENV=dev)
+- Saves retrieved papers to a pickle file for faster iteration
+- On re-run, loads papers from the pickle file instead of hitting arXiv
 
-### Production mode (PROJECT_ENV=prod):
-- Always retrieves papers directly from ArXiv
+### Production mode (PROJECT_ENV=prod)
+- Always fetches fresh papers from arXiv RSS feeds
 - Minimizes debug output
-- Optimized for production deployment
 
 ## Project Structure
 `/api`
-- `main.py`: simple orchestrator
-- `arxiv_client.py`: Handles the ArXiv API call
-- `agent.py`: OpenAI API integration for paper analysis
-- `file_handler.py`: Save and load paper info from disk
-- `utils.py`: Utility functions for PDF processing and text manipulation
-- `webs.py`: generated `.md` files used by Jekyll to make the blog
-- `settings.py`: Configuration and prompt templates
-- `tests/test_main.py`: Unit tests of core functionality
+- `main.py`: pipeline orchestrator
+- `arxiv_client.py`: fetches papers from arXiv RSS feeds
+- `agent.py`: Gemini API integration for thematic summarization
+- `file_handler.py`: save and load paper info from disk
+- `utils.py`: utility functions for PDF processing and text manipulation
+- `webs.py`: writes Jekyll `.md` blog post files
+- `settings.py`: configuration, RSS categories, and prompt templates
+- `tests/test_main.py`: unit tests for core functionality
 
-`/blog`: Contains all blog (jekyll) related functionality including the daily posts that are created by running `python main.py`
+`/blog`: Jekyll site including daily posts generated by running `api.main`
 
 ## Contributing
 - Fork the repository
-- Create a feature branch (git checkout -b feature/AmazingFeature)
-- Commit your changes (git commit -m 'Add some AmazingFeature')
-- Push to the branch (git push origin feature/AmazingFeature)
+- Create a feature branch (`git checkout -b feature/AmazingFeature`)
+- Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+- Push to the branch (`git push origin feature/AmazingFeature`)
 - Open a Pull Request
 
 ## License
-MIT License 
+MIT License
 
 ## Acknowledgments
-- ArXiv for providing the research paper API
+- arXiv for providing RSS feeds
