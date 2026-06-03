@@ -1,10 +1,15 @@
-import pdfplumber
+# TODO: pdfplumber, PIL, and fitz are only used by extract_text_from_pdf and
+# extract_images_from_pdf_base64, which are no longer called by main().
+# Imports commented out so prod and dev requirements stay aligned. Restore
+# (and re-add to requirements.txt) if PDF processing comes back, or delete
+# the unused functions entirely.
+# import pdfplumber
+# import fitz  # PyMuPDF
+# from PIL import Image
 import io
 import base64
-import fitz  # PyMuPDF
 import urllib
 import os
-from PIL import Image
 import urllib.request as libreq
 
 def extract_text_from_pdf(pdf_content):
