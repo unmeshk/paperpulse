@@ -12,15 +12,14 @@ import xml.etree.ElementTree as ET
 
 from dotenv import load_dotenv
 from api.utils import (
-    extract_text_from_pdf, 
+    extract_text_from_pdf,
     extract_images_from_pdf_base64,
     download_pdf,
-    add_markdown_links
-    )
+)
 from api.arxiv_client import ArxivClient
 from api.agent import Agent
 from api.file_handler import FileHandler
-from api.settings import ARXIV_SEARCH_QUERY, ARXIV_SORT_BY, ARXIV_SORT_ORDER
+from api.settings import RSS_CATEGORIES
 
 from api.webs import create_blogpost
 
@@ -39,8 +38,8 @@ def main():
     logger.info(dev_env)
 
     # initalize
-    arxiv_client = ArxivClient(ARXIV_SEARCH_QUERY, ARXIV_SORT_BY, ARXIV_SORT_ORDER)
-    llm_agent = Agent(os.getenv("OPENAI_API_KEY"))
+    arxiv_client = ArxivClient(RSS_CATEGORIES)
+    llm_agent = Agent(os.getenv("GEMINI_API_KEY"))
     file_handler = FileHandler(os.getenv("PROJECT_DIR"))
     papers = None
 
@@ -68,11 +67,7 @@ def main():
         print(f'Exception: {e}')
         return
 
-    # link papers mentioned in the summary to Arxiv
-    summary_linked = add_markdown_links(summary, papers)
-
-    # write the smummary to a web page based on the day when the papers were retrieved
-    create_blogpost(summary_linked, len(papers))
+    create_blogpost(summary, len(papers))
 
 if __name__ == "__main__":
     main()

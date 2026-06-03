@@ -1,20 +1,21 @@
-# Contains all of the Open AI calls
 import openai
 from openai import OpenAI
 import os
+import time
 import logging
 
-from api.settings import SUMMARY_PROMPT, COMBINE_PROMPT
+from google import genai
+from google.genai import types
 
-openai.api_key = os.getenv("OPENAI_API_KEY")
+from api.settings import SUMMARY_PROMPT, COMBINE_PROMPT
 
 logger = logging.getLogger(__name__)
 
 
 
 class Agent:
-    def __init__(self, openai_api_key):
-        openai.api_key = openai_api_key
+    def __init__(self, gemini_api_key):
+        self.client = genai.Client(api_key=gemini_api_key)
 
     def _combine_paper_info(self, paper):
         """
@@ -23,7 +24,7 @@ class Agent:
         Args:
         paper: the dict containing details of the paper
         """
-        return f"**Title:** {paper['title']}\n**Authors:** {', '.join(paper['authors'])}\n**Summary:** {paper['summary']}\n"
+        return f"**Title:** {paper['title']}\n**URL:** {paper['url']}\n**Authors:** {', '.join(paper['authors'])}\n**Summary:** {paper['summary']}\n"
 
     def _batch_papers(self, papers, max_length, prompt_template):
         """
@@ -61,36 +62,18 @@ class Agent:
         logger.info(f"Split {len(papers)} papers into {len(batches)} batches")
         return batches
 
-    def _call_llm(self, prompt, max_tokens = 5000):
-        """
-        Helper function to make LLM API calls.
-        
-        Args:
-            prompt: The prompt to send to the LLM
-            max_tokens: Maximum tokens for the response
-            
-        Returns:
-            The LLM's response text
-        
-        Raises:
-            Exception: If the API call fails
-        """
+    def _call_llm(self, prompt, max_tokens=5000):
         try:
-            messages = [
-                {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": prompt}
-            ]
-            
-            response = openai.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=messages,
-                max_tokens=max_tokens,
-                temperature=0.1,
-                top_p=0.9
+            response = self.client.models.generate_content(
+                model='gemini-3.1-flash-lite',
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    system_instruction='You are a helpful assistant.',
+                    temperature=0.1,
+                    max_output_tokens=max_tokens,
+                )
             )
-            
-            return response.choices[0].message.content
-            
+            return response.text
         except Exception as e:
             logger.error(f"LLM API call failed: {str(e)}")
             raise
@@ -121,20 +104,21 @@ class Agent:
         # Process each batch
         for i, batch in enumerate(batches, 1):
             logger.info(f"Processing batch {i} of {len(batches)}")
-            
+
             # Combine papers in this batch
             batch_info = "\n".join(self._combine_paper_info(p) for p in batch)
             prompt = SUMMARY_PROMPT + batch_info
-            
+
             try:
-                # Get summary for this batch
                 batch_summary = self._call_llm(prompt)
                 intermediate_summaries.append(batch_summary)
                 logger.info(f"Successfully processed batch {i}")
-                
             except Exception as e:
                 logger.error(f"Failed to process batch {i}: {str(e)}")
                 continue
+
+            if i < len(batches):
+                time.sleep(30)
         
         # If we have multiple summaries, combine them
         if len(intermediate_summaries) > 1:
@@ -312,21 +296,4 @@ class Agent:
 
         """
         prompt = prompt + ''.join(summaries)
-
-        # get summaries
-        messages = [
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": prompt}
-        ]
-
-        # Call the OpenAI API
-        response = openai.chat.completions.create(
-            model="gpt-4o-mini", 
-            messages=messages,
-            max_tokens=5000, 
-            temperature=0.1,
-            top_p=0.9,  # Adjust as needed
-        )
-
-        # Extract the paper titles from the response
-        return(response.choices[0].message.content)
+        return self._call_llm(prompt)
