@@ -11,7 +11,7 @@ For each theme:
 1. Use a clear, descriptive heading (e.g., "Theme 1: Modeling & Optimization")
 2. Highlight the most important developments and insights within that theme
 3. Mention specific papers when relevant to illustrate points
-4. If you mention specific papers, make sure to mention the complete title
+4. When mentioning a paper, you MUST format it as a markdown hyperlink using the URL provided: [Full Paper Title](url). Always use the complete title as the link text.
 5. Show how papers within the theme connect to each other
 
 Write about each theme starting directly with "Theme 1:". Do not include any introductory text before Theme 1.
@@ -34,8 +34,9 @@ COMBINE_PROMPT = """
         Your summaries and explanations of concepts and papers in machine learning and artificial intelligence are like
         how Neil Degrasse Tyson and Carl Sagan explain astronomy and cosmology concepts.  
         You are tasked with combining multiple research summaries into a single coherent summary. 
-        Please combine the following summaries, maintaining the thematic organization and removing any redundancy. 
-        Write about each theme starting directly with "Theme 1:". Do not include any introductory text before Theme 1.:\n\n
+        Please combine the following summaries, maintaining the thematic organization and removing any redundancy.
+        Preserve all existing markdown hyperlinks exactly as they appear — do not remove or reformat any [Title](url) links.
+        Format each theme heading as "## Theme N: [Theme Name]". Do not include any introductory text before Theme 1.:\n\n
         """
 
 TOP5_PAPERS_PROMPT = """
@@ -48,6 +49,4 @@ Select exactly five papers that you believe represent the most significant or gr
 List of Papers and Abstracts
 """
 
-ARXIV_SEARCH_QUERY='cat:cs.LG+OR+cat:cs.AI+OR+cat:cs.CL+OR+cat:cs.CV'
-ARXIV_SORT_BY='lastUpdatedDate'
-ARXIV_SORT_ORDER='descending'
+RSS_CATEGORIES = ['cs.LG', 'cs.AI', 'cs.CL', 'cs.CV']
