@@ -13,6 +13,7 @@ from api.agent import Agent
 from api.file_handler import FileHandler
 from api.utils import add_markdown_links, download_pdf
 from api.webs import create_blogpost
+from api.settings import get_secret
 
 
 # Fixtures
@@ -212,6 +213,37 @@ def test_create_blogpost(mock_open):
     # Check YAML front matter format
     assert written_content.startswith("---\n")
     assert "---\n" in written_content[3:]  # Check for closing front matter delimiter
+
+
+# get_secret tests
+class TestGetSecret:
+    @pytest.fixture
+    def patch_secrets_dir(self, tmp_path, monkeypatch):
+        """Redirect the /run/secrets lookup in api.settings to a tmp dir."""
+        import api.settings as settings_mod
+        original_path = settings_mod.Path
+        secrets_dir = tmp_path / "secrets"
+        secrets_dir.mkdir()
+
+        def fake_path(arg):
+            if arg == "/run/secrets":
+                return secrets_dir
+            return original_path(arg)
+
+        monkeypatch.setattr(settings_mod, "Path", fake_path)
+        return secrets_dir
+
+    def test_reads_from_secrets_file_when_present(self, patch_secrets_dir):
+        (patch_secrets_dir / "my_key").write_text("secret-from-file\n")
+        assert get_secret("my_key") == "secret-from-file"
+
+    def test_falls_back_to_env_when_file_absent(self, patch_secrets_dir, monkeypatch):
+        monkeypatch.setenv("MY_KEY", "secret-from-env")
+        assert get_secret("my_key") == "secret-from-env"
+
+    def test_returns_none_when_neither_present(self, patch_secrets_dir, monkeypatch):
+        monkeypatch.delenv("MISSING_KEY", raising=False)
+        assert get_secret("missing_key") is None
 
 
 if __name__ == '__main__':

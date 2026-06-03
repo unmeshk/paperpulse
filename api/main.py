@@ -10,15 +10,17 @@ from datetime import datetime
 import xml.etree.ElementTree as ET
 
 from dotenv import load_dotenv
-from api.utils import (
-    extract_text_from_pdf,
-    extract_images_from_pdf_base64,
-    download_pdf,
-)
+# TODO: remove these imports — they pull in pdfplumber/Pillow but the functions are not used by main().
+# Kept commented as a marker until we decide whether to bring back PDF processing or delete utils.py outright.
+# from api.utils import (
+#     extract_text_from_pdf,
+#     extract_images_from_pdf_base64,
+#     download_pdf,
+# )
 from api.arxiv_client import ArxivClient
 from api.agent import Agent
 from api.file_handler import FileHandler
-from api.settings import RSS_CATEGORIES
+from api.settings import RSS_CATEGORIES, get_secret
 
 from api.webs import create_blogpost
 
@@ -38,7 +40,7 @@ def main():
 
     # initalize
     arxiv_client = ArxivClient(RSS_CATEGORIES)
-    llm_agent = Agent(os.getenv("GEMINI_API_KEY"))
+    llm_agent = Agent(get_secret("gemini_api_key"))
     file_handler = FileHandler(os.getenv("PROJECT_DIR"))
     papers = None
 
