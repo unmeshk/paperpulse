@@ -1,17 +1,33 @@
 #!/usr/bin/env bash
 # Deploy script for ArXivSum / PaperPulse.
-# Installed at /usr/local/sbin/deploy-paperpulse on the droplet.
-# Invoked by CI over SSH as the `deploy` user via sudo (NOPASSWD restricted to this script).
+# Installed at /usr/local/sbin/deploy-paperpulse on the droplet, root-owned.
+# Invoked via sudo (NOPASSWD restricted to this script for the `deploy` user).
 #
-# Usage: deploy-paperpulse <image_tag> [--run-pipeline]
-#   image_tag       Full git SHA tag pushed to GHCR (e.g. abc123def...)
-#   --run-pipeline  Optional: after pulling images, run main.py once
-#                   (used when the CI workflow detects changes under api/)
+# Two invocation paths:
+#   1. CI over SSH. The `deploy` user's authorized_keys forces a single
+#      command="sudo --preserve-env=SSH_ORIGINAL_COMMAND /usr/local/sbin/deploy-paperpulse".
+#      The git SHA arrives in $SSH_ORIGINAL_COMMAND.
+#   2. Manual on droplet: sudo /usr/local/sbin/deploy-paperpulse <git_sha> [--run-pipeline]
+#
+# Input is validated strictly (40-char hex SHA). Defense in depth on top of the
+# sudoers + authorized_keys restrictions.
 
 set -euo pipefail
 
-IMAGE_TAG="${1:?image tag required (full git SHA)}"
+# Read tag from $1 (manual) or $SSH_ORIGINAL_COMMAND (SSH-forced-command).
+IMAGE_TAG="${1:-${SSH_ORIGINAL_COMMAND:-}}"
 RUN_PIPELINE="${2:-}"
+
+if [ -z "$IMAGE_TAG" ]; then
+    echo "Usage: deploy-paperpulse <git_sha> [--run-pipeline]" >&2
+    exit 1
+fi
+
+# Strict input validation. Reject anything that isn't a 40-char hex git SHA.
+if ! [[ "$IMAGE_TAG" =~ ^[a-f0-9]{40}$ ]]; then
+    echo "Refusing to deploy: image tag must be a 40-char git SHA, got: $IMAGE_TAG" >&2
+    exit 1
+fi
 
 REPO_DIR="/var/www/arxivsum"
 COMPOSE_FILE="${REPO_DIR}/docker-compose.prod.yml"
