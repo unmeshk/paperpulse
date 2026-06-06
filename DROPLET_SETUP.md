@@ -145,4 +145,78 @@ sudo /usr/local/sbin/deploy-paperpulse <40-char-git-sha>
 sudo /usr/local/sbin/deploy-paperpulse <40-char-git-sha> --run-pipeline
 ```
 
-CI never passes `--run-pipeline`. Daily pipeline runs via the systemd timer (step 6 of the CI/CD plan).
+CI never passes `--run-pipeline`. Daily pipeline runs via the systemd timer (see below).
+
+## 10. Install the systemd timer for the daily pipeline
+
+Replaces the old `crontab -e` entry that ran the pipeline via venv.
+
+### Disable the old cron entry first
+
+```bash
+crontab -l
+# Look for the line: 0 7 * * * cd /var/www/arxivsum/api && /var/www/arxivsum/avenv/bin/python ...
+# Remove it (or comment it out by adding a # at the start of the line)
+crontab -e
+```
+
+### Install the unit files
+
+```bash
+cd /var/www/arxivsum
+git fetch origin main
+git reset --hard origin/main
+
+install -m 644 -o root -g root systemd/paperpulse-daily.service /etc/systemd/system/paperpulse-daily.service
+install -m 644 -o root -g root systemd/paperpulse-daily.timer /etc/systemd/system/paperpulse-daily.timer
+
+# Make systemd aware of the new units
+systemctl daemon-reload
+
+# Enable + start the timer (the .service runs on demand)
+systemctl enable --now paperpulse-daily.timer
+```
+
+### Verify
+
+```bash
+# Confirm the timer is loaded and active
+systemctl status paperpulse-daily.timer
+
+# Show next firing time
+systemctl list-timers paperpulse-daily.timer
+# Expect: NEXT column shows tomorrow 06:00:00 Eastern (10:00 UTC during DST)
+```
+
+### Trigger a one-off run to test
+
+```bash
+# Run the service immediately, just once
+systemctl start paperpulse-daily.service
+
+# Watch the logs as it runs
+journalctl -u paperpulse-daily.service -f
+# Ctrl-C to stop tailing (doesn't affect the run)
+
+# After it finishes, confirm a post got generated
+ls -la /var/www/arxivsum/blog/_posts/ | head -5
+```
+
+### Useful inspection commands going forward
+
+```bash
+# Last 50 log lines from a run
+journalctl -u paperpulse-daily.service -n 50
+
+# Logs from a specific date
+journalctl -u paperpulse-daily.service --since "2026-06-06"
+
+# Service status (last invocation result, exit code)
+systemctl status paperpulse-daily.service
+
+# Disable the timer (e.g. for maintenance)
+systemctl disable --now paperpulse-daily.timer
+
+# Re-enable
+systemctl enable --now paperpulse-daily.timer
+```

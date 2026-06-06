@@ -1,0 +1,22 @@
+[Unit]
+Description=PaperPulse daily ArXiv summary pipeline
+Documentation=https://github.com/unmeshk/paperpulse
+Wants=docker.service network-online.target
+After=docker.service network-online.target
+Requires=docker.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/var/www/arxivsum
+Environment="PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+ExecStart=/usr/bin/docker compose -f /var/www/arxivsum/docker-compose.prod.yml run --rm api python -m api.main
+
+# Gemini batching with 30s sleeps takes ~10min on heavy days; allow plenty of headroom
+TimeoutStartSec=30min
+
+# Capture stdout/stderr into the journal
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
