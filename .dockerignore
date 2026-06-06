@@ -1,3 +1,11 @@
 certbot/
 .env
 *.env
+*.log
+*.pkl
+blog/_site/
+blog/.jekyll-cache/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
