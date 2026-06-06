@@ -1,0 +1,18 @@
+[Unit]
+Description=Run PaperPulse daily ArXiv pipeline at 6am Eastern
+Documentation=https://github.com/unmeshk/paperpulse
+
+[Timer]
+# 6am Eastern, year-round (DST handled by zoneinfo)
+OnCalendar=*-*-* 06:00:00 America/New_York
+
+# If the droplet was down at the scheduled time, run on next boot
+Persistent=true
+
+# Small jitter to avoid the exact-minute thundering herd if other services share a schedule
+RandomizedDelaySec=5min
+
+Unit=paperpulse-daily.service
+
+[Install]
+WantedBy=timers.target
