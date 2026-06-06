@@ -34,7 +34,6 @@ Landing the CI/CD pipeline end-to-end and replacing the broken cron with a syste
 - Repointed sources to `old-releases.ubuntu.com`, ran `do-release-upgrade` (in screen session that survived an SSH drop)
 - Picked "keep local" for the sshd_config conftest after diffing — only safe additions (comments, AcceptEnv tweaks)
 - After upgrade: re-installed Docker Compose V2 plugin from Docker's official apt repo, brought blog/nginx/certbot stack back via `docker compose up -d --build`
-- Note: 25.10 is also non-LTS (EOL ~July 2026). Need a clean migration to 24.04 LTS as a separate session.
 
 ### Decisions made
 - **Solo-dev branch protection**: keep "Require pull request" + "Require status checks" enabled, drop "Require approvals" to 0 via unchecking the sub-checkbox. PRs still enforce CI gate; no impossible-self-review block.
@@ -46,7 +45,6 @@ Landing the CI/CD pipeline end-to-end and replacing the broken cron with a syste
 ### Next session priorities
 - **Step 7 cleanup** — rotate Gemini key (then put new value in `/var/lib/paperpulse/secrets/gemini_api_key`), rotate Mixpanel token, set Gemini spend cap, remove old `.env` files from droplet
 - **Delete leftover test images from GHCR**: feature-branch SHA-tagged `paperpulse-api` and `paperpulse-blog` versions from `cc48127...` and `3162bf8...`
-- **OS migration to 24.04 LTS**: fresh droplet, copy `/var/www/arxivsum` + `/var/lib/paperpulse/secrets/` + Let's Encrypt certs, swap floating IP. Plan as its own session.
 - **Tomorrow morning**: confirm the 6am Eastern systemd timer fires automatically and publishes the daily summary without manual intervention
 
 ### Open follow-ups not blocking
