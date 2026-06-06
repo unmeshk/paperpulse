@@ -1,8 +1,6 @@
 services:
   blog:
-    build:
-      context: .
-      dockerfile: Dockerfile.jekyll
+    image: ghcr.io/unmeshk/paperpulse-blog:${IMAGE_TAG:-latest}
     expose:
       - "4000"
     volumes:
@@ -14,9 +12,7 @@ services:
       - web
 
   api:
-    build:
-      context: .
-      dockerfile: api/Dockerfile
+    image: ghcr.io/unmeshk/paperpulse-api:${IMAGE_TAG:-latest}
     volumes:
       - ./blog:/app/blog
     environment:
