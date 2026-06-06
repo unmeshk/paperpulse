@@ -1,5 +1,60 @@
 # Worklog
 
+## Session: 2026-06-06 (CI/CD landing + systemd timer)
+
+### Worked on
+Landing the CI/CD pipeline end-to-end and replacing the broken cron with a systemd timer.
+
+### Completed
+
+**Step 5: deploy job + droplet runbook completion**
+- Added `deploy` job to `.github/workflows/deploy.yml` — runs after `build` on push to main, gated by `production` environment, raw SSH with pinned known_hosts
+- Deploy script: accepts SHA from `$1` or `$SSH_ORIGINAL_COMMAND`, strict 40-char hex validation
+- Fixed `sha-` prefix on image tags in workflow so bare SHA matches deploy script + rollback doc expectations
+- DROPLET_SETUP.md runbook executed on droplet: `deploy` user with locked password, authorized_keys with forced command + restrictions, sudoers fragment validated by visudo, deploy script installed at `/usr/local/sbin/deploy-paperpulse`
+- Three GH Actions secrets configured: `DEPLOY_SSH_PRIVATE_KEY`, `DROPLET_HOST`, `DROPLET_KNOWN_HOSTS`
+- `production` environment configured with required-reviewer protection
+- Manual SSH test from laptop verified: forced command + sudo + validation + git fetch over HTTPS all work
+- Branch protection on main: PR required, status checks required, 0 approvals (solo-dev exception)
+
+**First auto-deploy**
+- PR #33 merged, workflow ran on main
+- First attempt: `deploy` job failed with "Host key verification failed" — `DROPLET_KNOWN_HOSTS` secret needed refresh
+- After fixing: re-ran failed jobs, full pipeline went green end-to-end
+- Production stayed up throughout
+
+**Step 4: systemd timer (PR #34)**
+- `systemd/paperpulse-daily.service` — oneshot unit running `docker compose run --rm api python -m api.main`, 30 min timeout, journal logging
+- `systemd/paperpulse-daily.timer` — fires at 6am Eastern year-round (`OnCalendar=*-*-* 06:00:00 America/New_York`), `Persistent=true` for missed-run catch-up
+- DROPLET_SETUP.md step 10 added: crontab removal, unit install, enable/start, verification, useful inspection commands
+- Manual fire on droplet ran successfully — `2026-06-06-daily-summary.markdown` (7380 bytes) generated, journal logged cleanly
+
+**Unplanned: Ubuntu 24.10 → 25.10 in-place upgrade**
+- Discovered apt repos 404'ing because 24.10 is EOL
+- Repointed sources to `old-releases.ubuntu.com`, ran `do-release-upgrade` (in screen session that survived an SSH drop)
+- Picked "keep local" for the sshd_config conftest after diffing — only safe additions (comments, AcceptEnv tweaks)
+- After upgrade: re-installed Docker Compose V2 plugin from Docker's official apt repo, brought blog/nginx/certbot stack back via `docker compose up -d --build`
+- Note: 25.10 is also non-LTS (EOL ~July 2026). Need a clean migration to 24.04 LTS as a separate session.
+
+### Decisions made
+- **Solo-dev branch protection**: keep "Require pull request" + "Require status checks" enabled, drop "Require approvals" to 0 via unchecking the sub-checkbox. PRs still enforce CI gate; no impossible-self-review block.
+- **Image tag format**: bare 40-char SHA (no `sha-` prefix). Cleaner mapping between CI output, deploy script input, and rollback procedures.
+- **systemd timer timezone**: `America/New_York` in `OnCalendar` rather than UTC, so 6am Eastern stays 6am Eastern across DST shifts.
+- **Defer MIXPANEL_TOKEN cleanup**: still passed as `${MIXPANEL_TOKEN}` env var, low-stakes since it's client-side anyway. Real secrets discipline reserved for GEMINI_API_KEY.
+- **Remote URL on droplet**: switched from `git@github.com:...` to `https://github.com/...` for `/var/www/arxivsum`. Public repo + HTTPS = no auth needed on droplet. Local laptop remote stays SSH (was accidentally malformed mid-session and got fixed).
+
+### Next session priorities
+- **Step 7 cleanup** — rotate Gemini key (then put new value in `/var/lib/paperpulse/secrets/gemini_api_key`), rotate Mixpanel token, set Gemini spend cap, remove old `.env` files from droplet
+- **Delete leftover test images from GHCR**: feature-branch SHA-tagged `paperpulse-api` and `paperpulse-blog` versions from `cc48127...` and `3162bf8...`
+- **OS migration to 24.04 LTS**: fresh droplet, copy `/var/www/arxivsum` + `/var/lib/paperpulse/secrets/` + Let's Encrypt certs, swap floating IP. Plan as its own session.
+- **Tomorrow morning**: confirm the 6am Eastern systemd timer fires automatically and publishes the daily summary without manual intervention
+
+### Open follow-ups not blocking
+- `api/utils.py` and `api/main.py` still have commented-out PDF processing code with TODO. Decide whether to restore PDF features or delete the dead code.
+- Consider whether the dry-run workflow path is still useful (we skipped using it for the actual rollout)
+
+---
+
 ## Session: 2026-06-03 → 2026-06-06 (CI/CD pipeline + OS upgrade)
 
 ### Worked on
