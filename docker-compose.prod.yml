@@ -1,8 +1,6 @@
 services:
   blog:
-    build:
-      context: .
-      dockerfile: Dockerfile.jekyll
+    image: ghcr.io/unmeshk/paperpulse-blog:${IMAGE_TAG:-latest}
     expose:
       - "4000"
     volumes:
@@ -10,6 +8,18 @@ services:
     environment:
       - JEKYLL_ENV=production
       - MIXPANEL_TOKEN=${MIXPANEL_TOKEN}
+    networks:
+      - web
+
+  api:
+    image: ghcr.io/unmeshk/paperpulse-api:${IMAGE_TAG:-latest}
+    volumes:
+      - ./blog:/app/blog
+    environment:
+      PROJECT_ENV: prod
+      PROJECT_DIR: /app
+    secrets:
+      - gemini_api_key
     networks:
       - web
 
@@ -39,3 +49,7 @@ services:
 networks:
   web:
     driver: bridge
+
+secrets:
+  gemini_api_key:
+    file: /var/lib/paperpulse/secrets/gemini_api_key

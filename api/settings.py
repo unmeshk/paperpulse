@@ -1,3 +1,18 @@
+import os
+from pathlib import Path
+
+
+def get_secret(name):
+    """Read a secret from /run/secrets/<name> if present, else fall back to os.getenv(NAME.upper()).
+
+    Lets prod use Docker Compose secrets while local dev keeps reading from .env via os.getenv.
+    """
+    secret_path = Path("/run/secrets") / name
+    if secret_path.exists():
+        return secret_path.read_text().strip()
+    return os.getenv(name.upper())
+
+
 SUMMARY_PROMPT = """
 You are a research scientist and professor with a PhD in machine learning. 
 You are also an educator skilled in explaining complex scientific concepts to the average technology professional. 
