@@ -3,6 +3,9 @@ layout: page
 title: What's New
 permalink: /whatsnew/
 ---
+#### v1.04
+- Expanded the categories we summarize daily: now covers `cs.LG` (Machine Learning), `cs.AI` (Artificial Intelligence), `cs.CL` (Computation and Language), `cs.CV` (Computer Vision), and `stat.ML` (Machine Learning Statistics)
+
 #### v1.03
 - Switched paper retrieval to arXiv RSS feeds for more reliable daily harvesting
 - Switched LLM summarization from OpenAI to Google Gemini (`gemini-3.1-flash-lite`)
