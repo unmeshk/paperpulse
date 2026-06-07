@@ -1,5 +1,5 @@
 # Paperpulse - A Daily ArXiv ML/AI Paper Summarizer
-This project automatically retrieves, analyzes, and summarizes the latest Machine Learning (**cs.LG**), Artificial Intelligence (**cs.AI**), Computer Vision (**cs.CV**), and Computation and Language (**cs.CL**) papers from ArXiv. It creates daily blog posts with thematic summaries of new research, making it easier to stay up-to-date with the latest developments in these fields.
+This project automatically retrieves, analyzes, and summarizes the latest Machine Learning (**cs.LG**), Artificial Intelligence (**cs.AI**), Computer Vision (**cs.CV**), Computation and Language (**cs.CL**), and Machine Learning Statistics (**stat.ML**) papers from ArXiv. It creates daily blog posts with thematic summaries of new research, making it easier to stay up-to-date with the latest developments in these fields.
 
 You can see the resulting site online at: <https://paperpulse.ukurup.com>
 
@@ -55,11 +55,15 @@ docker compose up --build
 
 This starts a server at `localhost:4000` showing the blog.
 
-For production, set `PROJECT_ENV=prod` and use:
-```
-docker-compose -f docker-compose.prod.yml up -d
-```
-You will need to set up *nginx* and *SSL* first, and create a cron job to run `api.main` once a day.
+### Production deployment
+Deploys are automated. Pushes to `main` trigger a GitHub Actions workflow that runs tests, builds the API and blog container images, pushes them to GHCR, and deploys to the production droplet.
+
+The daily pipeline runs at 6am Eastern via a systemd timer (`paperpulse-daily.timer`), not cron.
+
+Operational runbooks live in `docs/`:
+- `docs/DROPLET_SETUP.md` — droplet provisioning, secrets, SSH, systemd timer install
+- `docs/CICD_PLAN.md` — CI/CD architecture and decisions
+- `docs/ROLLBACK.md` — how to roll back a bad deploy
 
 ### Tests
 ```

@@ -64,4 +64,4 @@ Select exactly five papers that you believe represent the most significant or gr
 List of Papers and Abstracts
 """
 
-RSS_CATEGORIES = ['cs.LG', 'cs.AI', 'cs.CL', 'cs.CV']
+RSS_CATEGORIES = ['cs.LG', 'cs.AI', 'cs.CL', 'cs.CV', 'stat.ML']
