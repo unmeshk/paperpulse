@@ -15,9 +15,11 @@ services:
     image: ghcr.io/unmeshk/paperpulse-api:${IMAGE_TAG:-latest}
     volumes:
       - ./blog:/app/blog
+      - ./logs:/app/logs
     environment:
       PROJECT_ENV: prod
       PROJECT_DIR: /app
+      LOG_DIR: /app/logs
     secrets:
       - gemini_api_key
     networks:
