@@ -1,6 +1,7 @@
 import os
 import pickle
 import re
+import sys
 import logging
 
 import urllib
@@ -25,7 +26,17 @@ from api.settings import RSS_CATEGORIES, get_secret
 from api.webs import create_blogpost
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(filename='myapp.log', level=logging.INFO)
+# LOG_DIR lets the container redirect log files to a host-mounted volume so runs
+# survive `docker compose run --rm`. Defaults to CWD for local dev.
+_log_dir = os.getenv("LOG_DIR", ".")
+_log_path = os.path.join(_log_dir, "myapp.log")
+logging.basicConfig(
+    level=logging.INFO,
+    handlers=[
+        logging.FileHandler(_log_path),
+        logging.StreamHandler(sys.stderr),
+    ],
+)
 logger.setLevel(logging.INFO)
 
 
@@ -58,7 +69,9 @@ def main():
                 file_handler.save_papers(papers)
                 
         if not papers:
-            logger.error('No papers retrieved')
+            # Empty feeds are a legitimate steady state (e.g. arXiv didn't publish
+            # in the last cycle). Treat as a no-op success, not an error.
+            logger.info('No papers retrieved; skipping today\'s post')
             return
         
         logger.info(f'Retrieved: {len(papers)} papers')
