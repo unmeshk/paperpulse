@@ -163,3 +163,7 @@ cython_debug/
 #.idea/
 certbot/
 blog/_posts/*
+docs/internal-readme.md
+app/.env
+app/.venv/
+app/paperpulse.sqlite*

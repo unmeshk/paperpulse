@@ -1,0 +1,1087 @@
+[
+  {
+    "slug": "astro-ph.CO",
+    "display_name": "Cosmology and Nongalactic Astrophysics",
+    "archive": "astro-ph",
+    "description": "Phenomenology of early universe, cosmic microwave background, cosmological parameters.",
+    "rss_url": "https://rss.arxiv.org/rss/astro-ph.CO"
+  },
+  {
+    "slug": "astro-ph.EP",
+    "display_name": "Earth and Planetary Astrophysics",
+    "archive": "astro-ph",
+    "description": "Interplanetary medium, planetary physics, planetary astrobiology, extrasolar planets.",
+    "rss_url": "https://rss.arxiv.org/rss/astro-ph.EP"
+  },
+  {
+    "slug": "astro-ph.GA",
+    "display_name": "Astrophysics of Galaxies",
+    "archive": "astro-ph",
+    "description": "Phenomena pertaining to galaxies or the Milky Way. Star clusters, HII regions and planetary nebulae.",
+    "rss_url": "https://rss.arxiv.org/rss/astro-ph.GA"
+  },
+  {
+    "slug": "astro-ph.HE",
+    "display_name": "High Energy Astrophysical Phenomena",
+    "archive": "astro-ph",
+    "description": "Cosmic ray production, acceleration, propagation, detection. Gamma ray astronomy and bursts.",
+    "rss_url": "https://rss.arxiv.org/rss/astro-ph.HE"
+  },
+  {
+    "slug": "astro-ph.IM",
+    "display_name": "Instrumentation and Methods for Astrophysics",
+    "archive": "astro-ph",
+    "description": "Detector and telescope design, experiment proposals. Laboratory Astrophysics.",
+    "rss_url": "https://rss.arxiv.org/rss/astro-ph.IM"
+  },
+  {
+    "slug": "astro-ph.SR",
+    "display_name": "Solar and Stellar Astrophysics",
+    "archive": "astro-ph",
+    "description": "White dwarfs, brown dwarfs, cataclysmic variables. Star formation and protostellar systems.",
+    "rss_url": "https://rss.arxiv.org/rss/astro-ph.SR"
+  },
+  {
+    "slug": "cond-mat.dis-nn",
+    "display_name": "Disordered Systems and Neural Networks",
+    "archive": "cond-mat",
+    "description": "Glasses and spin glasses; properties of random, aperiodic and quasiperiodic systems.",
+    "rss_url": "https://rss.arxiv.org/rss/cond-mat.dis-nn"
+  },
+  {
+    "slug": "cond-mat.mes-hall",
+    "display_name": "Mesoscale and Nanoscale Physics",
+    "archive": "cond-mat",
+    "description": "Semiconducting nanostructures: quantum dots, wires, and wells. Single electronics, spintronics.",
+    "rss_url": "https://rss.arxiv.org/rss/cond-mat.mes-hall"
+  },
+  {
+    "slug": "cond-mat.mtrl-sci",
+    "display_name": "Materials Science",
+    "archive": "cond-mat",
+    "description": "Techniques, synthesis, characterization, structure. Structural phase transitions, mechanical properties.",
+    "rss_url": "https://rss.arxiv.org/rss/cond-mat.mtrl-sci"
+  },
+  {
+    "slug": "cond-mat.other",
+    "display_name": "Other Condensed Matter",
+    "archive": "cond-mat",
+    "description": "Work in condensed matter that does not fit into the other cond-mat classifications.",
+    "rss_url": "https://rss.arxiv.org/rss/cond-mat.other"
+  },
+  {
+    "slug": "cond-mat.quant-gas",
+    "display_name": "Quantum Gases",
+    "archive": "cond-mat",
+    "description": "Ultracold atomic and molecular gases, Bose-Einstein condensation, Feshbach resonances.",
+    "rss_url": "https://rss.arxiv.org/rss/cond-mat.quant-gas"
+  },
+  {
+    "slug": "cond-mat.soft",
+    "display_name": "Soft Condensed Matter",
+    "archive": "cond-mat",
+    "description": "Membranes, polymers, liquid crystals, glasses, colloids, granular matter.",
+    "rss_url": "https://rss.arxiv.org/rss/cond-mat.soft"
+  },
+  {
+    "slug": "cond-mat.stat-mech",
+    "display_name": "Statistical Mechanics",
+    "archive": "cond-mat",
+    "description": "Phase transitions, thermodynamics, field theory, non-equilibrium phenomena.",
+    "rss_url": "https://rss.arxiv.org/rss/cond-mat.stat-mech"
+  },
+  {
+    "slug": "cond-mat.str-el",
+    "display_name": "Strongly Correlated Electrons",
+    "archive": "cond-mat",
+    "description": "Quantum magnetism, non-Fermi liquids, spin liquids, quantum criticality.",
+    "rss_url": "https://rss.arxiv.org/rss/cond-mat.str-el"
+  },
+  {
+    "slug": "cond-mat.supr-con",
+    "display_name": "Superconductivity",
+    "archive": "cond-mat",
+    "description": "Superconductivity: theory, models, experiment. Superflow in helium.",
+    "rss_url": "https://rss.arxiv.org/rss/cond-mat.supr-con"
+  },
+  {
+    "slug": "cs.AI",
+    "display_name": "Artificial Intelligence",
+    "archive": "cs",
+    "description": "Covers all areas of AI except Vision, Robotics, Machine Learning, Multiagent Systems, and Computation and Language (Natural Language Processing), which have separate subject areas.",
+    "rss_url": "https://rss.arxiv.org/rss/cs.AI"
+  },
+  {
+    "slug": "cs.AR",
+    "display_name": "Hardware Architecture",
+    "archive": "cs",
+    "description": "Covers systems organization and hardware architecture.",
+    "rss_url": "https://rss.arxiv.org/rss/cs.AR"
+  },
+  {
+    "slug": "cs.CC",
+    "display_name": "Computational Complexity",
+    "archive": "cs",
+    "description": "Covers models of computation, complexity classes, structural complexity, complexity tradeoffs, upper and lower bounds.",
+    "rss_url": "https://rss.arxiv.org/rss/cs.CC"
+  },
+  {
+    "slug": "cs.CE",
+    "display_name": "Computational Engineering, Finance, and Science",
+    "archive": "cs",
+    "description": "Covers applications of computer science to the mathematical modeling of complex systems in the fields of science, engineering, and finance.",
+    "rss_url": "https://rss.arxiv.org/rss/cs.CE"
+  },
+  {
+    "slug": "cs.CG",
+    "display_name": "Computational Geometry",
+    "archive": "cs",
+    "description": "Roughly includes material in ACM Subject Classes I.3.5 and F.2.2.",
+    "rss_url": "https://rss.arxiv.org/rss/cs.CG"
+  },
+  {
+    "slug": "cs.CL",
+    "display_name": "Computation and Language",
+    "archive": "cs",
+    "description": "Covers natural language processing.",
+    "rss_url": "https://rss.arxiv.org/rss/cs.CL"
+  },
+  {
+    "slug": "cs.CR",
+    "display_name": "Cryptography and Security",
+    "archive": "cs",
+    "description": "Covers all areas of cryptography and security including authentication, public key cryptosytems, proof-carrying code, etc.",
+    "rss_url": "https://rss.arxiv.org/rss/cs.CR"
+  },
+  {
+    "slug": "cs.CV",
+    "display_name": "Computer Vision and Pattern Recognition",
+    "archive": "cs",
+    "description": "Covers image processing, computer vision, pattern recognition, and scene understanding.",
+    "rss_url": "https://rss.arxiv.org/rss/cs.CV"
+  },
+  {
+    "slug": "cs.CY",
+    "display_name": "Computers and Society",
+    "archive": "cs",
+    "description": "Covers impact of computers on society, computer ethics, information technology and public policy, legal aspects of computing, computers and education.",
+    "rss_url": "https://rss.arxiv.org/rss/cs.CY"
+  },
+  {
+    "slug": "cs.DB",
+    "display_name": "Databases",
+    "archive": "cs",
+    "description": "Covers database management, datamining, and data processing.",
+    "rss_url": "https://rss.arxiv.org/rss/cs.DB"
+  },
+  {
+    "slug": "cs.DC",
+    "display_name": "Distributed, Parallel, and Cluster Computing",
+    "archive": "cs",
+    "description": "Covers fault-tolerance, distributed algorithms, stabilility, parallel computation, and cluster computing.",
+    "rss_url": "https://rss.arxiv.org/rss/cs.DC"
+  },
+  {
+    "slug": "cs.DL",
+    "display_name": "Digital Libraries",
+    "archive": "cs",
+    "description": "Covers all aspects of the digital library design and document and text creation.",
+    "rss_url": "https://rss.arxiv.org/rss/cs.DL"
+  },
+  {
+    "slug": "cs.DM",
+    "display_name": "Discrete Mathematics",
+    "archive": "cs",
+    "description": "Covers combinatorics, graph theory, applications of probability.",
+    "rss_url": "https://rss.arxiv.org/rss/cs.DM"
+  },
+  {
+    "slug": "cs.DS",
+    "display_name": "Data Structures and Algorithms",
+    "archive": "cs",
+    "description": "Covers data structures and analysis of algorithms.",
+    "rss_url": "https://rss.arxiv.org/rss/cs.DS"
+  },
+  {
+    "slug": "cs.ET",
+    "display_name": "Emerging Technologies",
+    "archive": "cs",
+    "description": "Covers approaches to information processing based on alternatives to silicon CMOS-based technologies.",
+    "rss_url": "https://rss.arxiv.org/rss/cs.ET"
+  },
+  {
+    "slug": "cs.FL",
+    "display_name": "Formal Languages and Automata Theory",
+    "archive": "cs",
+    "description": "Covers automata theory, formal language theory, grammars, and combinatorics on words.",
+    "rss_url": "https://rss.arxiv.org/rss/cs.FL"
+  },
+  {
+    "slug": "cs.GL",
+    "display_name": "General Literature",
+    "archive": "cs",
+    "description": "Covers introductory material, survey material, predictions of future trends, biographies, and miscellaneous computer-science related material.",
+    "rss_url": "https://rss.arxiv.org/rss/cs.GL"
+  },
+  {
+    "slug": "cs.GR",
+    "display_name": "Graphics",
+    "archive": "cs",
+    "description": "Covers all aspects of computer graphics.",
+    "rss_url": "https://rss.arxiv.org/rss/cs.GR"
+  },
+  {
+    "slug": "cs.GT",
+    "display_name": "Computer Science and Game Theory",
+    "archive": "cs",
+    "description": "Covers all theoretical and applied aspects at the intersection of computer science and game theory.",
+    "rss_url": "https://rss.arxiv.org/rss/cs.GT"
+  },
+  {
+    "slug": "cs.HC",
+    "display_name": "Human-Computer Interaction",
+    "archive": "cs",
+    "description": "Covers human factors, user interfaces, and collaborative computing.",
+    "rss_url": "https://rss.arxiv.org/rss/cs.HC"
+  },
+  {
+    "slug": "cs.IR",
+    "display_name": "Information Retrieval",
+    "archive": "cs",
+    "description": "Covers indexing, dictionaries, retrieval, content and analysis.",
+    "rss_url": "https://rss.arxiv.org/rss/cs.IR"
+  },
+  {
+    "slug": "cs.IT",
+    "display_name": "Information Theory",
+    "archive": "cs",
+    "description": "Covers theoretical and experimental aspects of information theory and coding.",
+    "rss_url": "https://rss.arxiv.org/rss/cs.IT"
+  },
+  {
+    "slug": "cs.LG",
+    "display_name": "Machine Learning",
+    "archive": "cs",
+    "description": "Papers on all aspects of machine learning research including robustness, explanation, fairness, and methodology.",
+    "rss_url": "https://rss.arxiv.org/rss/cs.LG"
+  },
+  {
+    "slug": "cs.LO",
+    "display_name": "Logic in Computer Science",
+    "archive": "cs",
+    "description": "Covers all aspects of logic in computer science, including finite model theory, logics of programs, modal logic, and program verification.",
+    "rss_url": "https://rss.arxiv.org/rss/cs.LO"
+  },
+  {
+    "slug": "cs.MA",
+    "display_name": "Multiagent Systems",
+    "archive": "cs",
+    "description": "Covers multiagent systems, distributed artificial intelligence, intelligent agents, coordinated interactions. and practical applications.",
+    "rss_url": "https://rss.arxiv.org/rss/cs.MA"
+  },
+  {
+    "slug": "cs.MM",
+    "display_name": "Multimedia",
+    "archive": "cs",
+    "description": "Roughly includes material in ACM Subject Class H.5.1.",
+    "rss_url": "https://rss.arxiv.org/rss/cs.MM"
+  },
+  {
+    "slug": "cs.MS",
+    "display_name": "Mathematical Software",
+    "archive": "cs",
+    "description": "Roughly includes material in ACM Subject Class G.4.",
+    "rss_url": "https://rss.arxiv.org/rss/cs.MS"
+  },
+  {
+    "slug": "cs.NA",
+    "display_name": "Numerical Analysis",
+    "archive": "cs",
+    "description": "cs.NA is an alias for math.NA.",
+    "rss_url": "https://rss.arxiv.org/rss/cs.NA"
+  },
+  {
+    "slug": "cs.NE",
+    "display_name": "Neural and Evolutionary Computing",
+    "archive": "cs",
+    "description": "Covers neural networks, connectionism, genetic algorithms, artificial life, adaptive behavior.",
+    "rss_url": "https://rss.arxiv.org/rss/cs.NE"
+  },
+  {
+    "slug": "cs.NI",
+    "display_name": "Networking and Internet Architecture",
+    "archive": "cs",
+    "description": "Covers all aspects of computer communication networks, including network architecture and design, network protocols, and internetwork standards.",
+    "rss_url": "https://rss.arxiv.org/rss/cs.NI"
+  },
+  {
+    "slug": "cs.OH",
+    "display_name": "Other Computer Science",
+    "archive": "cs",
+    "description": "This is the classification to use for documents that do not fit anywhere else.",
+    "rss_url": "https://rss.arxiv.org/rss/cs.OH"
+  },
+  {
+    "slug": "cs.OS",
+    "display_name": "Operating Systems",
+    "archive": "cs",
+    "description": "Roughly includes material in ACM Subject Classes D.4.1, D.4.2., D.4.3, D.4.4, D.4.5, D.4.7, and D.4.9.",
+    "rss_url": "https://rss.arxiv.org/rss/cs.OS"
+  },
+  {
+    "slug": "cs.PF",
+    "display_name": "Performance",
+    "archive": "cs",
+    "description": "Covers performance measurement and evaluation, queueing, and simulation.",
+    "rss_url": "https://rss.arxiv.org/rss/cs.PF"
+  },
+  {
+    "slug": "cs.PL",
+    "display_name": "Programming Languages",
+    "archive": "cs",
+    "description": "Covers programming language semantics, language features, programming approaches.",
+    "rss_url": "https://rss.arxiv.org/rss/cs.PL"
+  },
+  {
+    "slug": "cs.RO",
+    "display_name": "Robotics",
+    "archive": "cs",
+    "description": "Roughly includes material in ACM Subject Class I.2.9.",
+    "rss_url": "https://rss.arxiv.org/rss/cs.RO"
+  },
+  {
+    "slug": "cs.SC",
+    "display_name": "Symbolic Computation",
+    "archive": "cs",
+    "description": "Roughly includes material in ACM Subject Class I.1.",
+    "rss_url": "https://rss.arxiv.org/rss/cs.SC"
+  },
+  {
+    "slug": "cs.SD",
+    "display_name": "Sound",
+    "archive": "cs",
+    "description": "Covers all aspects of computing with sound, and sound as an information channel.",
+    "rss_url": "https://rss.arxiv.org/rss/cs.SD"
+  },
+  {
+    "slug": "cs.SE",
+    "display_name": "Software Engineering",
+    "archive": "cs",
+    "description": "Covers design tools, software metrics, testing and debugging, programming environments, etc.",
+    "rss_url": "https://rss.arxiv.org/rss/cs.SE"
+  },
+  {
+    "slug": "cs.SI",
+    "display_name": "Social and Information Networks",
+    "archive": "cs",
+    "description": "Covers the design, analysis, and modeling of social and information networks.",
+    "rss_url": "https://rss.arxiv.org/rss/cs.SI"
+  },
+  {
+    "slug": "cs.SY",
+    "display_name": "Systems and Control",
+    "archive": "cs",
+    "description": "cs.SY is an alias for eess.SY.",
+    "rss_url": "https://rss.arxiv.org/rss/cs.SY"
+  },
+  {
+    "slug": "econ.EM",
+    "display_name": "Econometrics",
+    "archive": "econ",
+    "description": "Econometric Theory, Micro-Econometrics, Macro-Econometrics, Empirical Content of Economic Relations discovered via New Methods.",
+    "rss_url": "https://rss.arxiv.org/rss/econ.EM"
+  },
+  {
+    "slug": "econ.GN",
+    "display_name": "General Economics",
+    "archive": "econ",
+    "description": "General methodological, applied, and empirical contributions to economics.",
+    "rss_url": "https://rss.arxiv.org/rss/econ.GN"
+  },
+  {
+    "slug": "econ.TH",
+    "display_name": "Theoretical Economics",
+    "archive": "econ",
+    "description": "Includes theoretical contributions to Contract Theory, Decision Theory, Game Theory, General Equilibrium, Growth, Learning and Evolution.",
+    "rss_url": "https://rss.arxiv.org/rss/econ.TH"
+  },
+  {
+    "slug": "eess.AS",
+    "display_name": "Audio and Speech Processing",
+    "archive": "eess",
+    "description": "Theory and methods for processing signals representing audio, speech, and language, and their applications.",
+    "rss_url": "https://rss.arxiv.org/rss/eess.AS"
+  },
+  {
+    "slug": "eess.IV",
+    "display_name": "Image and Video Processing",
+    "archive": "eess",
+    "description": "Theory, algorithms, and architectures for the formation, capture, processing, communication, analysis, and display of images, video.",
+    "rss_url": "https://rss.arxiv.org/rss/eess.IV"
+  },
+  {
+    "slug": "eess.SP",
+    "display_name": "Signal Processing",
+    "archive": "eess",
+    "description": "Theory, algorithms, performance analysis and applications of signal and data analysis.",
+    "rss_url": "https://rss.arxiv.org/rss/eess.SP"
+  },
+  {
+    "slug": "eess.SY",
+    "display_name": "Systems and Control",
+    "archive": "eess",
+    "description": "Theoretical and experimental research covering all facets of automatic control systems.",
+    "rss_url": "https://rss.arxiv.org/rss/eess.SY"
+  },
+  {
+    "slug": "gr-qc",
+    "display_name": "General Relativity and Quantum Cosmology",
+    "archive": "gr-qc",
+    "description": "Areas of gravitational physics, including experiments and observations related to the detection and interpretation of gravitational waves.",
+    "rss_url": "https://rss.arxiv.org/rss/gr-qc"
+  },
+  {
+    "slug": "hep-ex",
+    "display_name": "High Energy Physics - Experiment",
+    "archive": "hep-ex",
+    "description": "Results from high-energy/particle physics experiments and prospects for future experimental results.",
+    "rss_url": "https://rss.arxiv.org/rss/hep-ex"
+  },
+  {
+    "slug": "hep-lat",
+    "display_name": "High Energy Physics - Lattice",
+    "archive": "hep-lat",
+    "description": "Lattice field theory. Phenomenology from lattice field theory. Algorithms for lattice field theory.",
+    "rss_url": "https://rss.arxiv.org/rss/hep-lat"
+  },
+  {
+    "slug": "hep-ph",
+    "display_name": "High Energy Physics - Phenomenology",
+    "archive": "hep-ph",
+    "description": "Theoretical particle physics and its interrelation with experiment.",
+    "rss_url": "https://rss.arxiv.org/rss/hep-ph"
+  },
+  {
+    "slug": "hep-th",
+    "display_name": "High Energy Physics - Theory",
+    "archive": "hep-th",
+    "description": "Formal aspects of quantum field theory. String theory, supersymmetry and supergravity.",
+    "rss_url": "https://rss.arxiv.org/rss/hep-th"
+  },
+  {
+    "slug": "math.AC",
+    "display_name": "Commutative Algebra",
+    "archive": "math",
+    "description": "Commutative rings, modules, ideals, homological algebra, computational aspects, invariant theory.",
+    "rss_url": "https://rss.arxiv.org/rss/math.AC"
+  },
+  {
+    "slug": "math.AG",
+    "display_name": "Algebraic Geometry",
+    "archive": "math",
+    "description": "Algebraic varieties, stacks, sheaves, schemes, moduli spaces, complex geometry, quantum cohomology.",
+    "rss_url": "https://rss.arxiv.org/rss/math.AG"
+  },
+  {
+    "slug": "math.AP",
+    "display_name": "Analysis of PDEs",
+    "archive": "math",
+    "description": "Existence and uniqueness, boundary conditions, linear and non-linear operators, stability, soliton theory.",
+    "rss_url": "https://rss.arxiv.org/rss/math.AP"
+  },
+  {
+    "slug": "math.AT",
+    "display_name": "Algebraic Topology",
+    "archive": "math",
+    "description": "Homotopy theory, homological algebra, algebraic treatments of manifolds.",
+    "rss_url": "https://rss.arxiv.org/rss/math.AT"
+  },
+  {
+    "slug": "math.CA",
+    "display_name": "Classical Analysis and ODEs",
+    "archive": "math",
+    "description": "Special functions, orthogonal polynomials, harmonic analysis, ODE's, differential relations.",
+    "rss_url": "https://rss.arxiv.org/rss/math.CA"
+  },
+  {
+    "slug": "math.CO",
+    "display_name": "Combinatorics",
+    "archive": "math",
+    "description": "Discrete mathematics, graph theory, enumeration, combinatorial optimization, Ramsey theory.",
+    "rss_url": "https://rss.arxiv.org/rss/math.CO"
+  },
+  {
+    "slug": "math.CT",
+    "display_name": "Category Theory",
+    "archive": "math",
+    "description": "Enriched categories, topoi, abelian categories, monoidal categories, homological algebra.",
+    "rss_url": "https://rss.arxiv.org/rss/math.CT"
+  },
+  {
+    "slug": "math.CV",
+    "display_name": "Complex Variables",
+    "archive": "math",
+    "description": "Holomorphic functions, automorphic group actions and forms, pseudoconvexity, complex geometry.",
+    "rss_url": "https://rss.arxiv.org/rss/math.CV"
+  },
+  {
+    "slug": "math.DG",
+    "display_name": "Differential Geometry",
+    "archive": "math",
+    "description": "Complex, contact, Riemannian, pseudo-Riemannian and Finsler geometry, relativity, gauge theory.",
+    "rss_url": "https://rss.arxiv.org/rss/math.DG"
+  },
+  {
+    "slug": "math.DS",
+    "display_name": "Dynamical Systems",
+    "archive": "math",
+    "description": "Dynamics of differential equations and flows, mechanics, classical few-body problems, iterations.",
+    "rss_url": "https://rss.arxiv.org/rss/math.DS"
+  },
+  {
+    "slug": "math.FA",
+    "display_name": "Functional Analysis",
+    "archive": "math",
+    "description": "Banach spaces, function spaces, real functions, integral transforms, theory of distributions.",
+    "rss_url": "https://rss.arxiv.org/rss/math.FA"
+  },
+  {
+    "slug": "math.GM",
+    "display_name": "General Mathematics",
+    "archive": "math",
+    "description": "Mathematical material of general interest, topics not covered elsewhere.",
+    "rss_url": "https://rss.arxiv.org/rss/math.GM"
+  },
+  {
+    "slug": "math.GN",
+    "display_name": "General Topology",
+    "archive": "math",
+    "description": "Continuum theory, point-set topology, spaces with algebraic structure, foundations, dimension theory.",
+    "rss_url": "https://rss.arxiv.org/rss/math.GN"
+  },
+  {
+    "slug": "math.GR",
+    "display_name": "Group Theory",
+    "archive": "math",
+    "description": "Finite groups, topological groups, representation theory, cohomology, classification and structure.",
+    "rss_url": "https://rss.arxiv.org/rss/math.GR"
+  },
+  {
+    "slug": "math.GT",
+    "display_name": "Geometric Topology",
+    "archive": "math",
+    "description": "Manifolds, orbifolds, polyhedra, cell complexes, foliations, geometric structures.",
+    "rss_url": "https://rss.arxiv.org/rss/math.GT"
+  },
+  {
+    "slug": "math.HO",
+    "display_name": "History and Overview",
+    "archive": "math",
+    "description": "Biographies, philosophy of mathematics, mathematics education, recreational mathematics.",
+    "rss_url": "https://rss.arxiv.org/rss/math.HO"
+  },
+  {
+    "slug": "math.IT",
+    "display_name": "Information Theory",
+    "archive": "math",
+    "description": "math.IT is an alias for cs.IT.",
+    "rss_url": "https://rss.arxiv.org/rss/math.IT"
+  },
+  {
+    "slug": "math.KT",
+    "display_name": "K-Theory and Homology",
+    "archive": "math",
+    "description": "Algebraic and topological K-theory, relations with topology, commutative algebra.",
+    "rss_url": "https://rss.arxiv.org/rss/math.KT"
+  },
+  {
+    "slug": "math.LO",
+    "display_name": "Logic",
+    "archive": "math",
+    "description": "Logic, set theory, point-set topology, formal mathematics.",
+    "rss_url": "https://rss.arxiv.org/rss/math.LO"
+  },
+  {
+    "slug": "math.MG",
+    "display_name": "Metric Geometry",
+    "archive": "math",
+    "description": "Euclidean, hyperbolic, discrete, convex, coarse geometry, comparisons in Riemannian geometry.",
+    "rss_url": "https://rss.arxiv.org/rss/math.MG"
+  },
+  {
+    "slug": "math.MP",
+    "display_name": "Mathematical Physics",
+    "archive": "math",
+    "description": "Articles focus on areas of research that illustrate the application of mathematics to problems in physics.",
+    "rss_url": "https://rss.arxiv.org/rss/math.MP"
+  },
+  {
+    "slug": "math.NA",
+    "display_name": "Numerical Analysis",
+    "archive": "math",
+    "description": "Numerical algorithms for problems in analysis and algebra, scientific computation.",
+    "rss_url": "https://rss.arxiv.org/rss/math.NA"
+  },
+  {
+    "slug": "math.NT",
+    "display_name": "Number Theory",
+    "archive": "math",
+    "description": "Prime numbers, diophantine equations, analytic number theory, algebraic number theory.",
+    "rss_url": "https://rss.arxiv.org/rss/math.NT"
+  },
+  {
+    "slug": "math.OA",
+    "display_name": "Operator Algebras",
+    "archive": "math",
+    "description": "Algebras of operators on Hilbert space, C*-algebras, von Neumann algebras, non-commutative geometry.",
+    "rss_url": "https://rss.arxiv.org/rss/math.OA"
+  },
+  {
+    "slug": "math.OC",
+    "display_name": "Optimization and Control",
+    "archive": "math",
+    "description": "Operations research, linear programming, control theory, systems theory, optimal control, game theory.",
+    "rss_url": "https://rss.arxiv.org/rss/math.OC"
+  },
+  {
+    "slug": "math.PR",
+    "display_name": "Probability",
+    "archive": "math",
+    "description": "Theory and applications of probability and stochastic processes.",
+    "rss_url": "https://rss.arxiv.org/rss/math.PR"
+  },
+  {
+    "slug": "math.QA",
+    "display_name": "Quantum Algebra",
+    "archive": "math",
+    "description": "Quantum groups, skein theories, operadic and diagrammatic algebra, quantum field theory.",
+    "rss_url": "https://rss.arxiv.org/rss/math.QA"
+  },
+  {
+    "slug": "math.RA",
+    "display_name": "Rings and Algebras",
+    "archive": "math",
+    "description": "Non-commutative rings and algebras, non-associative algebras, universal algebra and lattice theory.",
+    "rss_url": "https://rss.arxiv.org/rss/math.RA"
+  },
+  {
+    "slug": "math.RT",
+    "display_name": "Representation Theory",
+    "archive": "math",
+    "description": "Linear representations of algebras and groups, Lie theory, associative algebras, multilinear algebra.",
+    "rss_url": "https://rss.arxiv.org/rss/math.RT"
+  },
+  {
+    "slug": "math.SG",
+    "display_name": "Symplectic Geometry",
+    "archive": "math",
+    "description": "Hamiltonian systems, symplectic flows, classical integrable systems.",
+    "rss_url": "https://rss.arxiv.org/rss/math.SG"
+  },
+  {
+    "slug": "math.SP",
+    "display_name": "Spectral Theory",
+    "archive": "math",
+    "description": "Schrodinger operators, operators on manifolds, general differential operators.",
+    "rss_url": "https://rss.arxiv.org/rss/math.SP"
+  },
+  {
+    "slug": "math.ST",
+    "display_name": "Statistics Theory",
+    "archive": "math",
+    "description": "Applied, computational and theoretical statistics.",
+    "rss_url": "https://rss.arxiv.org/rss/math.ST"
+  },
+  {
+    "slug": "math-ph",
+    "display_name": "Mathematical Physics",
+    "archive": "math-ph",
+    "description": "Articles focus on areas of research that illustrate the application of mathematics to problems in physics.",
+    "rss_url": "https://rss.arxiv.org/rss/math-ph"
+  },
+  {
+    "slug": "nlin.AO",
+    "display_name": "Adaptation and Self-Organizing Systems",
+    "archive": "nlin",
+    "description": "Adaptation, self-organizing systems, statistical physics, fluctuating systems, stochastic processes.",
+    "rss_url": "https://rss.arxiv.org/rss/nlin.AO"
+  },
+  {
+    "slug": "nlin.CD",
+    "display_name": "Chaotic Dynamics",
+    "archive": "nlin",
+    "description": "Dynamical systems, chaos, quantum chaos, topological dynamics, cycle expansions, turbulence.",
+    "rss_url": "https://rss.arxiv.org/rss/nlin.CD"
+  },
+  {
+    "slug": "nlin.CG",
+    "display_name": "Cellular Automata and Lattice Gases",
+    "archive": "nlin",
+    "description": "Computational methods, time series analysis, signal processing, wavelets, lattice gases.",
+    "rss_url": "https://rss.arxiv.org/rss/nlin.CG"
+  },
+  {
+    "slug": "nlin.PS",
+    "display_name": "Pattern Formation and Solitons",
+    "archive": "nlin",
+    "description": "Pattern formation, coherent structures, solitons.",
+    "rss_url": "https://rss.arxiv.org/rss/nlin.PS"
+  },
+  {
+    "slug": "nlin.SI",
+    "display_name": "Exactly Solvable and Integrable Systems",
+    "archive": "nlin",
+    "description": "Exactly solvable systems, integrable PDEs, integrable ODEs, Painleve analysis.",
+    "rss_url": "https://rss.arxiv.org/rss/nlin.SI"
+  },
+  {
+    "slug": "nucl-ex",
+    "display_name": "Nuclear Experiment",
+    "archive": "nucl-ex",
+    "description": "Results from experimental nuclear physics including the areas of fundamental interactions.",
+    "rss_url": "https://rss.arxiv.org/rss/nucl-ex"
+  },
+  {
+    "slug": "nucl-th",
+    "display_name": "Nuclear Theory",
+    "archive": "nucl-th",
+    "description": "Theory of nuclear structure covering wide area from models of hadron structure to neutron stars.",
+    "rss_url": "https://rss.arxiv.org/rss/nucl-th"
+  },
+  {
+    "slug": "physics.acc-ph",
+    "display_name": "Accelerator Physics",
+    "archive": "physics",
+    "description": "Accelerator theory and simulation. Accelerator technology. Accelerator experiments. Beam Physics.",
+    "rss_url": "https://rss.arxiv.org/rss/physics.acc-ph"
+  },
+  {
+    "slug": "physics.ao-ph",
+    "display_name": "Atmospheric and Oceanic Physics",
+    "archive": "physics",
+    "description": "Atmospheric and oceanic physics and physical chemistry, biogeophysics, and climate science.",
+    "rss_url": "https://rss.arxiv.org/rss/physics.ao-ph"
+  },
+  {
+    "slug": "physics.app-ph",
+    "display_name": "Applied Physics",
+    "archive": "physics",
+    "description": "Applications of physics to new technology, including electronic devices, optics, photonics.",
+    "rss_url": "https://rss.arxiv.org/rss/physics.app-ph"
+  },
+  {
+    "slug": "physics.atm-clus",
+    "display_name": "Atomic and Molecular Clusters",
+    "archive": "physics",
+    "description": "Atomic and molecular clusters, nanoparticles: geometric, electronic, optical, chemical properties.",
+    "rss_url": "https://rss.arxiv.org/rss/physics.atm-clus"
+  },
+  {
+    "slug": "physics.atom-ph",
+    "display_name": "Atomic Physics",
+    "archive": "physics",
+    "description": "Atomic and molecular structure, spectra, collisions, and data. Atoms and molecules in external fields.",
+    "rss_url": "https://rss.arxiv.org/rss/physics.atom-ph"
+  },
+  {
+    "slug": "physics.bio-ph",
+    "display_name": "Biological Physics",
+    "archive": "physics",
+    "description": "Molecular biophysics, cellular biophysics, neurological biophysics, membrane biophysics.",
+    "rss_url": "https://rss.arxiv.org/rss/physics.bio-ph"
+  },
+  {
+    "slug": "physics.chem-ph",
+    "display_name": "Chemical Physics",
+    "archive": "physics",
+    "description": "Experimental, computational, and theoretical physics of atoms, molecules, and clusters.",
+    "rss_url": "https://rss.arxiv.org/rss/physics.chem-ph"
+  },
+  {
+    "slug": "physics.class-ph",
+    "display_name": "Classical Physics",
+    "archive": "physics",
+    "description": "Newtonian and relativistic dynamics; many particle systems; planetary motions; chaos.",
+    "rss_url": "https://rss.arxiv.org/rss/physics.class-ph"
+  },
+  {
+    "slug": "physics.comp-ph",
+    "display_name": "Computational Physics",
+    "archive": "physics",
+    "description": "All aspects of computational science applied to physics.",
+    "rss_url": "https://rss.arxiv.org/rss/physics.comp-ph"
+  },
+  {
+    "slug": "physics.data-an",
+    "display_name": "Data Analysis, Statistics and Probability",
+    "archive": "physics",
+    "description": "Methods, software and hardware for physics data analysis: data processing and storage.",
+    "rss_url": "https://rss.arxiv.org/rss/physics.data-an"
+  },
+  {
+    "slug": "physics.ed-ph",
+    "display_name": "Physics Education",
+    "archive": "physics",
+    "description": "Report of results of a research study, laboratory experience, assessment or classroom practice.",
+    "rss_url": "https://rss.arxiv.org/rss/physics.ed-ph"
+  },
+  {
+    "slug": "physics.flu-dyn",
+    "display_name": "Fluid Dynamics",
+    "archive": "physics",
+    "description": "Turbulence, instabilities, incompressible/compressible flows, reacting flows.",
+    "rss_url": "https://rss.arxiv.org/rss/physics.flu-dyn"
+  },
+  {
+    "slug": "physics.gen-ph",
+    "display_name": "General Physics",
+    "archive": "physics",
+    "description": "Description coming soon.",
+    "rss_url": "https://rss.arxiv.org/rss/physics.gen-ph"
+  },
+  {
+    "slug": "physics.geo-ph",
+    "display_name": "Geophysics",
+    "archive": "physics",
+    "description": "Atmospheric physics. Biogeosciences. Computational geophysics. Geographic location.",
+    "rss_url": "https://rss.arxiv.org/rss/physics.geo-ph"
+  },
+  {
+    "slug": "physics.hist-ph",
+    "display_name": "History and Philosophy of Physics",
+    "archive": "physics",
+    "description": "History and philosophy of all branches of physics, astrophysics, and cosmology.",
+    "rss_url": "https://rss.arxiv.org/rss/physics.hist-ph"
+  },
+  {
+    "slug": "physics.ins-det",
+    "display_name": "Instrumentation and Detectors",
+    "archive": "physics",
+    "description": "Instrumentation and Detectors for research in natural science.",
+    "rss_url": "https://rss.arxiv.org/rss/physics.ins-det"
+  },
+  {
+    "slug": "physics.med-ph",
+    "display_name": "Medical Physics",
+    "archive": "physics",
+    "description": "Radiation therapy. Radiation dosimetry. Biomedical imaging modelling.",
+    "rss_url": "https://rss.arxiv.org/rss/physics.med-ph"
+  },
+  {
+    "slug": "physics.optics",
+    "display_name": "Optics",
+    "archive": "physics",
+    "description": "Adaptive optics. Astronomical optics. Atmospheric optics. Biomedical optics.",
+    "rss_url": "https://rss.arxiv.org/rss/physics.optics"
+  },
+  {
+    "slug": "physics.plasm-ph",
+    "display_name": "Plasma Physics",
+    "archive": "physics",
+    "description": "Fundamental plasma physics. Magnetically Confined Plasmas.",
+    "rss_url": "https://rss.arxiv.org/rss/physics.plasm-ph"
+  },
+  {
+    "slug": "physics.pop-ph",
+    "display_name": "Popular Physics",
+    "archive": "physics",
+    "description": "Description coming soon.",
+    "rss_url": "https://rss.arxiv.org/rss/physics.pop-ph"
+  },
+  {
+    "slug": "physics.soc-ph",
+    "display_name": "Physics and Society",
+    "archive": "physics",
+    "description": "Structure, dynamics and collective behavior of societies and groups.",
+    "rss_url": "https://rss.arxiv.org/rss/physics.soc-ph"
+  },
+  {
+    "slug": "physics.space-ph",
+    "display_name": "Space Physics",
+    "archive": "physics",
+    "description": "Space plasma physics. Heliophysics. Space weather. Planetary magnetospheres.",
+    "rss_url": "https://rss.arxiv.org/rss/physics.space-ph"
+  },
+  {
+    "slug": "q-bio.BM",
+    "display_name": "Biomolecules",
+    "archive": "q-bio",
+    "description": "DNA, RNA, proteins, lipids, etc.; molecular structures and folding kinetics.",
+    "rss_url": "https://rss.arxiv.org/rss/q-bio.BM"
+  },
+  {
+    "slug": "q-bio.CB",
+    "display_name": "Cell Behavior",
+    "archive": "q-bio",
+    "description": "Cell-cell signaling and interaction; morphogenesis and development; apoptosis.",
+    "rss_url": "https://rss.arxiv.org/rss/q-bio.CB"
+  },
+  {
+    "slug": "q-bio.GN",
+    "display_name": "Genomics",
+    "archive": "q-bio",
+    "description": "DNA sequencing and assembly; gene and motif finding; RNA editing and alternative splicing.",
+    "rss_url": "https://rss.arxiv.org/rss/q-bio.GN"
+  },
+  {
+    "slug": "q-bio.MN",
+    "display_name": "Molecular Networks",
+    "archive": "q-bio",
+    "description": "Gene regulation, signal transduction, proteomics, metabolomics, gene and enzymatic networks.",
+    "rss_url": "https://rss.arxiv.org/rss/q-bio.MN"
+  },
+  {
+    "slug": "q-bio.NC",
+    "display_name": "Neurons and Cognition",
+    "archive": "q-bio",
+    "description": "Synapse, cortex, neuronal dynamics, neural network, sensorimotor control, behavior.",
+    "rss_url": "https://rss.arxiv.org/rss/q-bio.NC"
+  },
+  {
+    "slug": "q-bio.OT",
+    "display_name": "Other Quantitative Biology",
+    "archive": "q-bio",
+    "description": "Work in quantitative biology that does not fit into the other q-bio classifications.",
+    "rss_url": "https://rss.arxiv.org/rss/q-bio.OT"
+  },
+  {
+    "slug": "q-bio.PE",
+    "display_name": "Populations and Evolution",
+    "archive": "q-bio",
+    "description": "Population dynamics, spatio-temporal and epidemiological models, dynamic speciation.",
+    "rss_url": "https://rss.arxiv.org/rss/q-bio.PE"
+  },
+  {
+    "slug": "q-bio.QM",
+    "display_name": "Quantitative Methods",
+    "archive": "q-bio",
+    "description": "All experimental, numerical, statistical and mathematical contributions of value to biology.",
+    "rss_url": "https://rss.arxiv.org/rss/q-bio.QM"
+  },
+  {
+    "slug": "q-bio.SC",
+    "display_name": "Subcellular Processes",
+    "archive": "q-bio",
+    "description": "Assembly and control of subcellular structures; molecular motors, transport.",
+    "rss_url": "https://rss.arxiv.org/rss/q-bio.SC"
+  },
+  {
+    "slug": "q-bio.TO",
+    "display_name": "Tissues and Organs",
+    "archive": "q-bio",
+    "description": "Blood flow in vessels, biomechanics of bones, electrical waves, endocrine system, tumor growth.",
+    "rss_url": "https://rss.arxiv.org/rss/q-bio.TO"
+  },
+  {
+    "slug": "q-fin.CP",
+    "display_name": "Computational Finance",
+    "archive": "q-fin",
+    "description": "Computational methods, including Monte Carlo, PDE, lattice and other numerical methods with applications to financial modeling.",
+    "rss_url": "https://rss.arxiv.org/rss/q-fin.CP"
+  },
+  {
+    "slug": "q-fin.EC",
+    "display_name": "Economics",
+    "archive": "q-fin",
+    "description": "q-fin.EC is an alias for econ.GN.",
+    "rss_url": "https://rss.arxiv.org/rss/q-fin.EC"
+  },
+  {
+    "slug": "q-fin.GN",
+    "display_name": "General Finance",
+    "archive": "q-fin",
+    "description": "Development of general quantitative methodologies with applications in finance.",
+    "rss_url": "https://rss.arxiv.org/rss/q-fin.GN"
+  },
+  {
+    "slug": "q-fin.MF",
+    "display_name": "Mathematical Finance",
+    "archive": "q-fin",
+    "description": "Mathematical and analytical methods of finance, including stochastic, probabilistic and functional analysis.",
+    "rss_url": "https://rss.arxiv.org/rss/q-fin.MF"
+  },
+  {
+    "slug": "q-fin.PM",
+    "display_name": "Portfolio Management",
+    "archive": "q-fin",
+    "description": "Security selection and optimization, capital allocation, investment strategies.",
+    "rss_url": "https://rss.arxiv.org/rss/q-fin.PM"
+  },
+  {
+    "slug": "q-fin.PR",
+    "display_name": "Pricing of Securities",
+    "archive": "q-fin",
+    "description": "Valuation and hedging of financial securities, their derivatives, and structured products.",
+    "rss_url": "https://rss.arxiv.org/rss/q-fin.PR"
+  },
+  {
+    "slug": "q-fin.RM",
+    "display_name": "Risk Management",
+    "archive": "q-fin",
+    "description": "Measurement and management of financial risks in trading, banking, insurance.",
+    "rss_url": "https://rss.arxiv.org/rss/q-fin.RM"
+  },
+  {
+    "slug": "q-fin.ST",
+    "display_name": "Statistical Finance",
+    "archive": "q-fin",
+    "description": "Statistical, econometric and econophysics analyses with applications to financial markets.",
+    "rss_url": "https://rss.arxiv.org/rss/q-fin.ST"
+  },
+  {
+    "slug": "q-fin.TR",
+    "display_name": "Trading and Market Microstructure",
+    "archive": "q-fin",
+    "description": "Market microstructure, liquidity, exchange and auction design, automated trading.",
+    "rss_url": "https://rss.arxiv.org/rss/q-fin.TR"
+  },
+  {
+    "slug": "quant-ph",
+    "display_name": "Quantum Physics",
+    "archive": "quant-ph",
+    "description": "Description coming soon.",
+    "rss_url": "https://rss.arxiv.org/rss/quant-ph"
+  },
+  {
+    "slug": "stat.AP",
+    "display_name": "Applications",
+    "archive": "stat",
+    "description": "Biology, Education, Epidemiology, Engineering, Environmental Sciences, Medical.",
+    "rss_url": "https://rss.arxiv.org/rss/stat.AP"
+  },
+  {
+    "slug": "stat.CO",
+    "display_name": "Computation",
+    "archive": "stat",
+    "description": "Algorithms, Simulation, Visualization.",
+    "rss_url": "https://rss.arxiv.org/rss/stat.CO"
+  },
+  {
+    "slug": "stat.ME",
+    "display_name": "Methodology",
+    "archive": "stat",
+    "description": "Design, Surveys, Model Selection, Multiple Testing, Multivariate Methods.",
+    "rss_url": "https://rss.arxiv.org/rss/stat.ME"
+  },
+  {
+    "slug": "stat.ML",
+    "display_name": "Machine Learning",
+    "archive": "stat",
+    "description": "Covers machine learning papers with a statistical or theoretical grounding.",
+    "rss_url": "https://rss.arxiv.org/rss/stat.ML"
+  },
+  {
+    "slug": "stat.OT",
+    "display_name": "Other Statistics",
+    "archive": "stat",
+    "description": "Work in statistics that does not fit into the other stat classifications.",
+    "rss_url": "https://rss.arxiv.org/rss/stat.OT"
+  },
+  {
+    "slug": "stat.TH",
+    "display_name": "Statistics Theory",
+    "archive": "stat",
+    "description": "stat.TH is an alias for math.ST.",
+    "rss_url": "https://rss.arxiv.org/rss/stat.TH"
+  }
+]
