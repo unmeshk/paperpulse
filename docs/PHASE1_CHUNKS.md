@@ -20,22 +20,22 @@ Acceptance:
 
 ---
 
-## Chunk 1 — Category seed + onboarding picker
+## Chunk 1 — Category seed + onboarding picker (DONE)
 
 **Goal:** A logged-in user can pick 1–5 categories and have them persisted.
 
 Acceptance:
-- [ ] `app/data/categories.json` exists, committed, contains >= 100 arXiv subcategories with `slug`, `display_name`, `archive` (cs/stat/math/...), `rss_url`.
-- [ ] On `init_db()`, `categories` table is seeded from that JSON; re-running is idempotent (no duplicate rows, no errors).
-- [ ] `SELECT COUNT(*) FROM categories WHERE active = 1` matches the JSON row count.
-- [ ] `GET /onboarding` returns 200 for a logged-in user, 302 → `/auth/login` for anonymous.
-- [ ] `GET /onboarding` HTML contains all archives as group headers and a search input.
-- [ ] `POST /onboarding` with body `slugs=["cs.LG","cs.AI","cs.CL","cs.CV","stat.ML"]` for a logged-in user returns 302 → `/`, and `user_categories` has exactly 5 rows for that user.
-- [ ] `POST /onboarding` with 6 slugs returns 400 (cap-of-5 enforced server-side).
-- [ ] `POST /onboarding` with an unknown slug returns 400.
-- [ ] `POST /onboarding` for an anonymous request returns 401 or 302 → `/auth/login`.
-- [ ] After successful POST, `GET /` for that user redirects to `/feed` (or renders the feed placeholder — TBD when chunk 2 lands; for now just confirms session persists).
-- [ ] CSRF token required on `POST /onboarding`; missing/invalid token returns 403.
+- [x] `app/data/categories.json` exists, committed, contains >= 100 arXiv subcategories with `slug`, `display_name`, `archive` (cs/stat/math/...), `rss_url`.
+- [x] On `init_db()`, `categories` table is seeded from that JSON; re-running is idempotent (no duplicate rows, no errors).
+- [x] `SELECT COUNT(*) FROM categories WHERE active = 1` matches the JSON row count.
+- [x] `GET /onboarding` returns 200 for a logged-in user, 302 → `/auth/login` for anonymous.
+- [x] `GET /onboarding` HTML contains all archives as group headers and a search input.
+- [x] `POST /onboarding` with body `slugs=["cs.LG","cs.AI","cs.CL","cs.CV","stat.ML"]` for a logged-in user returns 302 → `/`, and `user_categories` has exactly 5 rows for that user.
+- [x] `POST /onboarding` with 6 slugs returns 400 (cap-of-5 enforced server-side).
+- [x] `POST /onboarding` with an unknown slug returns 400.
+- [x] `POST /onboarding` for an anonymous request returns 401 or 302 → `/auth/login`.
+- [x] After successful POST, `GET /` for that user redirects to `/feed` (or renders the feed placeholder — TBD when chunk 2 lands; for now just confirms session persists).
+- [x] CSRF token required on `POST /onboarding`; missing/invalid token returns 403.
 
 Test scaffolding required:
 - An auth-injection fixture (dependency-override on `current_user`) so tests don't have to run a real OAuth round-trip. This is the place to add it.

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Choose categories — PaperPulse{% endblock %}
+{% block content %}
+  <h1>Choose up to 5 categories</h1>
+  <p>Pick the arXiv categories you want in your daily feed.</p>
+
+  <input type="search" id="category-search" placeholder="Search categories…" autocomplete="off">
+
+  <form method="post" action="/onboarding">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    {% for archive, cats in grouped %}
+      <fieldset class="archive-group" data-archive="{{ archive }}">
+        <legend>{{ archive }}</legend>
+        {% for c in cats %}
+          <label class="category-option" data-search="{{ (c.slug ~ ' ' ~ c.display_name)|lower }}">
+            <input type="checkbox" name="slugs" value="{{ c.slug }}">
+            {{ c.slug }} — {{ c.display_name }}
+          </label><br>
+        {% endfor %}
+      </fieldset>
+    {% endfor %}
+    <button type="submit">Save categories</button>
+  </form>
+
+  <script>
+    (function () {
+      var search = document.getElementById("category-search");
+      if (!search) return;
+      search.addEventListener("input", function () {
+        var q = search.value.trim().toLowerCase();
+        document.querySelectorAll(".archive-group").forEach(function (group) {
+          var anyVisible = false;
+          group.querySelectorAll(".category-option").forEach(function (opt) {
+            var match = !q || opt.dataset.search.indexOf(q) !== -1;
+            opt.style.display = match ? "" : "none";
+            if (match) anyVisible = true;
+          });
+          group.style.display = anyVisible ? "" : "none";
+        });
+      });
+    })();
+  </script>
+{% endblock %}

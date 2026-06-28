@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from starlette.middleware.sessions import SessionMiddleware
 
@@ -7,8 +9,14 @@ from app.db import init_db
 from app.routes import router as routes_router
 
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    init_db()
+    yield
+
+
 def create_app() -> FastAPI:
-    app = FastAPI(title="PaperPulse")
+    app = FastAPI(title="PaperPulse", lifespan=lifespan)
     app.add_middleware(
         SessionMiddleware,
         secret_key=settings.session_secret,
@@ -17,11 +25,6 @@ def create_app() -> FastAPI:
     )
     app.include_router(auth_router)
     app.include_router(routes_router)
-
-    @app.on_event("startup")
-    def _startup() -> None:
-        init_db()
-
     return app
 
 
