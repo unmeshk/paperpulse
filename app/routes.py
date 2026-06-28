@@ -63,7 +63,16 @@ async def onboarding(request: Request, user: dict | None = Depends(current_user)
 async def save_onboarding(request: Request, user: dict | None = Depends(current_user)):
     if not user:
         return RedirectResponse(url="/auth/login", status_code=HTTP_302_FOUND)
+    error = await _apply_category_selection(request, user)
+    return error or RedirectResponse(url="/", status_code=HTTP_302_FOUND)
 
+
+async def _apply_category_selection(request: Request, user: dict):
+    """Validate and full-replace the user's category selection from the POST body.
+
+    Returns a PlainTextResponse on a CSRF/validation failure, or None on success.
+    Shared by POST /onboarding and POST /settings.
+    """
     fields = parse_qsl((await request.body()).decode("utf-8"), keep_blank_values=True)
     submitted_token = next((v for k, v in fields if k == "csrf_token"), None)
     if not _validate_csrf(request, submitted_token):
@@ -87,7 +96,48 @@ async def save_onboarding(request: Request, user: dict | None = Depends(current_
             "INSERT INTO user_categories (user_id, category_slug) VALUES (?, ?)",
             [(user["id"], s) for s in slugs],
         )
+    return None
 
+
+@router.get("/settings", response_class=HTMLResponse)
+async def settings_page(request: Request, user: dict | None = Depends(current_user)):
+    if not user:
+        return RedirectResponse(url="/auth/login", status_code=HTTP_302_FOUND)
+    csrf_token = _get_or_create_csrf(request)
+    return templates.TemplateResponse(
+        request,
+        "settings.html",
+        {
+            "user": user,
+            "csrf_token": csrf_token,
+            "grouped": _grouped_categories(),
+            "selected": set(_user_category_slugs(user["id"])),
+        },
+    )
+
+
+@router.post("/settings")
+async def save_settings(request: Request, user: dict | None = Depends(current_user)):
+    if not user:
+        return RedirectResponse(url="/auth/login", status_code=HTTP_302_FOUND)
+    error = await _apply_category_selection(request, user)
+    return error or RedirectResponse(url="/feed", status_code=HTTP_302_FOUND)
+
+
+@router.post("/settings/delete-account")
+async def delete_account(request: Request, user: dict | None = Depends(current_user)):
+    if not user:
+        return RedirectResponse(url="/auth/login", status_code=HTTP_302_FOUND)
+    fields = parse_qsl((await request.body()).decode("utf-8"), keep_blank_values=True)
+    submitted_token = next((v for k, v in fields if k == "csrf_token"), None)
+    if not _validate_csrf(request, submitted_token):
+        return PlainTextResponse("Invalid CSRF token", status_code=403)
+    with get_conn() as conn:
+        conn.execute(
+            "UPDATE users SET deleted_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+            (user["id"],),
+        )
+    request.session.clear()
     return RedirectResponse(url="/", status_code=HTTP_302_FOUND)
 
 

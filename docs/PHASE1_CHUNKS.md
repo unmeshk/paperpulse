@@ -83,17 +83,91 @@ Notes / follow-ups:
 
 ---
 
-## Chunk 3 — Settings + account deletion
+## Chunk 3 — Settings + account deletion (DONE)
 
-Acceptance (draft):
-- [ ] `GET /settings` shows current categories.
-- [ ] `POST /settings` updates `user_categories` (full replace, not append).
-- [ ] `POST /settings/delete-account` soft-deletes the user (`deleted_at` set), clears session.
-- [ ] After soft delete, `GET /` shows anonymous view.
-- [ ] CSRF tokens on both POSTs.
+**Goal:** A logged-in user can change their categories and delete their account.
+
+**Decisions (locked):**
+- Reuse chunk 1–2 building blocks: `current_user` dep, CSRF helpers,
+  `_user_category_slugs`, `_grouped_categories`, and the test fixtures.
+- The settings picker is the onboarding picker with the user's current slugs
+  pre-checked, plus a separate delete-account form.
+- `POST /settings` success → 302 → `/feed` (same as onboarding).
+- Delete is a **soft delete**: set `users.deleted_at`, clear the session, keep
+  the row and the user's `user_categories` rows. `current_user` already filters
+  `deleted_at IS NULL`, so the account reads as gone.
+
+Acceptance:
+- [x] `GET /settings` returns 200 for a logged-in user and the user's currently
+      selected slugs are rendered as checked; 302 → `/auth/login` for anonymous.
+- [x] `POST /settings` with a valid 1–5 slug set + CSRF full-replaces
+      `user_categories` for that user and returns 302 → `/feed`.
+- [x] `POST /settings` with 6 slugs → 400; with an unknown slug → 400.
+- [x] `POST /settings` with missing/invalid CSRF → 403; anonymous → 401 or 302 → `/auth/login`.
+- [x] `POST /settings/delete-account` with CSRF sets `users.deleted_at`, clears
+      the session, returns 302 → `/`.
+- [x] `POST /settings/delete-account` with missing/invalid CSRF → 403; anonymous → 401 or 302.
+- [x] After delete, `GET /` renders the anonymous landing ("Sign in with Google").
+- [x] After delete, the `users` row still exists with `deleted_at` set (soft, not hard, delete).
+
+Test scaffolding: reuse `auth_client`, `db_user`, `assign_categories`,
+`reset_db`, and the `_get_csrf` helper. No new dependencies.
+
+Test command: `PYTHONPATH=. app/.venv/bin/pytest app/tests`
 
 ---
 
 ## Chunk 4 — Pipeline integration (per-category blurbs)
 
-Out of `app/` scope — touches `api/`. Hard-gated (see `docs/GOAL_AUTONOMY.md`).
+Touches `api/` (the pipeline). Governed by the **chunk 4 scoped exception** in
+`docs/GOAL_AUTONOMY.md`: `api/` + `api/tests` edits and root-`.venv` pytest are
+in-scope for this goal; real Gemini/network calls, docker, deploy, and push stay
+hard-gated. Tests mock Gemini and the network — the goal run makes no external
+calls. The real pipeline run and prod deploy are done manually afterward.
+
+**Decisions (locked):**
+- **Keep the existing global Jekyll blog flow untouched** (`retrieve_daily_results`
+  + `create_blogpost`). Chunk 4 *adds* a per-category blurb path alongside it.
+- **Dynamic fetch list:** `SELECT DISTINCT category_slug FROM user_categories`
+  unioned with the fixed public list (`cs.LG`, `cs.AI`, `cs.CL`, `cs.CV`,
+  `stat.ML`), sorted, deduped. `api/` reads the app SQLite via a new
+  `APP_DB_PATH` env.
+- **Blurb generator reuses `Agent.identify_important_papers(papers)`** per
+  category (already emits themed markdown with `[Title](url)` links).
+- **Output:** `CONTENT_DIR/<NY-date>/<slug>.md`, one file per non-empty category.
+  New `CONTENT_DIR` env for `api/`; date computed in `America/New_York` to match
+  what the feed reads. Empty categories write no file (feed shows its placeholder).
+- **Cross-listed papers** appear in every feed-category they're in (dedupe is
+  per-category by URL, not global).
+
+Code changes (all under `api/`):
+- `arxiv_client.py`: add `retrieve_results_by_category(slugs)` → `{slug: [papers]}`,
+  deduping within each category. Factor the per-feed fetch into a mockable seam
+  (e.g. `_fetch_category_papers(slug)`). Leave `retrieve_daily_results` as-is.
+- New `api/feeds.py`: `get_fetch_list(app_db_path)`, `today_ny()`,
+  `generate_category_blurbs(papers_by_category, agent, content_dir, date)`.
+- `api/settings.py`: add `APP_DB_PATH`, `CONTENT_DIR`, `FIXED_PUBLIC_CATEGORIES`.
+- `api/main.py`: after the existing blog flow, run the per-category path.
+
+Acceptance:
+- [ ] `get_fetch_list` returns the sorted, deduped union of `user_categories`
+      slugs and the fixed public list; with zero users it equals the fixed list.
+- [ ] `retrieve_results_by_category` groups papers by source category; a paper in
+      two feeds appears in both groups; duplicates within one feed are removed.
+      (Network mocked via the fetch seam.)
+- [ ] `generate_category_blurbs` writes `CONTENT_DIR/<date>/<slug>.md` for each
+      non-empty category, content = the agent's markdown; creates the day dir.
+- [ ] A category with an empty paper list produces no file.
+- [ ] The day-dir name is the `America/New_York` date.
+- [ ] Blurb content preserves the agent's themed markdown and `[Title](url)` links.
+- [ ] Existing blog flow still works: `api/tests/test_main.py` (and test_mixpanel)
+      still pass; `create_blogpost` output unchanged.
+- [ ] No real Gemini or network call in any chunk 4 test (Agent + fetch mocked).
+
+Test scaffolding (`api/tests/`, root `.venv`):
+- A fake agent whose `identify_important_papers(papers)` returns canned markdown.
+- Monkeypatch `ArxivClient._fetch_category_papers` to return canned papers.
+- A temp app SQLite (users + user_categories) for `get_fetch_list`.
+- A tmpdir `CONTENT_DIR`.
+
+Test command: `PYTHONPATH=. .venv/bin/pytest api/tests`
