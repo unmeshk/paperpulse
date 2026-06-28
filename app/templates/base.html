@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>{% block title %}PaperPulse{% endblock %}</title>
+  <meta name="robots" content="noindex">
+</head>
+<body>
+  <header>
+    <strong>PaperPulse</strong>
+    {% if user %}
+      <span>{{ user.email }}</span>
+      <a href="/auth/logout">Sign out</a>
+    {% else %}
+      <a href="/auth/login">Sign in with Google</a>
+    {% endif %}
+  </header>
+  <main>{% block content %}{% endblock %}</main>
+</body>
+</html>

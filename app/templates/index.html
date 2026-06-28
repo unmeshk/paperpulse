@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+  {% if auth_error %}
+    <p>Auth error: {{ auth_error }}</p>
+  {% endif %}
+  {% if user %}
+    <h1>Hello, {{ user.display_name or user.email }}</h1>
+    <p>Signed in as {{ user.email }}.</p>
+    <p>Next: category picker (not built yet).</p>
+  {% else %}
+    <h1>PaperPulse</h1>
+    <p>Personalized arXiv summaries. Sign in with Google to get started.</p>
+  {% endif %}
+{% endblock %}

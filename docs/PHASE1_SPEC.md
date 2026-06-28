@@ -1,10 +1,10 @@
 # Phase 1 Spec — Profiles + Personalized Feed
 
 **Status:** Spec'd, not started
-**Last updated:** 2026-06-07
+**Last updated:** 2026-06-08
 
 ## What we're shipping
-Logged-in users sign in with Google, pick up to 5 categories from a curated list of ~20 arXiv cs.* subcategories, and see a personalized daily feed composed of per-category summaries. The existing public Jekyll archive at `paperpulse.ukurup.com` is untouched. The personalized experience lives at `app.paperpulse.ukurup.com`.
+Logged-in users sign in with Google, pick up to 5 categories from the full arXiv subcategory taxonomy (~150 subcategories across cs / stat / math / physics / q-bio / q-fin / eess / econ), and see a personalized daily feed composed of per-category summaries. The existing public Jekyll archive at `paperpulse.ukurup.com` is untouched. The personalized experience lives at `app.paperpulse.ukurup.com`.
 
 ## Goals
 - Users can sign in via Google OAuth, pick categories, and see a daily feed limited to those categories.
@@ -26,7 +26,7 @@ Logged-in users sign in with Google, pick up to 5 categories from a curated list
 1. User lands on `paperpulse.ukurup.com` (existing Jekyll archive). Header has a new "Sign in" link pointing to `app.paperpulse.ukurup.com`.
 2. App subdomain redirects to Google OAuth.
 3. Google redirects back with a code; app exchanges for tokens; session cookie set.
-4. First-time users: forced onboarding page — pick 1–5 categories from the curated list. Submit.
+4. First-time users: forced onboarding page — pick 1–5 categories from the full arXiv subcategory taxonomy. Picker is grouped by archive (cs, stat, math, physics, q-bio, q-fin, eess, econ) with a search box. Submit.
 5. Feed page: today's per-category summaries for the selected categories, concatenated, in a stable order (alphabetical by slug).
 6. Settings page: change selected categories, sign out, delete account.
 
@@ -117,7 +117,7 @@ CREATE INDEX idx_daily_runs_date ON daily_runs(run_date);
 Notes:
 - `users.google_sub` is the authoritative join key for OAuth, not email.
 - `users.deleted_at` is soft delete; a nightly purge can hard-delete after a grace period if desired.
-- `categories` is seeded once on first deploy from a static list (committed in the repo).
+- `categories` is seeded once on first deploy from a static list committed in the repo. The seed covers the full arXiv subcategory taxonomy (~150 entries). Idempotent re-seed on app startup so adding new arXiv categories later is a one-line config bump.
 - 5-category cap is enforced at the application layer when inserting into `user_categories`.
 - **Category popularity is queryable from `user_categories`.** Example: `SELECT category_slug, COUNT(*) AS users FROM user_categories WHERE user_id IN (SELECT id FROM users WHERE deleted_at IS NULL) GROUP BY category_slug ORDER BY users DESC;`. This gives a point-in-time snapshot of "which categories are most popular." Historical popularity (track adds/removes over time, e.g. churn per category) is NOT captured by this schema — if we want it, add an append-only `user_category_events` table later. Defer that until Phase 2 / when we actually need a trend.
 
@@ -149,18 +149,21 @@ Current flow (single combined summary):
 4. Write Jekyll post.
 
 New flow (combined + per-category):
-1. Fetch RSS for the curated ~20 cs.* categories.
-2. Dedup + filter to most recent pubDate.
-3. Continue: combined thematic summary → Jekyll post (public archive). Unchanged behavior.
-4. New: for each category, filter to papers tagged with that category and call Gemini with a per-category prompt → write `/var/lib/paperpulse/content/YYYY-MM-DD/<slug>.md`.
-5. Insert/update `daily_runs` row with status throughout.
+1. Compute the fetch list dynamically at run start: `SELECT DISTINCT category_slug FROM user_categories` UNION the fixed public-archive list (`cs.LG`, `cs.AI`, `cs.CL`, `cs.CV`, `stat.ML`). The fixed union guarantees the Jekyll archive keeps shipping even with zero users.
+2. Fetch RSS for that union.
+3. Dedup + filter to most recent pubDate.
+4. Continue: combined thematic summary over the fixed public-archive subset → Jekyll post. Unchanged behavior.
+5. New: for each category in the union, filter to papers tagged with that category and call Gemini with a per-category prompt → write `/var/lib/paperpulse/content/YYYY-MM-DD/<slug>.md`.
+6. Delete raw RSS feed data (in-memory parsed feeds, any on-disk intermediates) once the per-category markdown is written. Don't persist raw feeds across runs. The Jekyll post + per-category markdown files are the only durable artifacts.
+7. Insert/update `daily_runs` row with status throughout.
 
 **Design call: cross-listed papers appear in every relevant category's daily blurb.** Reasoning: a cs.CV reader who picks only cs.CV expects to see all cs.CV-relevant work, including papers primarily filed under cs.LG. Duplication for users selecting overlapping categories is an acceptable trade-off.
 
 Subtleties:
-- Per-category LLM passes add ~16 batches × 30s sleep ≈ ~8 extra minutes of pipeline time on top of current ~5 min. Existing systemd timeout is 30 min — verify in dev before assuming.
+- Pipeline runtime now scales with `len(distinct selected categories ∪ fixed public-archive list)`, not a fixed count. At 50 distinct categories × 30s inter-batch sleep that's already >25 min. Likely need to raise the systemd timeout, parallelize the LLM calls (within Gemini rate limits), or both. Decide during implementation once we see real numbers — don't pre-optimize.
 - If a category has zero new papers, skip the LLM call and write a placeholder file directly.
 - Empty-category placeholder is also useful when an LLM call fails — fail open with a "today's summary unavailable, see the public archive" line.
+- Raw RSS data is treated as ephemeral. No pickle cache in prod (already true), no JSON dumps left behind. The pipeline's persistent outputs are the Jekyll post, the per-category markdown files, and the `daily_runs` row.
 
 ## Deployment
 
@@ -188,7 +191,9 @@ DNS:
 - A record for `app.paperpulse.ukurup.com` pointing to the droplet.
 
 Backups:
-- Nightly cron: hot-backup `/var/lib/paperpulse/db/paperpulse.sqlite` via `.backup` or `VACUUM INTO` → off-droplet location (different host or small object store). Tested restore drill before launch.
+- Nightly systemd timer: hot-backup `/var/lib/paperpulse/db/paperpulse.sqlite` via `VACUUM INTO` (atomic, no lock contention with WAL writers) → upload to a **DigitalOcean Spaces** bucket (S3-compatible). Retain last 30 daily snapshots + last 12 monthly. Lifecycle rule on the bucket handles expiry.
+- Backup script lives at `/usr/local/bin/paperpulse-backup` and uses `s3cmd` or `aws s3` (with Spaces endpoint) authenticated via an access key stored in `/var/lib/paperpulse/secrets/spaces_credentials` (chmod 600, root-owned).
+- Tested restore drill before launch: download latest snapshot, open in `sqlite3`, run integrity check + sample queries.
 - `/var/lib/paperpulse/content` regenerates daily; backups nice-to-have, not load-bearing.
 
 ## Security & privacy
@@ -221,15 +226,16 @@ Privacy policy:
 2. **Redirect URI exact match.** Must match exactly including protocol, host, and path. Off-by-one trailing slash is the classic 30-minute debug.
 3. **`google_sub` is stable, email is not.** Always join by `google_sub`. If email changes upstream, update the column but never key off email.
 4. **Cookie domain trap.** Setting cookie domain to `.paperpulse.ukurup.com` would expose the session to the Jekyll site too — leave it scoped to the app subdomain only.
-5. **Pipeline runtime balloon.** ~20 LLM calls × 30s inter-batch sleep is real time. Verify against the 30-min systemd timeout; parallelize cautiously if it doesn't fit (rate limits).
+5. **Pipeline runtime balloon.** Runtime scales with the size of the dynamic fetch list. With 50+ distinct user-selected categories, current 30s inter-batch sleep blows past the 30-min systemd timeout. Plan to raise the timeout and/or parallelize within Gemini rate limits. Confirm with real numbers before launch.
 6. **Cross-listed papers** appear in multiple categories' summaries by design. Users selecting many overlapping categories will see some duplication; acceptable.
-7. **Empty-category days** for niche categories. Write a placeholder so the feed renders cleanly.
-8. **Time zone for "today."** Pipeline runs at 6am Eastern. The app should determine "today" using `America/New_York` to match the file layout, not server UTC.
-9. **SQLite write contention.** Pipeline writes `daily_runs`; app writes user data. WAL handles concurrent reads + one writer. Sanity-check it before launch.
-10. **Backup before launch.** Even one user lost is bad. Backup + restore drill before sending the sign-up link.
-11. **Logout doesn't kill the Google session.** Standard OAuth behavior; "Sign out" just kills the local session cookie. Worth a UX note if confusing.
-12. **GDPR-minimum compliance.** Privacy policy + working account-delete is the floor. Not a full compliance review.
-13. **Session secret rotation.** Rotating it logs everyone out. Plan a rotation policy or accept periodic forced logouts.
+7. **Raw feeds are ephemeral.** Don't persist raw RSS data across runs. Anything cached for debugging must be wiped at end-of-run. Avoids accidentally retaining paper metadata we never committed to keep.
+8. **Empty-category days** for niche categories. Write a placeholder so the feed renders cleanly.
+9. **Time zone for "today."** Pipeline runs at 6am Eastern. The app should determine "today" using `America/New_York` to match the file layout, not server UTC.
+10. **SQLite write contention.** Pipeline writes `daily_runs`; app writes user data. WAL handles concurrent reads + one writer. Sanity-check it before launch.
+11. **Backup before launch.** Even one user lost is bad. Backup + restore drill before sending the sign-up link.
+12. **Logout doesn't kill the Google session.** Standard OAuth behavior; "Sign out" just kills the local session cookie. Worth a UX note if confusing.
+13. **GDPR-minimum compliance.** Privacy policy + working account-delete is the floor. Not a full compliance review.
+14. **Session secret rotation.** Rotating it logs everyone out. Plan a rotation policy or accept periodic forced logouts.
 
 ## Low-hanging fruit (cheap wins worth doing in Phase 1)
 - `/healthz` endpoint (also satisfies Docker healthcheck).
@@ -243,12 +249,12 @@ Privacy policy:
 ## Sequencing (rough, solo-dev, evenings/weekends)
 1. **Foundations** — FastAPI skeleton, SQLite schema + migrations, Authlib + Google OAuth round-trip with a localhost redirect URI. Local dev only.
 2. **Onboarding + feed** — category picker page (with cap-of-5 enforcement), today's feed page reading from `/var/lib/paperpulse/content/`, settings page, account deletion.
-3. **Pipeline changes** — extend category list to ~20, add per-category Gemini passes, write to `/var/lib/paperpulse/content/`, populate `daily_runs`. Verify runtime fits the timeout.
+3. **Pipeline changes** — seed full arXiv subcategory taxonomy into `categories` table; switch fetch list to `DISTINCT user_categories ∪ fixed public-archive list`; add per-category Gemini passes; write to `/var/lib/paperpulse/content/`; populate `daily_runs`; delete raw feed data at end-of-run. Measure runtime against the timeout and parallelize if needed.
 4. **Deployment plumbing** — new subdomain DNS, nginx server block, Certbot SAN, new `app` service in `docker-compose.prod.yml`, persistent volumes, secrets, healthcheck. Manual deploy first; wire into existing CI/CD after.
 5. **Pre-launch hardening** — backup + restore drill, privacy policy page, GCP OAuth consent screen configured for production, end-to-end dogfood.
 6. **Soft launch** — invite-link to a small group; watch logs, fix issues, iterate before opening up.
 
 ## Open design questions (resolve during implementation; not blockers)
-- The exact curated list of ~20 cs.* subcategories. Quick pass: pick by paper volume + audience relevance. Easy to adjust post-launch.
+- Picker UI for ~150 subcategories. Lean: archive-grouped accordions (cs / stat / math / physics / q-bio / q-fin / eess / econ) with a search box. Confirm the archive list against current arXiv taxonomy before seeding.
 - Per-category prompt structure. Start with a literal adaptation of the current combined-summary prompt scoped to one category, then iterate on output quality.
 - Whether to keep the existing combined Jekyll summary indefinitely or eventually replace it with a "default" feed assembled from per-category content. Keep both for Phase 1.
