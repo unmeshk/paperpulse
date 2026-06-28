@@ -43,18 +43,43 @@ Test scaffolding required:
 
 ---
 
-## Chunk 2 — Feed page
+## Chunk 2 — Feed page (DONE)
 
-**Goal:** Logged-in user with selected categories sees today's per-category blurbs.
+**Goal:** A logged-in user with selected categories sees today's per-category
+blurbs, rendered from markdown to HTML, in alphabetical order by slug.
 
-Acceptance (draft — refine when chunk 1 lands):
-- [ ] `GET /feed` returns 200 for logged-in user with categories selected.
-- [ ] Response HTML contains one section per selected category, in alphabetical order by slug.
-- [ ] Each section contains the markdown rendered from `CONTENT_DIR/YYYY-MM-DD/<slug>.md`.
-- [ ] If a category's file is missing, section shows a "no new papers today" placeholder.
-- [ ] If the whole `YYYY-MM-DD/` dir is missing, page shows "pipeline runs at 6am Eastern" empty state.
-- [ ] "Today" is computed in `America/New_York`, not server UTC.
-- [ ] Anonymous `GET /feed` returns 302 → `/auth/login`.
+**Decisions (locked):**
+- **Renderer:** `markdown-it-py`, pinned in `app/requirements.txt`, configured
+  with raw HTML disabled (`html=False`) so LLM-generated blurbs can't inject
+  markup. (New dependency — install is pre-authorized for the `/goal` run.)
+- **No-categories user:** `GET /feed` redirects (302) to `/onboarding`.
+- **`/` routing (wires the chunk 1 TBD):** logged-in user with categories → 302
+  to `/feed`; logged-in without categories → 302 to `/onboarding`; anonymous →
+  landing page (unchanged).
+- **"Today":** `datetime.now(ZoneInfo("America/New_York")).date()` (stdlib
+  `zoneinfo`, no dep). Content path is `CONTENT_DIR/<YYYY-MM-DD>/<slug>.md`.
+
+Acceptance:
+- [x] Anonymous `GET /feed` returns 302 → `/auth/login`.
+- [x] Logged-in user with no selected categories: `GET /feed` returns 302 → `/onboarding`.
+- [x] Logged-in user with selected categories: `GET /feed` returns 200.
+- [x] Response contains one section per selected category, ordered alphabetically by slug, each section headed by the category (slug and/or display_name).
+- [x] Each section renders the HTML produced from `CONTENT_DIR/<today>/<slug>.md`: a source `## Theme 1` appears as an `<h2>`, and a source `[Title](url)` appears as `<a href="url">Title</a>`.
+- [x] XSS guard: a source file containing a literal `<script>…</script>` is not emitted as an executable tag (raw HTML escaped/stripped by the `html=False` renderer config).
+- [x] Missing single file: if a selected category's `<today>/<slug>.md` is absent, that section shows a "no new papers today" placeholder; page is still 200.
+- [x] Missing day dir: if `CONTENT_DIR/<today>/` does not exist, the page shows a "pipeline runs at 6am Eastern" empty state; page is still 200.
+- [x] "Today" is `America/New_York`, not server UTC: the feed reads from the directory named by the NY date. (Test: write a file under the NY-today dir, assert it renders.)
+- [x] `GET /` for a logged-in user with categories returns 302 → `/feed`; with no categories returns 302 → `/onboarding`; anonymous still renders the landing page with "Sign in with Google".
+
+Test scaffolding required:
+- `conftest.py`: set `CONTENT_DIR` to a tmpdir **before** any `app.*` import (same constraint as `DB_PATH` — config freezes at import time).
+- A content-writing fixture (e.g. `write_blurb(slug, body, date=<NY today>)`) that creates `CONTENT_DIR/<date>/<slug>.md`.
+- A helper to assign categories to the test user directly via DB insert into `user_categories`, so feed tests don't depend on the onboarding POST flow.
+- Reuse `auth_client`, `db_user`, `reset_db` from chunk 1. Extend `reset_db` (or add a sibling) to also clear `CONTENT_DIR` between tests.
+
+Notes / follow-ups:
+- Actual per-category `.md` files come from **chunk 4** (pipeline, `api/`, hard-gated). Chunk 2 is verified entirely with fixture files under `CONTENT_DIR`.
+- Alias-dedupe in the picker is still open from chunk 1 — not a chunk 2 blocker.
 
 ---
 

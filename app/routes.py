@@ -1,14 +1,17 @@
 import secrets
+from datetime import datetime
 from itertools import groupby
 from urllib.parse import parse_qsl
+from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
+from markdown_it import MarkdownIt
 from starlette.status import HTTP_302_FOUND
 
 from app.auth import current_user
-from app.config import APP_DIR
+from app.config import APP_DIR, settings
 from app.db import get_conn
 
 templates = Jinja2Templates(directory=str(APP_DIR / "templates"))
@@ -16,10 +19,17 @@ templates = Jinja2Templates(directory=str(APP_DIR / "templates"))
 router = APIRouter()
 
 MAX_CATEGORIES = 5
+FEED_TZ = ZoneInfo("America/New_York")
+
+# Raw HTML disabled so LLM-generated blurbs can't inject markup.
+_md = MarkdownIt("commonmark", {"html": False})
 
 
 @router.get("/", response_class=HTMLResponse)
 async def index(request: Request, user: dict | None = Depends(current_user)):
+    if user:
+        target = "/feed" if _user_category_slugs(user["id"]) else "/onboarding"
+        return RedirectResponse(url=target, status_code=HTTP_302_FOUND)
     return templates.TemplateResponse(
         request,
         "index.html",
@@ -79,6 +89,52 @@ async def save_onboarding(request: Request, user: dict | None = Depends(current_
         )
 
     return RedirectResponse(url="/", status_code=HTTP_302_FOUND)
+
+
+@router.get("/feed", response_class=HTMLResponse)
+async def feed(request: Request, user: dict | None = Depends(current_user)):
+    if not user:
+        return RedirectResponse(url="/auth/login", status_code=HTTP_302_FOUND)
+    slugs = _user_category_slugs(user["id"])  # alphabetical by slug
+    if not slugs:
+        return RedirectResponse(url="/onboarding", status_code=HTTP_302_FOUND)
+
+    today = datetime.now(FEED_TZ).strftime("%Y-%m-%d")
+    day_dir = settings.content_dir / today
+    day_dir_exists = day_dir.is_dir()
+    names = _display_names(slugs)
+
+    sections = []
+    for slug in slugs:
+        path = day_dir / f"{slug}.md"
+        body_html = _md.render(path.read_text(encoding="utf-8")) if path.is_file() else None
+        sections.append({"slug": slug, "display_name": names.get(slug, slug), "html": body_html})
+
+    return templates.TemplateResponse(
+        request,
+        "feed.html",
+        {"user": user, "today": today, "day_dir_exists": day_dir_exists, "sections": sections},
+    )
+
+
+def _user_category_slugs(user_id: int) -> list[str]:
+    with get_conn() as conn:
+        rows = conn.execute(
+            "SELECT category_slug FROM user_categories WHERE user_id = ? ORDER BY category_slug",
+            (user_id,),
+        ).fetchall()
+    return [row["category_slug"] for row in rows]
+
+
+def _display_names(slugs: list[str]) -> dict[str, str]:
+    if not slugs:
+        return {}
+    placeholders = ",".join("?" for _ in slugs)
+    with get_conn() as conn:
+        rows = conn.execute(
+            f"SELECT slug, display_name FROM categories WHERE slug IN ({placeholders})", slugs
+        ).fetchall()
+    return {row["slug"]: row["display_name"] for row in rows}
 
 
 def _grouped_categories() -> list[tuple[str, list[dict]]]:
