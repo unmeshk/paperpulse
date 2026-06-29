@@ -83,6 +83,22 @@ def main():
 
     create_blogpost(summary, len(papers))
 
+    # Per-category blurbs for the personalized feed (Phase 1). Additive to the
+    # public blog flow above; failures here must not break the blog post.
+    try:
+        from api.feeds import generate_category_blurbs, get_fetch_list, today_ny
+        from api.settings import APP_DB_PATH, CONTENT_DIR
+
+        if CONTENT_DIR:
+            fetch_list = get_fetch_list(APP_DB_PATH)
+            logger.info(f'Generating per-category blurbs for: {fetch_list}')
+            papers_by_category = arxiv_client.retrieve_results_by_category(fetch_list)
+            generate_category_blurbs(papers_by_category, llm_agent, CONTENT_DIR, today_ny())
+        else:
+            logger.info('CONTENT_DIR not set; skipping per-category blurbs')
+    except Exception as e:
+        logger.error(f'Per-category blurb generation failed: {e}')
+
 if __name__ == "__main__":
     main()
 

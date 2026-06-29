@@ -65,3 +65,11 @@ List of Papers and Abstracts
 """
 
 RSS_CATEGORIES = ['cs.LG', 'cs.AI', 'cs.CL', 'cs.CV', 'stat.ML']
+
+# Categories that always ship (the public archive), regardless of user signups.
+FIXED_PUBLIC_CATEGORIES = ['cs.LG', 'cs.AI', 'cs.CL', 'cs.CV', 'stat.ML']
+
+# Path to the app's SQLite DB (for reading user_categories) and the dir where
+# per-category feed blurbs are written. Both set via env in prod; empty locally.
+APP_DB_PATH = os.getenv("APP_DB_PATH", "")
+CONTENT_DIR = os.getenv("CONTENT_DIR", "")

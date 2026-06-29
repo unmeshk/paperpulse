@@ -117,7 +117,7 @@ Test command: `PYTHONPATH=. app/.venv/bin/pytest app/tests`
 
 ---
 
-## Chunk 4 — Pipeline integration (per-category blurbs)
+## Chunk 4 — Pipeline integration (per-category blurbs) (DONE)
 
 Touches `api/` (the pipeline). Governed by the **chunk 4 scoped exception** in
 `docs/GOAL_AUTONOMY.md`: `api/` + `api/tests` edits and root-`.venv` pytest are
@@ -150,19 +150,19 @@ Code changes (all under `api/`):
 - `api/main.py`: after the existing blog flow, run the per-category path.
 
 Acceptance:
-- [ ] `get_fetch_list` returns the sorted, deduped union of `user_categories`
+- [x] `get_fetch_list` returns the sorted, deduped union of `user_categories`
       slugs and the fixed public list; with zero users it equals the fixed list.
-- [ ] `retrieve_results_by_category` groups papers by source category; a paper in
+- [x] `retrieve_results_by_category` groups papers by source category; a paper in
       two feeds appears in both groups; duplicates within one feed are removed.
       (Network mocked via the fetch seam.)
-- [ ] `generate_category_blurbs` writes `CONTENT_DIR/<date>/<slug>.md` for each
+- [x] `generate_category_blurbs` writes `CONTENT_DIR/<date>/<slug>.md` for each
       non-empty category, content = the agent's markdown; creates the day dir.
-- [ ] A category with an empty paper list produces no file.
-- [ ] The day-dir name is the `America/New_York` date.
-- [ ] Blurb content preserves the agent's themed markdown and `[Title](url)` links.
-- [ ] Existing blog flow still works: `api/tests/test_main.py` (and test_mixpanel)
+- [x] A category with an empty paper list produces no file.
+- [x] The day-dir name is the `America/New_York` date.
+- [x] Blurb content preserves the agent's themed markdown and `[Title](url)` links.
+- [x] Existing blog flow still works: `api/tests/test_main.py` (and test_mixpanel)
       still pass; `create_blogpost` output unchanged.
-- [ ] No real Gemini or network call in any chunk 4 test (Agent + fetch mocked).
+- [x] No real Gemini or network call in any chunk 4 test (Agent + fetch mocked).
 
 Test scaffolding (`api/tests/`, root `.venv`):
 - A fake agent whose `identify_important_papers(papers)` returns canned markdown.
