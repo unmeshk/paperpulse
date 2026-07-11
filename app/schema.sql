@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS categories (
   display_name TEXT NOT NULL,
   description TEXT,
   rss_url TEXT NOT NULL,
+  archive TEXT NOT NULL DEFAULT '',
   active INTEGER NOT NULL DEFAULT 1,
   sort_order INTEGER NOT NULL DEFAULT 0
 );

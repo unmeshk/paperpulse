@@ -21,10 +21,22 @@ class Settings:
 
 
 def _require(name: str) -> str:
-    value = os.getenv(name, "").strip()
+    value = get_secret(name.lower()) or ""
+    value = value.strip()
     if not value:
         raise RuntimeError(f"Missing required env var: {name}. See app/.env.example.")
     return value
+
+
+def get_secret(name):
+    """Read a secret from /run/secrets/<name> if present, else fall back to os.getenv(NAME.upper()).
+
+    Lets prod use Docker Compose secrets while local dev keeps reading from .env via os.getenv.
+    """
+    secret_path = Path("/run/secrets") / name
+    if secret_path.exists():
+        return secret_path.read_text().strip()
+    return os.getenv(name.upper())
 
 
 def load_settings() -> Settings:

@@ -1,5 +1,171 @@
 # Worklog
 
+## Session: 2026-07-11 (deploy plan senior review + M0/M1) — IN PROGRESS
+
+### Worked on
+Senior-reviewed `docs/PHASE1_DEPLOY_PLAN.md` (junior-to-senior skill: repo research
++ July-2026 web research + isolated adversarial review), then executed milestones
+M0 (branch sync) and M1 (deploy-prep code changes) of the promoted plan.
+
+### Completed
+
+**Senior review — 3 blockers found in the original plan**
+1. OAuth would fail in prod: `request.url_for` yields `http://` behind
+   TLS-terminating nginx unless uvicorn runs `--proxy-headers` with
+   `FORWARDED_ALLOW_IPS` covering the nginx container (default trusts only
+   127.0.0.1). Google would reject every login with redirect_uri mismatch.
+2. Branch nginx.conf was stale: the runtime-resolver 502 fix (930f327, PR #38)
+   landed on main AFTER the branch forked. Editing nginx.conf on the branch
+   risked regressing the fix at merge.
+3. Cert-before-config ordering: adding the 443 block before the cert exists
+   crash-loops nginx and takes the blog down. Two-phase bootstrap required.
+
+Also: closed both "open decisions" with evidence (uvicorn multiproc manager ≥0.30,
+no gunicorn — `uvicorn.workers` deprecated; file-based Docker secrets matching the
+gemini_api_key convention); SQLite cross-container WAL confirmed safe on a local
+volume but hardened (busy_timeout both sides, read-only URI open in the pipeline);
+OAuth publish de-escalated (Testing mode fine ≤100 users, no 7-day token expiry
+for openid/email/profile scopes).
+
+**Decisions (user)**
+- Subdomain confirmed: `app.paperpulse.ukurup.com`.
+- OAuth stays in Testing mode for now.
+- Session cookie lifetime: 30 days.
+- Backups: DO droplet daily backups (7-day retention) cover it; DO Spaces
+  backup milestone dropped.
+
+**M0 — branch sync**
+- Merged origin/main into the branch. Surprise: main had gained PR #39 (chunk 0
+  squash-merged separately) → add/add conflicts on all app/ files. Verified
+  main's app content byte-identical to the branch's chunk-0 commit (only real
+  delta = nginx fix), merged keeping branch side. Resolver now on branch.
+- 39 app + 27 api tests green post-merge.
+
+**M1 — deploy-prep code (verified, not yet committed)**
+- `app/config.py`: `get_secret()` — `/run/secrets/<name>` first, env fallback.
+- `app/db.py` + `api/feeds.py`: `busy_timeout=5000`; feeds.py opens the app DB
+  read-only (`file:...?mode=ro`) and logs loudly on fallback.
+- `tzdata==2026.3` in both requirements (zoneinfo breaks in python:3.11-slim
+  without it — would have broken feed dates + blurb dirs on day one).
+- `app/main.py`: session `max_age` 30 days.
+- `app/Dockerfile`: uvicorn, 2 workers, `--proxy-headers`.
+- `docker-compose.prod.yml`: new `app` service (bind mounts
+  `/var/lib/paperpulse/{db,content}`, `COOKIE_SECURE=true`,
+  `FORWARDED_ALLOW_IPS=172.16.0.0/12`, 3 file secrets); api service gains the
+  same mounts + `CONTENT_DIR`/`APP_DB_PATH`.
+- `.github/workflows/deploy.yml`: full `pytest api/tests`, new `test-app` job,
+  app image build+push (`ghcr.io/unmeshk/paperpulse-app`).
+- `nginx/nginx.conf`: port-80 block for the app subdomain (ACME + redirect);
+  443 block deliberately deferred until after cert issuance.
+- Verified: both suites green; app image builds; zoneinfo works in-container;
+  container boots via env AND via /run/secrets files; /healthz ok.
+
+**Sequencing correction:** cert issuance needs the port-80 block live on the
+droplet, which only arrives at merge/deploy. So: deploy port-80 block → issue
+cert → follow-up commit adds 443 block → restart nginx.
+
+### In progress
+`/goal complete all aspects of Phase 1 deploy plan` — paused at the
+GOAL_AUTONOMY boundary: remaining steps (commit/push/PR/merge, droplet ops,
+Google console, DNS) are hard-gated; waiting on explicit authorization + the
+user-only external steps. gh CLI token found invalid (needs re-auth); doctl
+not installed.
+
+### Next
+M2 external prep → M4 merge+deploy → cert + 443 block → M5 pipeline live run →
+M6 smoke test. Then Dependabot vulns + alias-dedupe follow-ups.
+
+---
+
+## Session: 2026-06-28 (Phase 1 chunks 1–4 via /goal + deploy plan)
+
+### Worked on
+Drove Phase 1 chunks 1–4 to completion on `feat/phase1-personalized-feed`, mostly
+under `/goal` (Stop-hook condition = pytest green incl. new acceptance tests).
+Smoke-tested the full UI live in Chrome. Wrote the production deployment plan.
+
+### Completed
+
+**Chunk 1 — category seed + onboarding picker (commit `fd5cb07`)**
+- Seed `categories` from `app/data/categories.json` idempotently on `init_db()`;
+  added `archive` column + ALTER guard for pre-existing dev DBs.
+- `GET/POST /onboarding`: archive-grouped picker with search, session CSRF, 1–5
+  cap, unknown-slug rejection, full-replace persistence.
+- Auth via `Depends(current_user)` so tests override it; switched `/` to it.
+- Folded in both FastAPI deprecation warnings (lifespan + `TemplateResponse`).
+- Test scaffold: `reset_db`, `db_user`, `auth_client` fixtures + `test_onboarding.py`.
+
+**Chunk 2 — feed page (commit `5f9020f`)**
+- `GET /feed`: per-category sections (alphabetical), markdown→HTML via
+  `markdown-it-py` pinned `==4.2.0` with `html=False` (XSS guard).
+- Empty states: missing day dir → "pipeline runs at 6am Eastern"; missing file →
+  "no new papers today". "Today" in America/New_York.
+- `/` routing: logged-in + categories → `/feed`, none → `/onboarding`, anon →
+  landing. `CONTENT_DIR` tmpdir + `write_blurb`/`assign_categories` fixtures.
+
+**Chunk 3 — settings + account deletion (commit `e5d8146`)**
+- `GET/POST /settings` (picker pre-checked, full-replace → `/feed`),
+  `POST /settings/delete-account` (soft delete: `deleted_at`, clear session → `/`).
+- Extracted shared `_apply_category_selection` helper from `save_onboarding`.
+
+**Chunk 4 — pipeline per-category blurbs (commit `a36724f`, `api/`)**
+- `api/feeds.py`: `get_fetch_list(app_db_path)` (user_categories ∪ fixed public
+  list), `generate_category_blurbs()` (write `CONTENT_DIR/<NY-date>/<slug>.md`
+  per non-empty category), `today_ny()`.
+- `arxiv_client.py`: `_fetch_category_papers(slug)` seam +
+  `retrieve_results_by_category(slugs)` (per-category dedup; cross-listed papers
+  in each feed). Blog flow + `retrieve_daily_results` left untouched.
+- `api/main.py` runs the per-category path after the blog post (guarded by
+  `CONTENT_DIR`). `test_feeds.py` covers all criteria; Gemini + network mocked.
+
+**Verification**
+- 39 `app/tests` + 27 `api/tests` green. Chrome smoke test: onboarding (CSRF
+  403), feed (rendered blurbs + placeholders, via demo content), settings
+  (pre-checked), and a reversible save flow (cs.CG↔cs.LG, restored). Did not
+  touch delete-account on the real dogfood account.
+
+**Deploy plan written**
+- `docs/PHASE1_DEPLOY_PLAN.md` — full rollout plan (see below).
+
+### Decisions made
+- **markdown-it-py with `html=False`** for blurb rendering (XSS guard); pinned 4.2.0.
+- **No `python-multipart`** — onboarding/settings POSTs parse the urlencoded body
+  manually via `urllib.parse.parse_qsl` to stay within the autonomy boundary.
+- **Keep the public Jekyll blog flow untouched**; chunk 4 *adds* per-category blurbs.
+- **Dynamic fetch list** (api reads app SQLite via `APP_DB_PATH`), per spec.
+- **Soft delete** keeps the user row + `user_categories`; `current_user` filters
+  `deleted_at IS NULL`.
+- Added a **chunk 4 scoped exception** to `docs/GOAL_AUTONOMY.md` (api/ edits +
+  root-`.venv` pytest in-scope for that goal; Gemini/network/docker/deploy gated).
+
+### In progress
+- Nothing mid-edit. Branch is clean and pushed; all four chunks committed.
+
+### Next session priorities
+Execute `docs/PHASE1_DEPLOY_PLAN.md`. Highest-leverage / riskiest first:
+1. **Add `tzdata`** to `app/requirements.txt` + `api/requirements.txt` — `zoneinfo`
+   will break in `python:3.11-slim` (feed date + blurb dirs). Passes locally on macOS.
+2. Containerize the app (`app/Dockerfile`) + add `app` service and the shared
+   content + DB volumes to `docker-compose.prod.yml` (also mount into `api`).
+3. Fix CI: test step runs only `api/tests/test_main.py` — change to `pytest
+   api/tests`; add an app test job + app image build.
+4. App secrets: `app/config.py` only reads env, no file-based-secret support —
+   decide env vs add `get_secret`-style reader.
+5. External: DNS for app subdomain, OAuth prod redirect URI + privacy policy +
+   production mode, nginx server block (runtime-resolver) + certbot cert.
+6. Merge PR → deploy → verify (manual pipeline run, confirm blurbs render).
+7. DO Spaces backup (now holds real user data).
+
+### Open follow-ups not blocking
+- Alias-dedupe in the picker (cs.NA↔math.NA, cs.SY↔eess.SY) — chunk 1 carry-over.
+- `api/main.py` skips per-category blurbs on days the blog RSS feeds are empty
+  even if a user-only category has papers (edge case).
+- Per-category path re-fetches feeds independently of the blog fetch (could unify).
+- Repo has 18 Dependabot vulns on the default branch (1 critical, 5 high).
+- Demo content left at `content/2026-06-28/{cs.AI,cs.CC}.md` (untracked, local only).
+
+---
+
 ## Session: 2026-06-28 (Phase 1 chunk 0 — app skeleton + OAuth + /goal prep)
 
 ### Worked on
