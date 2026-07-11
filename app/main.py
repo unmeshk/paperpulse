@@ -22,6 +22,7 @@ def create_app() -> FastAPI:
         secret_key=settings.session_secret,
         https_only=settings.cookie_secure,
         same_site="lax",
+        max_age=60 * 60 * 24 * 30,
     )
     app.include_router(auth_router)
     app.include_router(routes_router)

@@ -38,14 +38,19 @@ def get_fetch_list(app_db_path):
     slugs = set(FIXED_PUBLIC_CATEGORIES)
     try:
         if app_db_path and Path(app_db_path).exists():
-            conn = sqlite3.connect(app_db_path)
+            # Read-only URI open: a single SELECT must never create or lock the app's DB.
+            conn = sqlite3.connect(f"file:{app_db_path}?mode=ro", uri=True)
             try:
+                conn.execute("PRAGMA busy_timeout = 5000;")
                 rows = conn.execute("SELECT DISTINCT category_slug FROM user_categories").fetchall()
                 slugs.update(row[0] for row in rows if row[0])
             finally:
                 conn.close()
+        elif app_db_path:
+            logger.warning(f"App DB not found at {app_db_path}; using fixed public categories only")
     except Exception as e:
-        logger.error(f"Could not read user categories from {app_db_path}: {e}")
+        logger.error(f"Could not read user categories from {app_db_path}; "
+                     f"falling back to fixed public categories: {e}")
     return sorted(slugs)
 
 
