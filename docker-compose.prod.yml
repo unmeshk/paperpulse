@@ -16,12 +16,35 @@ services:
     volumes:
       - ./blog:/app/blog
       - ./logs:/app/logs
+      - /var/lib/paperpulse/content:/data/content
+      - /var/lib/paperpulse/db:/data/db
     environment:
       PROJECT_ENV: prod
       PROJECT_DIR: /app
       LOG_DIR: /app/logs
+      CONTENT_DIR: /data/content
+      APP_DB_PATH: /data/db/paperpulse.sqlite
     secrets:
       - gemini_api_key
+    networks:
+      - web
+
+  app:
+    image: ghcr.io/unmeshk/paperpulse-app:${IMAGE_TAG:-latest}
+    expose:
+      - "8000"
+    volumes:
+      - /var/lib/paperpulse/content:/data/content
+      - /var/lib/paperpulse/db:/data/db
+    environment:
+      DB_PATH: /data/db/paperpulse.sqlite
+      CONTENT_DIR: /data/content
+      COOKIE_SECURE: "true"
+      FORWARDED_ALLOW_IPS: "172.16.0.0/12"
+    secrets:
+      - google_oauth_client_id
+      - google_oauth_client_secret
+      - session_secret
     networks:
       - web
 
@@ -55,3 +78,9 @@ networks:
 secrets:
   gemini_api_key:
     file: /var/lib/paperpulse/secrets/gemini_api_key
+  google_oauth_client_id:
+    file: /var/lib/paperpulse/secrets/google_oauth_client_id
+  google_oauth_client_secret:
+    file: /var/lib/paperpulse/secrets/google_oauth_client_secret
+  session_secret:
+    file: /var/lib/paperpulse/secrets/session_secret

@@ -99,6 +99,85 @@ class ArxivClient:
 
         return papers
 
+    def _fetch_category_papers(self, slug):
+        """Fetch one RSS feed and return its most-recent-pubDate papers.
+
+        Mirrors the per-feed logic of retrieve_daily_results for a single category,
+        deduping within the feed by URL. Mockable seam for the per-category path.
+
+        Args:
+            slug: arXiv category slug (also the RSS feed name), e.g. 'cs.LG'.
+
+        Returns:
+            List of paper dicts (possibly empty).
+        """
+        url = f'{self.base_url}/{slug}'
+        root = None
+        max_retries = 5
+
+        for attempt in range(1, max_retries + 1):
+            try:
+                with libreq.urlopen(url, timeout=30) as response:
+                    root = ET.fromstring(response.read())
+                break
+            except Exception as e:
+                if attempt == max_retries:
+                    logger.error(f"Failed to fetch {slug} after {max_retries} attempts: {e}")
+                else:
+                    time.sleep(5)
+
+        if root is None:
+            return []
+
+        items = root.findall('.//item')
+
+        # Keep only items from the most recent pubDate in this feed.
+        pub_dates = []
+        for item in items:
+            raw = item.findtext('pubDate')
+            if raw:
+                try:
+                    pub_dates.append(parsedate_to_datetime(raw).date())
+                except Exception:
+                    pass
+        latest_date = max(pub_dates) if pub_dates else None
+
+        papers = []
+        seen_urls = set()
+        for item in items:
+            if latest_date:
+                raw = item.findtext('pubDate')
+                try:
+                    if parsedate_to_datetime(raw).date() != latest_date:
+                        continue
+                except Exception:
+                    pass
+            paper = self._process_paper_entry(item)
+            if paper and paper['url'] not in seen_urls:
+                seen_urls.add(paper['url'])
+                papers.append(paper)
+        return papers
+
+    def retrieve_results_by_category(self, slugs):
+        """Fetch papers grouped by category slug.
+
+        Each feed is deduped within itself; a cross-listed paper appears in every
+        feed it shows up in (no global dedup across categories), so it lands in
+        each relevant category's blurb.
+
+        Args:
+            slugs: List of category slugs to fetch.
+
+        Returns:
+            Dict mapping each slug to its list of paper dicts.
+        """
+        results = {}
+        for i, slug in enumerate(slugs):
+            if i > 0:
+                time.sleep(3)
+            results[slug] = self._fetch_category_papers(slug)
+        return results
+
     def extract_titles(self, content):
         """
         Extracts titles from the content using regex.

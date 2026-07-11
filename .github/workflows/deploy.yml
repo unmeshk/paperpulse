@@ -10,6 +10,7 @@ env:
   REGISTRY: ghcr.io
   API_IMAGE: ${{ github.repository_owner }}/paperpulse-api
   BLOG_IMAGE: ${{ github.repository_owner }}/paperpulse-blog
+  APP_IMAGE: ${{ github.repository_owner }}/paperpulse-app
 
 jobs:
   test:
@@ -26,13 +27,30 @@ jobs:
       - name: Install deps
         run: |
           pip install -r api/requirements.txt
-          pip install pytest
+          pip install pytest pyyaml
 
       - name: Run tests
-        run: PYTHONPATH=. pytest api/tests/test_main.py -v
+        run: PYTHONPATH=. pytest api/tests -v
+
+  test-app:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: app/requirements.txt
+
+      - name: Install deps
+        run: pip install -r app/requirements.txt
+
+      - name: Run tests
+        run: PYTHONPATH=. pytest app/tests -v
 
   build:
-    needs: test
+    needs: [test, test-app]
     runs-on: ubuntu-24.04
     permissions:
       contents: read
@@ -87,6 +105,26 @@ jobs:
           push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
           tags: ${{ steps.blog-meta.outputs.tags }}
           labels: ${{ steps.blog-meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: App image metadata
+        id: app-meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.APP_IMAGE }}
+          tags: |
+            type=sha,format=long,prefix=
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push App image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: app/Dockerfile
+          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+          tags: ${{ steps.app-meta.outputs.tags }}
+          labels: ${{ steps.app-meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 

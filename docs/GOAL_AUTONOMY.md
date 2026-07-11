@@ -68,6 +68,30 @@ PII / secrets:
 
 ---
 
+## Chunk 4 scoped exception (approved 2026-06-28)
+
+For the chunk 4 (`api/` pipeline) goal run only, the boundary is widened as
+follows. This exception is specific to chunk 4 and does not generalize.
+
+In-scope for the chunk 4 goal:
+- Create, edit, delete files under `api/**` and `api/tests/**`.
+- `pytest` against the root `.venv`: `PYTHONPATH=. .venv/bin/pytest api/tests`.
+- `sqlite3` against temp DBs created by the tests.
+
+Still hard-gated during chunk 4 (unchanged):
+- Any real Gemini / Google / network call. Chunk 4 tests MUST mock the Agent
+  and the RSS fetch; the goal run makes no external calls.
+- `docker`, deploy scripts, `git` state changes, `ssh`/`scp`.
+- Editing `api/.env` or reading secrets; writing to the prod content dir.
+- Editing `api/requirements.txt` + installing new deps (none are needed — genai
+  is present; `sqlite3`/`zoneinfo` are stdlib). If a new dep turns out to be
+  required, stop and ask.
+
+The real pipeline run against Gemini and any prod deploy are performed manually
+after the goal, with explicit confirmation.
+
+---
+
 ## How to invoke a goal under this boundary
 
 1. Make sure auto mode is on (`/auto`).

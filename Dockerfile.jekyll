@@ -3,7 +3,10 @@ FROM jekyll/jekyll:4
 WORKDIR /srv/jekyll
 
 COPY blog/Gemfile* ./
+# jekyll/jekyll:4 is a floating tag; newer images (Debian-based) dropped the
+# bundled jekyll user, so create it when missing.
 RUN bundle install && \
+    (id jekyll >/dev/null 2>&1 || useradd -m -U -r jekyll) && \
     chown -R jekyll:jekyll /srv/jekyll
 
 USER jekyll
