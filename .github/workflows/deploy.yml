@@ -27,7 +27,7 @@ jobs:
       - name: Install deps
         run: |
           pip install -r api/requirements.txt
-          pip install pytest
+          pip install pytest pyyaml
 
       - name: Run tests
         run: PYTHONPATH=. pytest api/tests -v
