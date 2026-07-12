@@ -1,12 +1,16 @@
-FROM jekyll/jekyll:4
+# Pinned by digest to the long-running alpine build (the floating :4 tag
+# drifted to a Debian/Ruby-3.4 image on 2026-07-11 that breaks jekyll 4.2:
+# missing jekyll user, musl-only Gemfile.lock platform, csv gem removed from
+# default gems). Bump the digest deliberately, never implicitly.
+FROM jekyll/jekyll:4@sha256:400b8d1569f118bca8a3a09a25f32803b00a55d1ea241feaf5f904d66ca9c625
 
 WORKDIR /srv/jekyll
 
 COPY blog/Gemfile* ./
-# jekyll/jekyll:4 is a floating tag; newer images (Debian-based) dropped the
-# bundled jekyll user, so create it when missing.
+# The image must run as uid 1000: the droplet bind-mounts ./blog (owned by
+# uid 1000) over /srv/jekyll, so any other uid cannot write the site build.
 RUN bundle install && \
-    (id jekyll >/dev/null 2>&1 || useradd -m -U -r jekyll) && \
+    (id jekyll >/dev/null 2>&1 || useradd -m -u 1000 -U jekyll) && \
     chown -R jekyll:jekyll /srv/jekyll
 
 USER jekyll
