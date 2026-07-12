@@ -64,16 +64,50 @@ for openid/email/profile scopes).
 droplet, which only arrives at merge/deploy. So: deploy port-80 block → issue
 cert → follow-up commit adds 443 block → restart nginx.
 
+**Deploy execution (after user authorized a goal-run exception: git ops,
+docker, gh API, droplet ssh, files outside app//docs/)**
+- User did: gh re-auth, DNS A record (app.paperpulse.ukurup.com →
+  198.211.99.138), OAuth redirect URI in Google console. OAuth stays Testing.
+- Droplet prep via ssh (root@198.211.99.138, do-macm1-ed25519 key):
+  /var/lib/paperpulse/{db,content} created; 3 secret files written 600
+  (client id/secret from app/.env, fresh random session_secret for prod).
+- CI fix 1: full api suite surfaced test_mixpanel's `import yaml` —
+  pyyaml added to the CI install step (test-only dep, not shipped).
+- PR #40 opened, CI green, admin-squash-merged (branch protection wants 1
+  review; solo repo). Deploy job ran; app container came up.
+
+**PROD INCIDENT — blog 502 after #40's deploy (~15 min, resolved)**
+- The deploy rebuilt the blog image and the floating `jekyll/jekyll:4` tag had
+  drifted (2022 alpine → Debian/Ruby-3.4). Fresh image crash-looped on the
+  droplet: bundler PermissionError rewriting Gemfile.lock. nginx → 502.
+- Immediate restore: rolled blog back to the previous SHA-tagged image
+  (`IMAGE_TAG=73fb23a... docker compose up -d blog`). Blog 200 again.
+- Root causes (three, layered): (1) host ./blog bind mount is uid 1000, new
+  image's created jekyll user was 999; (2) committed Gemfile.lock had only
+  x86_64-linux-musl PLATFORMS (alpine) — Debian runtime forces a lock rewrite
+  the mount forbids; (3) Ruby 3.4 dropped csv from default gems (jekyll 4.2
+  needs it).
+- Fix-forward (PR #41): pin base by the known-good alpine digest (recovered
+  from droplet docker cache — sha256:400b8d15...), uid-1000 useradd guard,
+  `bundle lock --add-platform x86_64-linux aarch64-linux`. Verified locally:
+  builds from pinned digest + serves with ./blog bind-mounted.
+
+**Cert + nginx (M3, done via ssh)**
+- nginx restarted with the port-80 ACME block (from #40) — blog stayed 200,
+  app subdomain 301s.
+- certbot webroot issued cert for app.paperpulse.ukurup.com.
+- 443 app server block (resolver pattern + X-Forwarded-Proto) committed to
+  PR #41 — goes live at next deploy + nginx restart.
+
 ### In progress
-`/goal complete all aspects of Phase 1 deploy plan` — paused at the
-GOAL_AUTONOMY boundary: remaining steps (commit/push/PR/merge, droplet ops,
-Google console, DNS) are hard-gated; waiting on explicit authorization + the
-user-only external steps. gh CLI token found invalid (needs re-auth); doctl
-not installed.
+PR #41 (blog image pin + app 443 block) in CI. Then: merge → deploy → nginx
+restart → app HTTPS smoke → M5 manual pipeline run (first real Gemini
+per-category run) → M6 OAuth E2E smoke → final worklog entry.
 
 ### Next
-M2 external prep → M4 merge+deploy → cert + 443 block → M5 pipeline live run →
-M6 smoke test. Then Dependabot vulns + alias-dedupe follow-ups.
+Dependabot vulns (18 on main, 1 critical) + alias-dedupe picker follow-up.
+Consider: image-drift guard for other floating tags (nginx:alpine,
+certbot/certbot).
 
 ---
 
