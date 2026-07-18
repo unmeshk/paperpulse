@@ -3,14 +3,17 @@
 ## Phase 1 — In progress
 Daily personalized feed via Google login + curated cs.* category selection. See `PHASE1_SPEC.md` for the full scope.
 
-Core app + pipeline shipped and verified in prod (2026-07-18). Remaining before Phase 1 closes:
+Core app + pipeline shipped and verified in prod (2026-07-18). Items 1–6 shipped 2026-07-18 (PRs #45–#47). Remaining before Phase 1 closes:
 
-1. **Theme port.** App pages (landing, onboarding, feed, settings) styled to match the main PaperPulse blog design. Currently bare HTML (deferred during chunks 1–4).
-2. **Login entry point on the main blog page.** The general PaperPulse page gets a login button that takes you to the app's login page.
-3. **Dedicated login/signup page.** Interstitial between "login" click and the Google OAuth redirect, instead of the bare landing-page link.
-4. **Logout lands on the main blog page** with a "you are now logged out" message. Note: blog is static Jekyll, so the message needs a query-param + small JS include (or a static logged-out page variant).
-5. **Hard delete.** Account deletion removes all user data — user row + category selections. Schema already has `ON DELETE CASCADE`, so either hard-delete on request or a purge job replacing the current soft-delete-only flow.
-6. **"Buy me a coffee" on the personalized feed.** Find a placement for the coffee link in the app (blog already has it in the header nav).
+1. ~~**Theme port.**~~ Shipped (PR #45, then superseded by the shared sidebar in #47).
+2. ~~**Login entry point on the main blog page.**~~ Shipped (PR #46, routed through /login in #47).
+3. ~~**Dedicated login/signup page.**~~ Shipped (PR #47): /login interstitial.
+4. ~~**Logout lands on the main blog page**~~ Shipped (PR #47): ?logged_out=1 banner.
+5. ~~**Hard delete.**~~ Shipped (PR #47): cascade delete + confirmation checkbox.
+6. ~~**"Buy me a coffee" on the personalized feed.**~~ Shipped (PR #47): sidebar link.
+7. **Cross-site login-state consistency.** Bug: while logged in, clicking About or What's New lands on the static blog, whose header always shows "Log in" — the logged-in state disappears. Fix so the header state is consistent when moving between app and blog (options: small JS on the blog that checks an app session endpoint and swaps the nav; or serve About/What's New from the app when logged in). Include a general consistency audit: walk every nav path logged in and logged out, verify the header always reflects actual session state.
+8. **Update What's New for public launch.** Once OAuth leaves Testing mode and signup opens to everyone, add a What's New entry announcing the personalized feed.
+9. **Deploy-script image pruning.** Each deploy leaves a ~1.4GB image set on the droplet; disk filled and broke a deploy on 2026-07-18. Prune old SHA-tagged sets in `deploy-paperpulse.sh` (keep current + previous; GHCR retains everything for rollback).
 
 ## Phase 2 — Next major release (post-Phase 1)
 Feedback-driven feed improvement. Readers mark sections / papers / themes as "more like this" or "less like this." The system uses the signal to re-rank or re-prompt summaries over time. End state: each user's feed continually adapts to their preferences.
