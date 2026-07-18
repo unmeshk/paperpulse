@@ -30,8 +30,21 @@
   <p>Permanently deletes your account and all its data (including your category selections), and signs you out. This cannot be undone.</p>
   <form method="post" action="/settings/delete-account">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-    <button type="submit" class="button-danger">Delete my account</button>
+    <label class="delete-confirm">
+      <input type="checkbox" id="delete-confirm-box" name="confirm" value="yes">
+      I understand this permanently deletes my account and all its data.
+    </label>
+    <button type="submit" id="delete-account-button" class="button-danger" disabled>Delete my account</button>
   </form>
+  <script>
+    (function () {
+      var box = document.getElementById("delete-confirm-box");
+      var button = document.getElementById("delete-account-button");
+      box.addEventListener("change", function () {
+        button.disabled = !box.checked;
+      });
+    })();
+  </script>
 
   <script>
     (function () {

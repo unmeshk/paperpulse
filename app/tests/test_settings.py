@@ -106,7 +106,7 @@ def test_delete_account_hard_deletes_all_data(auth_client, db_user):
     token = _csrf(auth_client, "/settings")
     resp = auth_client.post(
         "/settings/delete-account",
-        data={"csrf_token": token},
+        data={"csrf_token": token, "confirm": "yes"},
         follow_redirects=False,
     )
     assert resp.status_code == 302
@@ -132,6 +132,21 @@ def test_delete_account_missing_csrf_forbidden(auth_client):
     assert resp.status_code == 403
 
 
+def test_delete_account_requires_confirmation(auth_client, db_user):
+    from app.db import get_conn
+
+    token = _csrf(auth_client, "/settings")
+    resp = auth_client.post(
+        "/settings/delete-account",
+        data={"csrf_token": token},
+        follow_redirects=False,
+    )
+    assert resp.status_code == 400
+    with get_conn() as conn:
+        row = conn.execute("SELECT id FROM users WHERE id = ?", (db_user["id"],)).fetchone()
+    assert row is not None  # unconfirmed request deletes nothing
+
+
 def test_after_delete_index_is_anonymous(auth_client, db_user):
     from app.auth import current_user
     from app.main import app
@@ -139,7 +154,7 @@ def test_after_delete_index_is_anonymous(auth_client, db_user):
     token = _csrf(auth_client, "/settings")
     auth_client.post(
         "/settings/delete-account",
-        data={"csrf_token": token},
+        data={"csrf_token": token, "confirm": "yes"},
         follow_redirects=False,
     )
     # Drop the override so current_user uses the real (now-cleared) session.

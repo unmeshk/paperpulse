@@ -139,6 +139,9 @@ async def delete_account(request: Request, user: dict | None = Depends(current_u
     submitted_token = next((v for k, v in fields if k == "csrf_token"), None)
     if not _validate_csrf(request, submitted_token):
         return PlainTextResponse("Invalid CSRF token", status_code=403)
+    confirmed = next((v for k, v in fields if k == "confirm"), None)
+    if confirmed != "yes":
+        return PlainTextResponse("Deletion not confirmed", status_code=400)
     with get_conn() as conn:
         # Hard delete: removes the user row and, via ON DELETE CASCADE, all
         # category selections. Nothing about the account is retained.

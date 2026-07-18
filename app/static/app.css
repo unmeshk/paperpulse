@@ -93,6 +93,17 @@ button[type="submit"].button-danger {
   background: #b00020;
 }
 
+button[type="submit"].button-danger:disabled {
+  border-color: #d9a3ae;
+  background: #d9a3ae;
+  cursor: not-allowed;
+}
+
+.delete-confirm {
+  display: block;
+  margin-bottom: 10px;
+}
+
 button[type="submit"].button-danger:hover {
   background: #7f0017;
 }
