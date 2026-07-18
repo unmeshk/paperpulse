@@ -70,18 +70,16 @@ def main():
                 
         if not papers:
             # Empty feeds are a legitimate steady state (e.g. arXiv didn't publish
-            # in the last cycle). Treat as a no-op success, not an error.
+            # in the last cycle). Skip the blog post only — the per-category blurbs
+            # below fetch their own feeds, and a user category can have papers on a
+            # day the blog categories don't.
             logger.info('No papers retrieved; skipping today\'s post')
-            return
-        
-        logger.info(f'Retrieved: {len(papers)} papers')
-
-        summary = llm_agent.identify_important_papers(papers)
+        else:
+            logger.info(f'Retrieved: {len(papers)} papers')
+            summary = llm_agent.identify_important_papers(papers)
+            create_blogpost(summary, len(papers))
     except Exception as e:
         print(f'Exception: {e}')
-        return
-
-    create_blogpost(summary, len(papers))
 
     # Per-category blurbs for the personalized feed (Phase 1). Additive to the
     # public blog flow above; failures here must not break the blog post.

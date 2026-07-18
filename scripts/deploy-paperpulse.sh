@@ -46,6 +46,11 @@ export IMAGE_TAG
 # Pull new images from GHCR.
 docker compose -f "$COMPOSE_FILE" pull
 
+# Keep the local :latest tag pointing at the image just deployed. The systemd
+# timer runs `docker compose run` without IMAGE_TAG, so it resolves to local
+# :latest — without this it keeps running whatever :latest was last pulled.
+docker tag "ghcr.io/unmeshk/paperpulse-api:${IMAGE_TAG}" ghcr.io/unmeshk/paperpulse-api:latest
+
 # Recreate containers with the new images. --remove-orphans cleans up any
 # services that have been removed from the compose file.
 docker compose -f "$COMPOSE_FILE" up -d --remove-orphans

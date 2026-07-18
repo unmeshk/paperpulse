@@ -1,5 +1,85 @@
 # Worklog
 
+## Session: 2026-07-18 (M5: first real per-category run verified + stale-latest root cause)
+
+### Worked on
+Ran M5 under `/goal`: first real per-category pipeline run on prod, verified
+blurbs land and render at /feed. Found and fixed the reason nightly runs never
+produced blurbs.
+
+### Completed
+- **Root cause**: systemd timer runs `docker compose run` without `IMAGE_TAG`,
+  so it resolves to the droplet-local `latest` tag — which was the 2026-06-06
+  pre-Phase-1 image. Deploy script only pulls SHA tags; CI pushes `latest` to
+  GHCR but nothing on the droplet ever pulled it. Nightly runs Jul 16–18 ran
+  June code: blog post written, no blurbs, no host-side logs.
+- Operational fix: pulled current `api:latest` on droplet (now = bc1de8b image).
+- Ran `paperpulse-daily.service` with correct image. Saturday: arXiv empty,
+  pipeline early-returned with zero Gemini spend — which confirmed the
+  empty-feed edge case live. Blurb path itself proven by the 07-15 full run
+  (5 categories written).
+- Render verified on prod /feed in browser (staged copies of 07-15 cs.AI/cs.CL
+  blurbs as today's content; staging dir removed after). Onboarding → feed
+  click-through worked, effectively covering M6.
+- **Fix 1** (`api/main.py`): empty blog feeds now skip only the blog steps
+  (`else` branch instead of early `return`); per-category blurbs always run.
+  Blog-flow exceptions no longer abort blurbs either. 27/27 api tests pass.
+- **Fix 2** (`scripts/deploy-paperpulse.sh`): after compose pull, `docker tag`
+  the deployed SHA image as local `latest` so the timer always runs the
+  deployed code. Also installed to `/usr/local/sbin/deploy-paperpulse` on the
+  droplet (verified installed copy matched repo HEAD first).
+
+### Decisions made
+- Chose `docker tag` in deploy script over pinning `IMAGE_TAG` in the systemd
+  unit: no second pull, `latest` guaranteed equal to deployed SHA.
+- No personal info (emails, account identifiers) in worklog/commits — durable
+  rule going forward.
+
+### Notes / open items
+- Prod DB has two user rows for the same owner: id 1 (test account, 07-12 E2E)
+  and id 2 (personal account, auto-created 07-18 by a silent OAuth round-trip
+  from the browser during /feed verification). Both are on the Google
+  Testing-mode test-users list. Decide canonical row; soft-delete the other
+  via /settings.
+- Fix 1 reaches prod on next merge to main; that deploy also first-exercises
+  the new `docker tag` line.
+
+## Session: 2026-07-15 (Dependabot alert fixes) — PR #43 MERGED
+
+### Worked on
+Fixed all 18 open Dependabot alerts (1 critical, 5 high, 10 moderate, 2 low)
+on branch `fix/dependabot-alerts`; pushed and opened PR #43.
+
+### Completed
+- `app/requirements.txt` bumps:
+  - authlib 1.3.2 → 1.6.12 (9 alerts, incl. critical JWS JWK header-injection
+    signature bypass, JWE RSA1_5 padding oracle, OIDC open redirects)
+  - jinja2 3.1.4 → 3.1.6 (3 sandbox-breakout alerts)
+  - python-dotenv 1.0.1 → 1.2.2 (symlink file overwrite in set_key)
+  - pytest 8.3.4 → 9.0.3 (tmpdir handling; major bump, no test changes needed)
+- `blog/Gemfile.lock`: concurrent-ruby 1.1.10 → 1.3.7 (3 alerts). Relocked
+  inside the digest-pinned jekyll image from `Dockerfile.jekyll` so the diff
+  is one line and BUNDLED WITH stays 2.3.25.
+- Verified: 39/39 app tests green with new deps; blog builds cleanly in the
+  prod-pinned jekyll image.
+- Gotcha confirmed: floating `jekyll/jekyll:4` tag (Ruby 3.4) is broken for
+  this repo — csv gone from default gems, jekyll 4.2.2 fails to load. Also
+  stamps BUNDLED WITH 2.6.9 into the lockfile if used for `bundle lock`.
+  Always use the digest pin from `Dockerfile.jekyll` for lockfile work.
+  Dev `docker-compose.yml` still references the floating tag (not touched).
+
+### Decisions made
+- PR flow instead of direct merge to main (local merge was undone,
+  main reset to origin/main; work lives only on the branch).
+- Rollback plan if the merge breaks something: GitHub Revert button on the
+  merged PR; for prod service issues, image-SHA rollback per
+  `docs/ROLLBACK.md` is the fast path. No pre-staged revert branch.
+
+### Next session priorities
+- Merge PR #43 (merging to main triggers deploy.yml → prod build/deploy).
+- Confirm the 18 alerts auto-close after merge.
+- Optional: align dev `docker-compose.yml` jekyll image with the digest pin.
+
 ## Session: 2026-07-11 (continued — part 2: deploy landed, app live, OAuth working)
 
 ### Worked on
@@ -269,7 +349,7 @@ Stood up the new FastAPI app at `app/` per the Phase 1 spec. End-to-end Google O
 
 **End-to-end OAuth round-trip — verified locally**
 - Google Cloud OAuth client created in the new "Google Auth Platform" UI (was reorganized from the older "OAuth consent screen" flow). Scopes: openid, email, profile. Test-user mode. Redirect URI: `http://localhost:8000/auth/google/callback`.
-- Logged in successfully, came back as Unmesh / turingmachinesllc@gmail.com, user row upserted.
+- Logged in successfully with the test account, user row upserted.
 
 **Test scaffold (`app/tests/`)**
 - `conftest.py` sets dummy OAuth env + tmpdir SQLite DB *before* any `app.*` import (config loads at import time, so order matters). Session-scoped `client` fixture using `TestClient`.
