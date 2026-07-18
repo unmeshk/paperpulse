@@ -10,6 +10,7 @@ Core app + pipeline shipped and verified in prod (2026-07-18). Remaining before 
 3. **Dedicated login/signup page.** Interstitial between "login" click and the Google OAuth redirect, instead of the bare landing-page link.
 4. **Logout lands on the main blog page** with a "you are now logged out" message. Note: blog is static Jekyll, so the message needs a query-param + small JS include (or a static logged-out page variant).
 5. **Hard delete.** Account deletion removes all user data — user row + category selections. Schema already has `ON DELETE CASCADE`, so either hard-delete on request or a purge job replacing the current soft-delete-only flow.
+6. **"Buy me a coffee" on the personalized feed.** Find a placement for the coffee link in the app (blog already has it in the header nav).
 
 ## Phase 2 — Next major release (post-Phase 1)
 Feedback-driven feed improvement. Readers mark sections / papers / themes as "more like this" or "less like this." The system uses the signal to re-rank or re-prompt summaries over time. End state: each user's feed continually adapts to their preferences.
