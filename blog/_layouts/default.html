@@ -7,11 +7,43 @@
 
     {%- include header.html -%}
 
-    <main class="page-content" aria-label="Content">
-      <div class="wrapper">
-        {{ content }}
-      </div>
-    </main>
+    <div id="logged-out-banner" class="logged-out-banner" hidden></div>
+    <script>
+      (function () {
+        var params = new URLSearchParams(window.location.search);
+        var message = null;
+        if (params.get("logged_out") === "1") {
+          message = "You are now logged out.";
+          params.delete("logged_out");
+        } else if (params.get("account_deleted") === "1") {
+          message = "Your account and all its data have been deleted.";
+          params.delete("account_deleted");
+        }
+        if (message) {
+          var banner = document.getElementById("logged-out-banner");
+          banner.textContent = message;
+          banner.hidden = false;
+          var qs = params.toString();
+          history.replaceState(null, "", window.location.pathname + (qs ? "?" + qs : ""));
+        }
+      })();
+    </script>
+
+    <div class="layout-wrap">
+      <aside class="site-sidebar" aria-label="Site">
+        <nav>
+          <a class="page-link" href="{{ '/about/' | relative_url }}">About</a>
+          <a class="page-link" href="{{ '/whatsnew/' | relative_url }}">What's New</a>
+          <a class="page-link" href="https://coff.ee/unmeshk" target="_blank">Buy me a coffee</a>
+        </nav>
+      </aside>
+
+      <main class="page-content" aria-label="Content">
+        <div class="wrapper">
+          {{ content }}
+        </div>
+      </main>
+    </div>
 
     {%- include footer.html -%}
 
