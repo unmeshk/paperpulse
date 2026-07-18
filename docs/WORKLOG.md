@@ -1,6 +1,58 @@
 # Worklog
 
-## Session: 2026-07-11 (deploy plan senior review + M0/M1) — IN PROGRESS
+## Session: 2026-07-11 (continued — part 2: deploy landed, app live, OAuth working)
+
+### Worked on
+Finished the Phase 1 deploy: verified PR #41's merge + deploy, confirmed the app
+serving over HTTPS, debugged and fixed the Google OAuth `redirect_uri_mismatch`.
+
+### Completed
+
+**Deploy verification**
+- PR #41 (blog image pin + app 443 block) merged; main run `29176317320` green
+  including the deploy job.
+- Droplet (`/var/www/arxivsum`) at `9d55a3c`; all three containers up on the new
+  SHA-tagged images — blog running the digest-pinned image (the #40-incident fix
+  is holding), app container on `ghcr.io/unmeshk/paperpulse-app:9d55a3c...`.
+- nginx serving the 443 app block (`nginx -T` shows the app server block; app
+  subdomain live over HTTPS). Blog unaffected.
+
+**OAuth incident — `Error 400: redirect_uri_mismatch` on first real login**
+- Diagnosed from outside in: `curl -D - https://app.paperpulse.ukurup.com/auth/login`
+  showed the app sending the exactly-correct
+  `redirect_uri=https://app.paperpulse.ukurup.com/auth/google/callback` — so the
+  whole proxy-header chain (nginx `X-Forwarded-Proto`/`Host` → uvicorn
+  `--proxy-headers` + `FORWARDED_ALLOW_IPS` CIDR, supported in uvicorn 0.32.1)
+  worked first try. The senior-review blocker #1 fix paid off.
+- Root cause was console-side: the prod redirect URI had not actually landed on
+  the OAuth client (client had only localhost dev entries). User added the exact
+  URI to Authorized redirect URIs on the correct client → login works E2E.
+- Login restricted to a single account via consent-screen Test users list
+  (Testing mode enforces it server-side; no app-side allowlist needed for now).
+
+**M6 (partial)** — real OAuth login through nginx/TLS verified live by the user.
+
+### In progress / not done
+- **M5 — manual pipeline run** (first real Gemini per-category run): NOT run.
+  Next session: ssh droplet → `systemctl start paperpulse-daily.service` →
+  confirm blurb files in `/var/lib/paperpulse/content/<NY-date>/` → render at
+  `/feed`. Needs explicit go-ahead (real Gemini spend, writes prod content).
+- **M6 remainder** — onboarding → feed → settings click-through on prod.
+
+### Decisions made
+- Single-user gate = Google Testing-mode test-users list only; app-side email
+  allowlist deferred until (if) the consent screen moves to Production.
+
+### Next session priorities
+- M5 manual pipeline run + /feed verify (see above).
+- Finish M6 click-through; then close out the deploy plan.
+- Dependabot vulns (18 on main, 1 critical) + alias-dedupe picker follow-up.
+- Consider image-drift guard for remaining floating tags (nginx:alpine,
+  certbot/certbot).
+
+---
+
+## Session: 2026-07-11 (deploy plan senior review + M0/M1)
 
 ### Worked on
 Senior-reviewed `docs/PHASE1_DEPLOY_PLAN.md` (junior-to-senior skill: repo research
