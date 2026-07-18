@@ -30,14 +30,23 @@
           {% else %}
             <a class="page-link" href="/auth/login">Sign in with Google</a>
           {% endif %}
-          <a class="page-link" href="https://paperpulse.ukurup.com">Blog</a>
         </div>
       </nav>
     </div>
   </header>
-  <main class="page-content" aria-label="Content">
-    <div class="wrapper">{% block content %}{% endblock %}</div>
-  </main>
+  <div class="layout-wrap">
+    <aside class="site-sidebar" aria-label="Site">
+      <nav>
+        <a class="page-link" href="https://paperpulse.ukurup.com/about/">About</a>
+        <a class="page-link" href="https://paperpulse.ukurup.com/whatsnew/">What's New</a>
+        <a class="page-link" href="https://coff.ee/unmeshk" target="_blank">Buy me a coffee</a>
+      </nav>
+    </aside>
+
+    <main class="page-content" aria-label="Content">
+      <div class="wrapper">{% block content %}{% endblock %}</div>
+    </main>
+  </div>
   <footer class="site-footer h-card">
     <div class="wrapper">
       <div class="footer-col-wrapper">

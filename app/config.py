@@ -18,6 +18,7 @@ class Settings:
     db_path: Path
     content_dir: Path
     cookie_secure: bool
+    blog_url: str
 
 
 def _require(name: str) -> str:
@@ -47,6 +48,7 @@ def load_settings() -> Settings:
         db_path=Path(os.getenv("DB_PATH", str(APP_DIR / "paperpulse.sqlite"))),
         content_dir=Path(os.getenv("CONTENT_DIR", str(REPO_ROOT / "content"))),
         cookie_secure=os.getenv("COOKIE_SECURE", "false").lower() == "true",
+        blog_url=os.getenv("BLOG_URL", "https://paperpulse.ukurup.com").rstrip("/"),
     )
 
 

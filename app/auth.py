@@ -48,7 +48,8 @@ async def auth_callback(request: Request):
 @router.get("/logout")
 async def logout(request: Request):
     request.session.clear()
-    return RedirectResponse(url="/", status_code=HTTP_302_FOUND)
+    # Land on the main blog with a "logged out" banner (Phase 1 item 4).
+    return RedirectResponse(url=f"{settings.blog_url}/?logged_out=1", status_code=HTTP_302_FOUND)
 
 
 def _upsert_user(google_sub: str, email: str, display_name: str | None, picture_url: str | None) -> int:
