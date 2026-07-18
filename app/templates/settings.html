@@ -30,7 +30,7 @@
   <p>This soft-deletes your account and signs you out.</p>
   <form method="post" action="/settings/delete-account">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-    <button type="submit">Delete my account</button>
+    <button type="submit" class="button-danger">Delete my account</button>
   </form>
 
   <script>

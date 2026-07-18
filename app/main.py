@@ -1,6 +1,8 @@
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 
 from app.auth import router as auth_router
@@ -24,6 +26,7 @@ def create_app() -> FastAPI:
         same_site="lax",
         max_age=60 * 60 * 24 * 30,
     )
+    app.mount("/static", StaticFiles(directory=Path(__file__).parent / "static"), name="static")
     app.include_router(auth_router)
     app.include_router(routes_router)
     return app
