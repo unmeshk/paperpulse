@@ -3,6 +3,14 @@
 ## Phase 1 — In progress
 Daily personalized feed via Google login + curated cs.* category selection. See `PHASE1_SPEC.md` for the full scope.
 
+Core app + pipeline shipped and verified in prod (2026-07-18). Remaining before Phase 1 closes:
+
+1. **Theme port.** App pages (landing, onboarding, feed, settings) styled to match the main PaperPulse blog design. Currently bare HTML (deferred during chunks 1–4).
+2. **Login entry point on the main blog page.** The general PaperPulse page gets a login button that takes you to the app's login page.
+3. **Dedicated login/signup page.** Interstitial between "login" click and the Google OAuth redirect, instead of the bare landing-page link.
+4. **Logout lands on the main blog page** with a "you are now logged out" message. Note: blog is static Jekyll, so the message needs a query-param + small JS include (or a static logged-out page variant).
+5. **Hard delete.** Account deletion removes all user data — user row + category selections. Schema already has `ON DELETE CASCADE`, so either hard-delete on request or a purge job replacing the current soft-delete-only flow.
+
 ## Phase 2 — Next major release (post-Phase 1)
 Feedback-driven feed improvement. Readers mark sections / papers / themes as "more like this" or "less like this." The system uses the signal to re-rank or re-prompt summaries over time. End state: each user's feed continually adapts to their preferences.
 

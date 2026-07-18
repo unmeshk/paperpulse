@@ -1,0 +1,67 @@
+/* App-specific styles layered on top of the ported blog theme (main.css). */
+
+.site-nav .nav-user {
+  color: #828282;
+  margin-right: 10px;
+}
+
+/* Category picker */
+#category-search {
+  width: 100%;
+  max-width: 400px;
+  padding: 8px 10px;
+  margin-bottom: 15px;
+  border: 1px solid #e8e8e8;
+  border-radius: 3px;
+  font: inherit;
+}
+
+.archive-group {
+  border: 1px solid #e8e8e8;
+  border-radius: 3px;
+  margin-bottom: 15px;
+  padding: 10px 15px;
+}
+
+.archive-group legend {
+  font-weight: 600;
+  padding: 0 5px;
+}
+
+.category-option {
+  display: inline-block;
+  padding: 2px 0;
+}
+
+button[type="submit"] {
+  padding: 8px 16px;
+  border: 1px solid #2a7ae2;
+  border-radius: 3px;
+  background: #2a7ae2;
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+
+button[type="submit"]:hover {
+  background: #1756a9;
+}
+
+button[type="submit"].button-danger {
+  border-color: #b00020;
+  background: #b00020;
+}
+
+button[type="submit"].button-danger:hover {
+  background: #7f0017;
+}
+
+/* Feed */
+.feed-category {
+  margin-bottom: 30px;
+}
+
+.feed-category h2 {
+  border-bottom: 1px solid #e8e8e8;
+  padding-bottom: 5px;
+}
