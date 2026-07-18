@@ -1,5 +1,7 @@
 # ArXivSum Development Guide
 
+Use the caveman skill from global skills always unless specifically asked to not use it
+
 ## Commands
 - Run application: `PYTHONPATH=. .venv/bin/python -m api.main`
 - Run tests: `PYTHONPATH=. .venv/bin/python -m pytest api/tests/test_main.py`
