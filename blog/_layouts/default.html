@@ -7,13 +7,22 @@
 
     {%- include header.html -%}
 
-    <div id="logged-out-banner" class="logged-out-banner" hidden>You are now logged out.</div>
+    <div id="logged-out-banner" class="logged-out-banner" hidden></div>
     <script>
       (function () {
         var params = new URLSearchParams(window.location.search);
+        var message = null;
         if (params.get("logged_out") === "1") {
-          document.getElementById("logged-out-banner").hidden = false;
+          message = "You are now logged out.";
           params.delete("logged_out");
+        } else if (params.get("account_deleted") === "1") {
+          message = "Your account and all its data have been deleted.";
+          params.delete("account_deleted");
+        }
+        if (message) {
+          var banner = document.getElementById("logged-out-banner");
+          banner.textContent = message;
+          banner.hidden = false;
           var qs = params.toString();
           history.replaceState(null, "", window.location.pathname + (qs ? "?" + qs : ""));
         }

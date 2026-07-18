@@ -37,6 +37,13 @@ async def index(request: Request, user: dict | None = Depends(current_user)):
     )
 
 
+@router.get("/login", response_class=HTMLResponse)
+async def login_page(request: Request, user: dict | None = Depends(current_user)):
+    if user:
+        return RedirectResponse(url="/feed", status_code=HTTP_302_FOUND)
+    return templates.TemplateResponse(request, "login.html", {"user": None})
+
+
 @router.get("/healthz")
 async def healthz():
     try:
@@ -133,12 +140,11 @@ async def delete_account(request: Request, user: dict | None = Depends(current_u
     if not _validate_csrf(request, submitted_token):
         return PlainTextResponse("Invalid CSRF token", status_code=403)
     with get_conn() as conn:
-        conn.execute(
-            "UPDATE users SET deleted_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
-            (user["id"],),
-        )
+        # Hard delete: removes the user row and, via ON DELETE CASCADE, all
+        # category selections. Nothing about the account is retained.
+        conn.execute("DELETE FROM users WHERE id = ?", (user["id"],))
     request.session.clear()
-    return RedirectResponse(url="/", status_code=HTTP_302_FOUND)
+    return RedirectResponse(url=f"{settings.blog_url}/?account_deleted=1", status_code=HTTP_302_FOUND)
 
 
 @router.get("/feed", response_class=HTMLResponse)

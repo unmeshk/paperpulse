@@ -99,7 +99,8 @@ def test_settings_post_anonymous_blocked(client):
 # --- delete account ------------------------------------------------------------
 
 
-def test_delete_account_soft_deletes(auth_client, db_user):
+def test_delete_account_hard_deletes_all_data(auth_client, db_user):
+    from app.config import settings
     from app.db import get_conn
 
     token = _csrf(auth_client, "/settings")
@@ -109,13 +110,16 @@ def test_delete_account_soft_deletes(auth_client, db_user):
         follow_redirects=False,
     )
     assert resp.status_code == 302
-    assert resp.headers["location"] == "/"
+    assert resp.headers["location"] == f"{settings.blog_url}/?account_deleted=1"
     with get_conn() as conn:
-        row = conn.execute(
-            "SELECT deleted_at FROM users WHERE id = ?", (db_user["id"],)
+        user_row = conn.execute(
+            "SELECT id FROM users WHERE id = ?", (db_user["id"],)
         ).fetchone()
-    assert row is not None  # row still exists (soft delete)
-    assert row["deleted_at"] is not None  # deleted_at set
+        cat_rows = conn.execute(
+            "SELECT * FROM user_categories WHERE user_id = ?", (db_user["id"],)
+        ).fetchall()
+    assert user_row is None  # user row gone
+    assert cat_rows == []  # category selections cascade-deleted
 
 
 def test_delete_account_missing_csrf_forbidden(auth_client):
@@ -142,4 +146,4 @@ def test_after_delete_index_is_anonymous(auth_client, db_user):
     app.dependency_overrides.pop(current_user, None)
     resp = auth_client.get("/")
     assert resp.status_code == 200
-    assert "Sign in with Google" in resp.text
+    assert 'href="/login"' in resp.text

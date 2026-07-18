@@ -97,6 +97,27 @@ button[type="submit"].button-danger:hover {
   background: #7f0017;
 }
 
+/* Login page */
+.button-link {
+  display: inline-block;
+  padding: 8px 16px;
+  border: 1px solid #2a7ae2;
+  border-radius: 3px;
+  background: #2a7ae2;
+  color: #fff !important;
+  text-decoration: none;
+}
+
+.button-link:hover {
+  background: #1756a9;
+  text-decoration: none;
+}
+
+.login-note {
+  color: #828282;
+  font-size: 14px;
+}
+
 /* Feed */
 .feed-category {
   margin-bottom: 30px;

@@ -27,7 +27,7 @@
   <hr>
 
   <h2>Delete account</h2>
-  <p>This soft-deletes your account and signs you out.</p>
+  <p>Permanently deletes your account and all its data (including your category selections), and signs you out. This cannot be undone.</p>
   <form method="post" action="/settings/delete-account">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <button type="submit" class="button-danger">Delete my account</button>

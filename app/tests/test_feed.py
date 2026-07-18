@@ -110,4 +110,4 @@ def test_index_logged_in_without_categories_redirects_to_onboarding(auth_client)
 def test_index_anonymous_renders_landing(client):
     resp = client.get("/")
     assert resp.status_code == 200
-    assert "Sign in with Google" in resp.text
+    assert 'href="/login"' in resp.text

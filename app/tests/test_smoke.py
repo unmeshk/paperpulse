@@ -7,7 +7,14 @@ def test_healthz_returns_ok(client):
 def test_index_renders_for_anonymous(client):
     response = client.get("/")
     assert response.status_code == 200
-    assert "Sign in with Google" in response.text
+    assert 'href="/login"' in response.text
+
+
+def test_login_page_renders_for_anonymous(client):
+    response = client.get("/login")
+    assert response.status_code == 200
+    assert "Continue with Google" in response.text
+    assert 'href="/auth/login"' in response.text
 
 
 def test_logout_redirects_to_blog_with_banner_param(client):
