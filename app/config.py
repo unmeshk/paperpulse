@@ -19,6 +19,8 @@ class Settings:
     content_dir: Path
     cookie_secure: bool
     blog_url: str
+    indicator_cookie_domain: str | None
+    session_max_age: int
 
 
 def _require(name: str) -> str:
@@ -49,6 +51,11 @@ def load_settings() -> Settings:
         content_dir=Path(os.getenv("CONTENT_DIR", str(REPO_ROOT / "content"))),
         cookie_secure=os.getenv("COOKIE_SECURE", "false").lower() == "true",
         blog_url=os.getenv("BLOG_URL", "https://paperpulse.ukurup.com").rstrip("/"),
+        # Domain for the non-sensitive pp_logged_in indicator cookie so the
+        # static blog can reflect login state. Empty string => host-only
+        # cookie (local dev, where localhost cookies span ports anyway).
+        indicator_cookie_domain=os.getenv("INDICATOR_COOKIE_DOMAIN", "paperpulse.ukurup.com") or None,
+        session_max_age=60 * 60 * 24 * 30,
     )
 
 

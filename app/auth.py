@@ -17,6 +17,27 @@ oauth.register(
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
+# Non-sensitive, JS-readable cookie on the shared parent domain so the static
+# blog can render the logged-in nav. Display hint only — never used for auth.
+INDICATOR_COOKIE = "pp_logged_in"
+
+
+def set_login_indicator(response):
+    response.set_cookie(
+        INDICATOR_COOKIE,
+        "1",
+        max_age=settings.session_max_age,
+        domain=settings.indicator_cookie_domain,
+        secure=settings.cookie_secure,
+        httponly=False,
+        samesite="lax",
+        path="/",
+    )
+
+
+def clear_login_indicator(response):
+    response.delete_cookie(INDICATOR_COOKIE, domain=settings.indicator_cookie_domain, path="/")
+
 
 @router.get("/login")
 async def login(request: Request):
@@ -42,14 +63,18 @@ async def auth_callback(request: Request):
 
     user_id = _upsert_user(google_sub, email, display_name, picture_url)
     request.session["user_id"] = user_id
-    return RedirectResponse(url="/", status_code=HTTP_302_FOUND)
+    response = RedirectResponse(url="/", status_code=HTTP_302_FOUND)
+    set_login_indicator(response)
+    return response
 
 
 @router.get("/logout")
 async def logout(request: Request):
     request.session.clear()
     # Land on the main blog with a "logged out" banner (Phase 1 item 4).
-    return RedirectResponse(url=f"{settings.blog_url}/?logged_out=1", status_code=HTTP_302_FOUND)
+    response = RedirectResponse(url=f"{settings.blog_url}/?logged_out=1", status_code=HTTP_302_FOUND)
+    clear_login_indicator(response)
+    return response
 
 
 def _upsert_user(google_sub: str, email: str, display_name: str | None, picture_url: str | None) -> int:

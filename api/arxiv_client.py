@@ -172,7 +172,10 @@ class ArxivClient:
             Dict mapping each slug to its list of paper dicts.
         """
         results = {}
-        for i, slug in enumerate(slugs):
+        # Deduplicate while preserving order: each category is downloaded exactly
+        # once per run, no matter how many times it appears in the input (or how
+        # many users selected it upstream).
+        for i, slug in enumerate(dict.fromkeys(slugs)):
             if i > 0:
                 time.sleep(3)
             results[slug] = self._fetch_category_papers(slug)
