@@ -129,6 +129,16 @@ button[type="submit"].button-danger:hover {
   font-size: 14px;
 }
 
+/* Feed date list */
+.feed-dates {
+  list-style: none;
+  margin-left: 0;
+}
+
+.feed-dates li {
+  padding: 2px 0;
+}
+
 /* Feed */
 .feed-category {
   margin-bottom: 30px;

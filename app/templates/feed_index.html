@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Your feed — PaperPulse{% endblock %}
+{% block content %}
+  <h1>Your feed</h1>
+  {% if not months %}
+    <p>No summaries yet — your first personalized summaries appear after the next daily run (6am Eastern).</p>
+  {% else %}
+    {% for month in months %}
+      <h2>{{ month.label }}</h2>
+      <ul class="feed-dates">
+        {% for e in month.entries %}
+          <li><a href="/feed/{{ e.date }}">{{ e.label }}</a></li>
+        {% endfor %}
+      </ul>
+    {% endfor %}
+  {% endif %}
+{% endblock %}
