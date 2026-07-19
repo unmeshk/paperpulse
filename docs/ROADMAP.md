@@ -12,7 +12,7 @@ Core app + pipeline shipped and verified in prod (2026-07-18). Items 1–6 shipp
 5. ~~**Hard delete.**~~ Shipped (PR #47): cascade delete + confirmation checkbox.
 6. ~~**"Buy me a coffee" on the personalized feed.**~~ Shipped (PR #47): sidebar link.
 7. ~~**Cross-site login-state consistency.**~~ Fixed: app sets/clears a non-sensitive `pp_logged_in` indicator cookie on the shared domain; blog JS swaps the header nav accordingly. Known limit: if a session expires server-side before the cookie does, the blog header can briefly overstate login until the next app visit. Remaining from this item: the general nav-audit walk after the next deploy.
-8. **Update What's New for public launch.** Once OAuth leaves Testing mode and signup opens to everyone, add a What's New entry announcing the personalized feed.
+8. ~~**Update What's New for public launch.**~~ Done: v1.1 entry announces the personalized feed; About page corrected (Gemini not OpenAI/GPT-4o-mini, stat.ML added, personalized-feed paragraph). Note: goes live on next deploy — until OAuth leaves Testing mode, only test-listed accounts can actually sign in.
 9. ~~**Deploy-script image pruning.**~~ Fixed: deploy script keeps the two newest SHA image sets per repo, prunes older (GHCR retains all tags for rollback). Installed on droplet 2026-07-19.
 10. ~~**Verify one-fetch-per-category.**~~ Verified + pinned: tests assert the fetch list dedupes across users and `retrieve_results_by_category` downloads each unique slug exactly once (now hardened against duplicate input).
 
