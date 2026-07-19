@@ -10,7 +10,7 @@ from fastapi.templating import Jinja2Templates
 from markdown_it import MarkdownIt
 from starlette.status import HTTP_302_FOUND
 
-from app.auth import current_user
+from app.auth import clear_login_indicator, current_user
 from app.config import APP_DIR, settings
 from app.db import get_conn
 
@@ -147,7 +147,9 @@ async def delete_account(request: Request, user: dict | None = Depends(current_u
         # category selections. Nothing about the account is retained.
         conn.execute("DELETE FROM users WHERE id = ?", (user["id"],))
     request.session.clear()
-    return RedirectResponse(url=f"{settings.blog_url}/?account_deleted=1", status_code=HTTP_302_FOUND)
+    response = RedirectResponse(url=f"{settings.blog_url}/?account_deleted=1", status_code=HTTP_302_FOUND)
+    clear_login_indicator(response)
+    return response
 
 
 @router.get("/feed", response_class=HTMLResponse)

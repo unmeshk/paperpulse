@@ -3,14 +3,18 @@
 ## Phase 1 — In progress
 Daily personalized feed via Google login + curated cs.* category selection. See `PHASE1_SPEC.md` for the full scope.
 
-Core app + pipeline shipped and verified in prod (2026-07-18). Remaining before Phase 1 closes:
+Core app + pipeline shipped and verified in prod (2026-07-18). Items 1–6 shipped 2026-07-18 (PRs #45–#47). Remaining before Phase 1 closes:
 
-1. **Theme port.** App pages (landing, onboarding, feed, settings) styled to match the main PaperPulse blog design. Currently bare HTML (deferred during chunks 1–4).
-2. **Login entry point on the main blog page.** The general PaperPulse page gets a login button that takes you to the app's login page.
-3. **Dedicated login/signup page.** Interstitial between "login" click and the Google OAuth redirect, instead of the bare landing-page link.
-4. **Logout lands on the main blog page** with a "you are now logged out" message. Note: blog is static Jekyll, so the message needs a query-param + small JS include (or a static logged-out page variant).
-5. **Hard delete.** Account deletion removes all user data — user row + category selections. Schema already has `ON DELETE CASCADE`, so either hard-delete on request or a purge job replacing the current soft-delete-only flow.
-6. **"Buy me a coffee" on the personalized feed.** Find a placement for the coffee link in the app (blog already has it in the header nav).
+1. ~~**Theme port.**~~ Shipped (PR #45, then superseded by the shared sidebar in #47).
+2. ~~**Login entry point on the main blog page.**~~ Shipped (PR #46, routed through /login in #47).
+3. ~~**Dedicated login/signup page.**~~ Shipped (PR #47): /login interstitial.
+4. ~~**Logout lands on the main blog page**~~ Shipped (PR #47): ?logged_out=1 banner.
+5. ~~**Hard delete.**~~ Shipped (PR #47): cascade delete + confirmation checkbox.
+6. ~~**"Buy me a coffee" on the personalized feed.**~~ Shipped (PR #47): sidebar link.
+7. ~~**Cross-site login-state consistency.**~~ Fixed: app sets/clears a non-sensitive `pp_logged_in` indicator cookie on the shared domain; blog JS swaps the header nav accordingly. Known limit: if a session expires server-side before the cookie does, the blog header can briefly overstate login until the next app visit. Remaining from this item: the general nav-audit walk after the next deploy.
+8. ~~**Update What's New for public launch.**~~ Done: v1.1 entry announces the personalized feed; About page corrected (Gemini not OpenAI/GPT-4o-mini, stat.ML added, personalized-feed paragraph). Note: goes live on next deploy — until OAuth leaves Testing mode, only test-listed accounts can actually sign in.
+9. ~~**Deploy-script image pruning.**~~ Fixed: deploy script keeps the two newest SHA image sets per repo, prunes older (GHCR retains all tags for rollback). Installed on droplet 2026-07-19.
+10. ~~**Verify one-fetch-per-category.**~~ Verified + pinned: tests assert the fetch list dedupes across users and `retrieve_results_by_category` downloads each unique slug exactly once (now hardened against duplicate input).
 
 ## Phase 2 — Next major release (post-Phase 1)
 Feedback-driven feed improvement. Readers mark sections / papers / themes as "more like this" or "less like this." The system uses the signal to re-rank or re-prompt summaries over time. End state: each user's feed continually adapts to their preferences.

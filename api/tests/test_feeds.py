@@ -52,6 +52,27 @@ def test_fetch_list_unions_users_and_fixed_sorted_deduped(tmp_path):
     assert len(result) == len(set(result))
 
 
+def test_fetch_list_same_category_many_users_appears_once(tmp_path):
+    db = tmp_path / "app.sqlite"
+    _make_app_db(db, [(1, "cs.LG"), (2, "cs.LG"), (3, "cs.LG")])
+    result = get_fetch_list(str(db))
+    assert result.count("cs.LG") == 1
+
+
+def test_retrieve_results_by_category_fetches_each_slug_once(monkeypatch):
+    from api.arxiv_client import ArxivClient
+
+    client = ArxivClient([])
+    calls = []
+    monkeypatch.setattr(client, "_fetch_category_papers", lambda slug: calls.append(slug) or [])
+    monkeypatch.setattr("api.arxiv_client.time.sleep", lambda s: None)
+
+    results = client.retrieve_results_by_category(["cs.LG", "cs.AI", "cs.LG"])
+
+    assert calls == ["cs.LG", "cs.AI"]  # one download per unique category
+    assert set(results) == {"cs.LG", "cs.AI"}
+
+
 def test_fetch_list_zero_users_equals_fixed(tmp_path):
     db = tmp_path / "app.sqlite"
     _make_app_db(db, [])

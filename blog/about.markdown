@@ -4,14 +4,16 @@ title: About
 permalink: /about/
 ---
 
-Paper Pulse summarizes the daily AI/ML (cs.AI, cs. CL, cs.LG, and cs.CV) activity on ArXiv. It uses the OpenAI API to summarize papers and identify important themes as well as any new and interesting work. 
-These results are not hand-checked so it is possible that some parts of the summary might be hallucinated. 
-The ArXiv API is usually a day or so behind so the latest results will only show up in a couple of days. 
+Paper Pulse summarizes the daily AI/ML (cs.AI, cs.CL, cs.LG, cs.CV, and stat.ML) activity on ArXiv. It uses Google's Gemini API to summarize papers and identify important themes as well as any new and interesting work.
+These results are not hand-checked so it is possible that some parts of the summary might be hallucinated.
+The ArXiv API is usually a day or so behind so the latest results will only show up in a couple of days.
+
+There is also a personalized feed: [sign in with Google](https://app.paperpulse.ukurup.com/login), pick up to 5 arXiv categories (any archive, not just AI/ML), and get a daily summary of just those categories.
 
 <strong> Thank you to arXiv for use of its open access interoperability. </strong>
 
 ### Current Model:
-GPT-4o-mini
+gemini-3.1-flash-lite
 
 ### Current Prompts:
 I use two prompts. One to summarize a set of abstracts. Since there are too many papers submitted daily to combine all abstracts into a single prompt, I use a second prompt to summarize the summaries. (insert "yo, dawg" meme here)
@@ -59,4 +61,4 @@ Write about each theme starting directly with "Theme 1:". Do not include any int
 
 <hr>
 (c) [Unmesh Kurup](https://ukurup.com)
-2025
+2025-2026

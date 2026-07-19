@@ -12,9 +12,23 @@
           </span>
         </label>
        
-        <div class="trigger">
+        <div class="trigger" id="contextual-nav">
           <a class="page-link" href="https://app.paperpulse.ukurup.com/login">Log in</a>
         </div>
+        <script>
+          // Swap the nav to the logged-in state when the app's indicator
+          // cookie (display hint only, set/cleared by the app) is present.
+          (function () {
+            if (!/(?:^|;\s*)pp_logged_in=1(?:;|$)/.test(document.cookie)) return;
+            var base = window.location.hostname === "localhost"
+              ? "http://localhost:8000"
+              : "https://app.paperpulse.ukurup.com";
+            document.getElementById("contextual-nav").innerHTML =
+              '<a class="page-link" href="' + base + '/feed">Feed</a>' +
+              '<a class="page-link" href="' + base + '/settings">Settings</a>' +
+              '<a class="page-link" href="' + base + '/auth/logout">Sign out</a>';
+          })();
+        </script>
       </nav>
     </div>
   </header>
