@@ -24,8 +24,11 @@ description: >- # this means to ignore newlines until "baseurl:"
   Your daily summary of ML papers on ArXiV
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
-# Analytics
-mixpanel_token: !ENV MIXPANEL_TOKEN
+# Analytics. The Mixpanel project token is a public client-side identifier
+# (it ships in the served JS on every page), so it lives directly in config.
+# NOTE: plain Jekyll has no !ENV support — a previous attempt to read this
+# from the environment produced the literal string "MIXPANEL_TOKEN".
+mixpanel_token: 6e1c3105902b102d105256b6dd8d421b
 
 
 # Build settings
