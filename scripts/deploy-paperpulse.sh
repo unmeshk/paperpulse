@@ -62,3 +62,18 @@ fi
 
 # Clean up dangling image layers from previous deploys.
 docker image prune -f
+
+# Prune old SHA-tagged paperpulse images, keeping the two newest per repo
+# (the set just deployed + one rollback target). Each deploy leaves a
+# ~1.4GB image set; unpruned, the disk fills after a handful of deploys
+# (it broke a deploy on 2026-07-18). GHCR retains every tag, so anything
+# removed here can be re-pulled for a deeper rollback.
+for repo in paperpulse-api paperpulse-blog paperpulse-app; do
+    docker image ls --format '{{.Tag}}\t{{.CreatedAt}}' "ghcr.io/unmeshk/${repo}" \
+        | grep -E '^[a-f0-9]{40}' \
+        | sort -t$'\t' -k2 -r \
+        | tail -n +3 \
+        | cut -f1 \
+        | sed "s|^|ghcr.io/unmeshk/${repo}:|" \
+        | xargs -r docker rmi || true
+done
