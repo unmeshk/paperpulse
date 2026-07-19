@@ -1,19 +1,16 @@
 {% extends "base.html" %}
-{% block title %}Your feed — PaperPulse{% endblock %}
+{% block title %}Your feed — {{ day }} — PaperPulse{% endblock %}
 {% block content %}
-  <h1>Your feed — {{ today }}</h1>
-  {% if not day_dir_exists %}
-    <p>No summaries yet. The daily pipeline runs at 6am Eastern — check back later.</p>
-  {% else %}
-    {% for s in sections %}
-      <section class="feed-category" data-slug="{{ s.slug }}">
-        <h2>{{ s.slug }} — {{ s.display_name }}</h2>
-        {% if s.html %}
-          {{ s.html | safe }}
-        {% else %}
-          <p>No new papers today.</p>
-        {% endif %}
-      </section>
-    {% endfor %}
-  {% endif %}
+  <p><a href="/feed">&larr; All days</a></p>
+  <h1>Your feed — {{ day }}</h1>
+  {% for s in sections %}
+    <section class="feed-category" data-slug="{{ s.slug }}">
+      <h2>{{ s.slug }} — {{ s.display_name }}</h2>
+      {% if s.html %}
+        {{ s.html | safe }}
+      {% else %}
+        <p>No new papers today.</p>
+      {% endif %}
+    </section>
+  {% endfor %}
 {% endblock %}

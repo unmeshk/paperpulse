@@ -30,7 +30,7 @@ Priority order will depend on what we learn from real users; this is not a fixed
 
 1. **Free-text category input.** User types a topic of interest in plain text. System maps it to the closest cs.* category (or a curated topic vocabulary) and generates a daily summary for that custom topic, treated identically to a built-in category.
 2. **Daily email digest.** Opt-in. Sends the user's personalized feed to an email address they choose.
-3. **Personalized feed archive.** Show last N days of personalized feeds, not just today.
+3. ~~**Personalized feed archive.**~~ Shipped 2026-07-19: /feed is a month-grouped date list (only days with content for the user's categories); /feed/&lt;date&gt; renders that day.
 4. **Pricing tiers via Stripe.** E.g. free = 1 category, paid = more. Note: current LLM cost is fixed regardless of user count, so tiering is positioning/monetization, not cost recovery.
 5. **Hover-to-explain on paper titles.** Hovering a paper title in the feed pops up a short plain-language explanation of the abstract (LLM-generated, cached per paper). Reduces clicks to arXiv for skim-reading users.
 

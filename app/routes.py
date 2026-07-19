@@ -1,3 +1,4 @@
+import re
 import secrets
 from datetime import datetime
 from itertools import groupby
@@ -152,19 +153,66 @@ async def delete_account(request: Request, user: dict | None = Depends(current_u
     return response
 
 
+_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+
+
+def _available_dates(slugs) -> list[str]:
+    """Dates (newest first) with a blurb file for at least one of the categories."""
+    root = settings.content_dir
+    if not root.is_dir():
+        return []
+    dates = [
+        child.name
+        for child in root.iterdir()
+        if child.is_dir()
+        and _DATE_RE.match(child.name)
+        and any((child / f"{slug}.md").is_file() for slug in slugs)
+    ]
+    return sorted(dates, reverse=True)
+
+
 @router.get("/feed", response_class=HTMLResponse)
-async def feed(request: Request, user: dict | None = Depends(current_user)):
+async def feed_index(request: Request, user: dict | None = Depends(current_user)):
     if not user:
         return RedirectResponse(url="/auth/login", status_code=HTTP_302_FOUND)
     slugs = _user_category_slugs(user["id"])  # alphabetical by slug
     if not slugs:
         return RedirectResponse(url="/onboarding", status_code=HTTP_302_FOUND)
 
-    today = datetime.now(FEED_TZ).strftime("%Y-%m-%d")
-    day_dir = settings.content_dir / today
-    day_dir_exists = day_dir.is_dir()
-    names = _display_names(slugs)
+    # Group the available dates into month buckets, blog-homepage style.
+    months = []
+    for day in _available_dates(slugs):
+        dt = datetime.strptime(day, "%Y-%m-%d")
+        month_label = dt.strftime("%B %Y")
+        entry = {"date": day, "label": dt.strftime("%b %d, %a")}
+        if months and months[-1]["label"] == month_label:
+            months[-1]["entries"].append(entry)
+        else:
+            months.append({"label": month_label, "entries": [entry]})
 
+    return templates.TemplateResponse(
+        request,
+        "feed_index.html",
+        {"user": user, "months": months},
+    )
+
+
+@router.get("/feed/{day}", response_class=HTMLResponse)
+async def feed_day(day: str, request: Request, user: dict | None = Depends(current_user)):
+    if not user:
+        return RedirectResponse(url="/auth/login", status_code=HTTP_302_FOUND)
+    slugs = _user_category_slugs(user["id"])  # alphabetical by slug
+    if not slugs:
+        return RedirectResponse(url="/onboarding", status_code=HTTP_302_FOUND)
+
+    # Only dates that actually have content for this user are linkable; anything
+    # else (bad format, missing day, other users' categories only) goes back to
+    # the date list rather than rendering an empty page.
+    day_dir = settings.content_dir / day
+    if not _DATE_RE.match(day) or not any((day_dir / f"{slug}.md").is_file() for slug in slugs):
+        return RedirectResponse(url="/feed", status_code=HTTP_302_FOUND)
+
+    names = _display_names(slugs)
     sections = []
     for slug in slugs:
         path = day_dir / f"{slug}.md"
@@ -174,7 +222,7 @@ async def feed(request: Request, user: dict | None = Depends(current_user)):
     return templates.TemplateResponse(
         request,
         "feed.html",
-        {"user": user, "today": today, "day_dir_exists": day_dir_exists, "sections": sections},
+        {"user": user, "day": day, "sections": sections},
     )
 
 
