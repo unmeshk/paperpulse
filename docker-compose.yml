@@ -7,7 +7,6 @@ services:
       - ./blog:/srv/jekyll
     environment:
       - JEKYLL_ENV=development
-      - MIXPANEL_TOKEN=${MIXPANEL_TOKEN}
     command: jekyll serve --livereload
 
 
