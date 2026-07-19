@@ -25,10 +25,13 @@ class TestMixpanelIntegration:
         
         # Check if mixpanel_token line exists in the raw content
         assert 'mixpanel_token:' in config_content, "mixpanel_token not found in _config.yml"
-        
-        # Verify the token is set to read from environment using Jekyll's !ENV tag
-        assert "!ENV MIXPANEL_TOKEN" in config_content, \
-            "mixpanel_token in _config.yml is not configured to use environment variable with !ENV tag"
+
+        # The token must be a concrete 32-hex Mixpanel project token. Plain
+        # Jekyll has no !ENV support: the old `!ENV MIXPANEL_TOKEN` config
+        # rendered mixpanel.init("MIXPANEL_TOKEN") and no event ever arrived.
+        token_line = re.search(r'^mixpanel_token:\s*([a-f0-9]{32})\s*$', config_content, re.MULTILINE)
+        assert token_line is not None, \
+            "mixpanel_token in _config.yml must be a literal 32-hex project token (!ENV is not supported by Jekyll)"
 
     def test_analytics_file_includes_token(self):
         """Test that analytics.html properly initializes Mixpanel with the token."""
