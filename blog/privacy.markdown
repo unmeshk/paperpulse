@@ -34,8 +34,11 @@ Three third parties are involved in running the site: Google (sign-in), Mixpanel
 
 ### How long we keep it
 
-Until you delete your account. Deleting your account (Settings → Delete account) permanently removes your account and all its data — immediately, with no retention period.
+Until you delete your account. Deleting your account (Settings → Delete account) immediately and permanently removes your account and all its data from our systems.
+
+One exception: we take a daily backup snapshot of the server, and snapshots are kept for 7 days. A deleted account may persist inside those snapshots until they expire, after which it is gone entirely. Backups are used only for disaster recovery — we never restore them to recover a deleted account.
 
 ### Contact
 
-Questions about this policy: reach me via [ukurup.com](https://ukurup.com).
+Questions about this policy or your data: [privacy@ukurup.com](mailto:privacy@ukurup.com)
+
