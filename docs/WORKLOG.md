@@ -1,5 +1,64 @@
 # Worklog
 
+## Session: 2026-07-18/19 (Phase 1 close-out: theme, nav, login flow, privacy, Mixpanel, archive) — PRs #45–#52 MERGED
+
+### Worked on
+Closed out every buildable Phase 1 item plus backlog item 3, across eight
+merged PRs, all deployed and verified on prod.
+
+### Completed
+- **PR #45 — theme port**: app pages styled to match the blog (minima CSS
+  snapshot at /static, minima header/footer skeleton in base.html).
+- **PR #46 — blog→app Log in link** in the blog header.
+- **PR #47 — nav redesign + remaining items**: shared left sidebar
+  (About/What's New/Buy me a coffee) on both sites, contextual top-right nav;
+  /login interstitial; logout lands on blog with "logged out" banner
+  (BLOG_URL setting); hard delete (cascade) with confirmation checkbox
+  enforced server-side; first deploy attempt failed on a FULL DISK (24G at
+  100% — ~8GB of stacked deploy image sets), fixed by pruning old images
+  (GHCR retains all tags) and re-running the deploy manually.
+- **PR #48 — close-out items**: `pp_logged_in` indicator cookie so the blog
+  header reflects login state (display hint only, set at callback, cleared on
+  logout + delete); deploy-script image pruning (keep 2 newest SHA sets —
+  verified working on its first live deploy); fetch dedup hardened
+  (`dict.fromkeys`) + tests pinning one-download-per-category; What's New
+  v1.1 entry + About page corrections (Gemini not OpenAI, stat.ML).
+- **PR #51 — privacy policy** at /privacy/: collection, purpose, DO-NYC
+  storage, providers, retention (immediate hard delete + 7-day snapshot
+  window, no-restore commitment), privacy@ alias contact. Linked from both
+  footers + /login. Unblocks the OAuth consent screen.
+- **PRs #49+#50 — Mixpanel fixed**: root cause was `!ENV MIXPANEL_TOKEN` in
+  _config.yml — plain Jekyll has no !ENV support, so prod ran
+  `mixpanel.init("MIXPANEL_TOKEN")` literally and no event ever arrived; the
+  compose env var was also unset on the droplet. Real project token (public
+  client ID) now inline; dead env wiring removed. #49 was merged while its
+  test job was red (test asserted the broken !ENV pattern) — #50 fixed the
+  test and unblocked the deploy. Verified: /track POSTs return 200, events
+  visible in the Mixpanel Events view.
+- **PR #52 — personalized feed archive** (backlog item 3): /feed is now a
+  month-grouped date list (only days with content for the user's categories,
+  newest first); /feed/<date> renders that day; unlinkable days redirect back
+  to the list. Prod click-through verified with real content.
+- Git history rewrite (git-filter-repo): scrubbed a personal email from all
+  branches/tags; residue only in GitHub's read-only PR refs (Support ticket
+  can purge). Branch protection lifted and restored exactly for the push.
+
+### Decisions made
+- Mixpanel/analytics tokens: hardcode public client IDs in config; no env
+  indirection for values that ship in served JS anyway.
+- Indicator cookie over CORS session endpoint for cross-site login state
+  (no SameSite weakening; display hint only).
+- Immediate hard delete, no grace period; privacy policy discloses the
+  7-day backup-snapshot window instead.
+- No PII in commits/worklogs/PRs — durable rule.
+- Merge only after explicitly reading green checks (lesson from #49).
+
+### Next session priorities
+- User console step: flip OAuth Testing → In production (privacy URL ready).
+- Check Monday's nightly run (first real accumulation for the archive).
+- Duplicate prod user rows; privacy@ alias test-send.
+- Optional: GitHub Support ticket for old PR-ref purge.
+
 ## Session: 2026-07-18 (M5: first real per-category run verified + stale-latest root cause)
 
 ### Worked on
