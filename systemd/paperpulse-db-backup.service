@@ -1,0 +1,7 @@
+[Unit]
+Description=PaperPulse consistent SQLite backup
+
+[Service]
+Type=oneshot
+UMask=0077
+ExecStart=/usr/bin/python3 /usr/local/sbin/backup-paperpulse-db.py

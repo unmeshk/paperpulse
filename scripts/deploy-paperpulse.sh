@@ -53,7 +53,7 @@ docker tag "ghcr.io/unmeshk/paperpulse-api:${IMAGE_TAG}" ghcr.io/unmeshk/paperpu
 
 # Recreate containers with the new images. --remove-orphans cleans up any
 # services that have been removed from the compose file.
-docker compose -f "$COMPOSE_FILE" up -d --remove-orphans
+docker compose -f "$COMPOSE_FILE" up -d --remove-orphans blog app nginx
 
 # Optionally run the daily pipeline once (CI sets this when api/ changed).
 if [ "$RUN_PIPELINE" = "--run-pipeline" ]; then

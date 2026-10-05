@@ -1,0 +1,10 @@
+[Unit]
+Description=Daily PaperPulse SQLite backup
+
+[Timer]
+OnCalendar=*-*-* 00:30:00 UTC
+Persistent=true
+Unit=paperpulse-db-backup.service
+
+[Install]
+WantedBy=timers.target

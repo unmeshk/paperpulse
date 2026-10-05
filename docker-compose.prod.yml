@@ -1,5 +1,6 @@
 services:
   blog:
+    restart: unless-stopped
     image: ghcr.io/unmeshk/paperpulse-blog:${IMAGE_TAG:-latest}
     expose:
       - "4000"
@@ -29,6 +30,7 @@ services:
       - web
 
   app:
+    restart: unless-stopped
     image: ghcr.io/unmeshk/paperpulse-app:${IMAGE_TAG:-latest}
     expose:
       - "8000"
@@ -48,6 +50,7 @@ services:
       - web
 
   nginx:
+    restart: unless-stopped
     image: nginx:alpine
     ports:
       - "80:80"
