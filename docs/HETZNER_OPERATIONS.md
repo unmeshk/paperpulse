@@ -3,6 +3,11 @@
 Apply the privacy-policy change only at cutover. During private rehearsal,
 DigitalOcean remains the production writer and the Hetzner daily timer stays disabled.
 
+GitHub's `production` environment requires approval from the owner before its
+deployment job starts; administrator bypass is disabled. PR tests/builds can run
+with the workflow enabled. Keep production deployments unapproved until the
+Hetzner target, final sync, and cutover are ready.
+
 ## Installed host configuration
 
 - Repo: `/var/www/arxivsum`.
