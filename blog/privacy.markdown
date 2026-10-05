@@ -4,7 +4,7 @@ title: Privacy Policy
 permalink: /privacy/
 ---
 
-*Last updated: July 19, 2026*
+*Last updated: October 4, 2026*
 
 PaperPulse is a daily arXiv summary site with an optional personalized feed. This page describes what data we collect and what we do with it.
 
@@ -26,19 +26,18 @@ That's all. We don't sell your data, share it with advertisers, or use it for an
 
 ### Where it lives
 
-Data is stored on a server hosted by DigitalOcean in New York, USA.
+Data is stored on a server hosted by Hetzner in Helsinki, Finland. During the hosting migration, a temporary copy remains on the previous DigitalOcean server in New York, USA. That copy is restricted and removed within seven days of cutover.
 
 ### Service providers
 
-Three third parties are involved in running the site: Google (sign-in), Mixpanel (blog analytics), and DigitalOcean (hosting). Each receives only what's needed for its function.
+Service providers are Google (sign-in), Mixpanel (blog analytics), and Hetzner (hosting and server backups). DigitalOcean also holds a restricted temporary migration copy during the move. Each receives only what's needed for its function.
 
 ### How long we keep it
 
 Until you delete your account. Deleting your account (Settings → Delete account) immediately and permanently removes your account and all its data from our systems.
 
-One exception: we take a daily backup snapshot of the server, and snapshots are kept for 7 days. A deleted account may persist inside those snapshots until they expire, after which it is gone entirely. Backups are used only for disaster recovery — we never restore them to recover a deleted account.
+One exception: a deleted account may remain temporarily in backups. We make daily server backups and integrity-checked database backups. Database backup files are pruned after seven days when the backup job succeeds. Hetzner keeps seven rotating server-backup slots; failed backups can delay rotation, so older provider backups and migration copies require monitoring and removal. Manual snapshots do not expire automatically. Backups are used only for disaster recovery — we never restore them to recover a deleted account.
 
 ### Contact
 
 Questions about this policy or your data: [privacy@ukurup.com](mailto:privacy@ukurup.com)
-
