@@ -16,6 +16,17 @@ from app.config import APP_DIR, settings
 from app.db import get_conn
 
 templates = Jinja2Templates(directory=str(APP_DIR / "templates"))
+templates.env.globals["blog_url"] = settings.blog_url
+templates.env.globals["subject_names"] = {
+    "astro-ph": "Astrophysics", "cond-mat": "Condensed Matter", "cs": "Computer Science",
+    "econ": "Economics", "eess": "Electrical Engineering and Systems Science",
+    "gr-qc": "General Relativity and Quantum Cosmology", "hep-ex": "High Energy Physics — Experiment",
+    "hep-lat": "High Energy Physics — Lattice", "hep-ph": "High Energy Physics — Phenomenology",
+    "hep-th": "High Energy Physics — Theory", "math": "Mathematics", "math-ph": "Mathematical Physics",
+    "nlin": "Nonlinear Sciences", "nucl-ex": "Nuclear Experiment", "nucl-th": "Nuclear Theory",
+    "physics": "Physics", "q-bio": "Quantitative Biology", "q-fin": "Quantitative Finance",
+    "quant-ph": "Quantum Physics", "stat": "Statistics",
+}
 
 router = APIRouter()
 
@@ -63,7 +74,8 @@ async def onboarding(request: Request, user: dict | None = Depends(current_user)
     return templates.TemplateResponse(
         request,
         "onboarding.html",
-        {"user": user, "csrf_token": csrf_token, "grouped": _grouped_categories()},
+        {"user": user, "csrf_token": csrf_token, "grouped": _grouped_categories(),
+         "selected": set(_user_category_slugs(user["id"]))},
     )
 
 
@@ -208,6 +220,10 @@ async def feed_day(day: str, request: Request, user: dict | None = Depends(curre
     # Only dates that actually have content for this user are linkable; anything
     # else (bad format, missing day, other users' categories only) goes back to
     # the date list rather than rendering an empty page.
+    try:
+        datetime.strptime(day, "%Y-%m-%d")
+    except ValueError:
+        return RedirectResponse(url="/feed", status_code=HTTP_302_FOUND)
     day_dir = settings.content_dir / day
     if not _DATE_RE.match(day) or not any((day_dir / f"{slug}.md").is_file() for slug in slugs):
         return RedirectResponse(url="/feed", status_code=HTTP_302_FOUND)
@@ -222,7 +238,8 @@ async def feed_day(day: str, request: Request, user: dict | None = Depends(curre
     return templates.TemplateResponse(
         request,
         "feed.html",
-        {"user": user, "day": day, "sections": sections},
+        {"user": user, "day": day, "day_label": datetime.strptime(day, "%Y-%m-%d").strftime("%b %d, %Y"),
+         "sections": sections},
     )
 
 

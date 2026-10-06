@@ -1,0 +1,49 @@
+<div class="category-picker" data-category-picker data-max="5">
+  <p class="picker-count" data-selection-count aria-live="polite">{{ selected|length }} of 5 selected</p>
+  <ul class="selected-categories" aria-label="Selected categories" data-selected-categories>
+    {% for archive, cats in grouped %}
+      {% for c in cats if c.slug in selected %}
+        <li>{{ c.display_name }} <span class="category-code">{{ c.slug }}</span>
+          <button type="button" data-remove="{{ c.slug }}"
+            aria-label="Remove {{ c.display_name }} ({{ c.slug }})" hidden>×</button>
+        </li>
+      {% endfor %}
+    {% endfor %}
+  </ul>
+  <p class="picker-note" data-selection-note id="selection-note">Choose between 1 and 5 categories.</p>
+  <details class="picker-panel" open data-default-open="{{ 'true' if picker_open else 'false' }}">
+    <summary>Choose categories</summary>
+    <div class="picker-filters" hidden>
+      <div>
+        <label for="category-search">Search categories</label>
+        <input type="search" id="category-search" placeholder="Name or code, e.g. Machine Learning" autocomplete="off">
+      </div>
+      <div>
+        <label for="category-subject">Subject</label>
+        <select id="category-subject">
+          <option value="">All subjects</option>
+          {% for archive, cats in grouped %}
+            <option value="{{ archive }}">{{ subject_names.get(archive, archive) }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <p class="picker-note" data-result-count aria-live="polite" hidden></p>
+    <div class="picker-results" role="region" aria-label="Category options" tabindex="0">
+      {% for archive, cats in grouped %}
+        <fieldset class="archive-group" data-archive="{{ archive }}">
+          <legend>{{ subject_names.get(archive, archive) }}</legend>
+          {% for c in cats %}
+            <label class="category-option" data-search="{{ (c.slug ~ ' ' ~ c.display_name)|lower }}"
+              data-name="{{ c.display_name }}">
+              <input type="checkbox" name="slugs" value="{{ c.slug }}" {% if c.slug in selected %}checked{% endif %}
+                aria-describedby="selection-note">
+              <span>{{ c.display_name }} <small class="category-code">{{ c.slug }}</small></span>
+            </label>
+          {% endfor %}
+        </fieldset>
+      {% endfor %}
+      <p data-no-results hidden>No categories match. Try another search or subject.</p>
+    </div>
+  </details>
+</div>

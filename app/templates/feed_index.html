@@ -1,17 +1,23 @@
 {% extends "base.html" %}
 {% block title %}Your feed — PaperPulse{% endblock %}
 {% block content %}
-  <h1>Your feed</h1>
+<div class="home">
+  <h1 class="site-subtitle">Your feed</h1>
+  <h2 class="page-heading">Daily Pulse of Your ArXiv Papers</h2>
+  <p class="site-description">Research summarized into digestible themes, from your chosen categories.
+    <a href="/settings">Manage categories</a></p>
   {% if not months %}
     <p>No summaries yet — your first personalized summaries appear after the next daily run (6am Eastern).</p>
   {% else %}
     {% for month in months %}
-      <h2>{{ month.label }}</h2>
-      <ul class="feed-dates">
+      <section class="month-section" aria-label="{{ month.label }}">
+        <h2>{{ month.label }}</h2>
         {% for e in month.entries %}
-          <li><a href="/feed/{{ e.date }}">{{ e.label }}</a></li>
+          <div class="date-entry"><a href="/feed/{{ e.date }}">{{ e.label }}</a></div>
         {% endfor %}
-      </ul>
+      </section>
     {% endfor %}
   {% endif %}
+  <div class="wave-decoration" aria-hidden="true"></div>
+</div>
 {% endblock %}
