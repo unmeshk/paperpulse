@@ -80,7 +80,7 @@ def test_onboarding_has_all_archives_and_search(auth_client):
     assert 'type="search"' in html  # search input present
     archives = sorted({row["archive"] for row in _load_categories()})
     for archive in archives:
-        assert f"<legend>{archive}</legend>" in html, f"missing archive header: {archive}"
+        assert f'data-archive="{archive}"' in html, f"missing archive group: {archive}"
 
 
 # --- POST /onboarding ----------------------------------------------------------
@@ -189,4 +189,5 @@ def test_session_persists_after_onboarding(auth_client):
     assert resp.status_code == 302
     home = auth_client.get("/")
     assert home.status_code == 200
-    assert "tester@example.com" in home.text
+    assert 'href="/settings"' in home.text
+    assert "tester@example.com" in auth_client.get("/settings").text

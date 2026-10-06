@@ -1,150 +1,128 @@
-/* App-specific styles layered on top of the ported blog theme (main.css). */
+/* Blog shell lives in blog.css; only app-specific controls belong here. */
+[hidden] { display: none !important; }
 
-.site-nav .nav-user {
-  color: #828282;
-  margin-right: 10px;
+button, input, select { font: inherit; }
+button, .button-link { border-radius: 3px; }
+a:focus-visible, button:focus-visible, input:focus-visible,
+select:focus-visible, summary:focus-visible, [tabindex]:focus-visible {
+  outline: 2px solid #1756a9;
+  outline-offset: 3px;
 }
-
-/* Left sidebar for links common to the blog and the app (mirrored in
-   blog/assets/custom.css); contextual links stay in the top-right nav. */
-.layout-wrap {
-  display: flex;
-  align-items: flex-start;
-}
-
-.site-sidebar {
-  width: 200px;
-  flex-shrink: 0;
-  padding: 30px 0 30px 30px;
-}
-
-.site-sidebar .page-link {
-  display: block;
-  margin-bottom: 10px;
-  color: #111;
-}
-
-.layout-wrap .page-content {
-  flex: 1;
-  min-width: 0;
-}
-
-@media screen and (max-width: 600px) {
-  .layout-wrap {
-    display: block;
-  }
-
-  .site-sidebar {
-    width: auto;
-    padding: 15px 15px 0;
-  }
-
-  .site-sidebar .page-link {
-    display: inline-block;
-    margin-right: 15px;
-    margin-bottom: 0;
-  }
-}
-
-/* Category picker */
-#category-search {
-  width: 100%;
-  max-width: 400px;
-  padding: 8px 10px;
-  margin-bottom: 15px;
-  border: 1px solid #e8e8e8;
-  border-radius: 3px;
-  font: inherit;
-}
-
-.archive-group {
-  border: 1px solid #e8e8e8;
-  border-radius: 3px;
-  margin-bottom: 15px;
-  padding: 10px 15px;
-}
-
-.archive-group legend {
-  font-weight: 600;
-  padding: 0 5px;
-}
-
-.category-option {
+button[type="submit"], .button-link {
   display: inline-block;
-  padding: 2px 0;
-}
-
-button[type="submit"] {
   padding: 8px 16px;
   border: 1px solid #2a7ae2;
-  border-radius: 3px;
   background: #2a7ae2;
   color: #fff;
-  font: inherit;
   cursor: pointer;
+  text-decoration: none;
 }
-
-button[type="submit"]:hover {
+button[type="submit"]:hover, .button-link:hover {
   background: #1756a9;
+  color: #fff;
+  text-decoration: none;
 }
-
+.button-link:visited { color: #fff; }
+button[type="submit"]:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
 button[type="submit"].button-danger {
   border-color: #b00020;
   background: #b00020;
 }
+button[type="submit"].button-danger:hover { background: #7f0017; }
+.account-deletion { margin-top: 30px; padding-top: 30px; border-top: 1px solid #e8e8e8; }
+.delete-confirm { display: block; margin-bottom: 15px; }
+.login-note, .picker-note, .category-code { color: #666; font-size: 14px; }
+.category-code { display: inline-block; font-weight: 400; letter-spacing: normal; }
 
-button[type="submit"].button-danger:disabled {
-  border-color: #d9a3ae;
-  background: #d9a3ae;
-  cursor: not-allowed;
-}
-
-.delete-confirm {
-  display: block;
-  margin-bottom: 10px;
-}
-
-button[type="submit"].button-danger:hover {
-  background: #7f0017;
-}
-
-/* Login page */
-.button-link {
-  display: inline-block;
-  padding: 8px 16px;
-  border: 1px solid #2a7ae2;
-  border-radius: 3px;
-  background: #2a7ae2;
-  color: #fff !important;
-  text-decoration: none;
-}
-
-.button-link:hover {
-  background: #1756a9;
-  text-decoration: none;
-}
-
-.login-note {
-  color: #828282;
-  font-size: 14px;
-}
-
-/* Feed date list */
-.feed-dates {
-  list-style: none;
-  margin-left: 0;
-}
-
-.feed-dates li {
-  padding: 2px 0;
-}
-
-/* Feed */
-.feed-category {
-  margin-bottom: 30px;
-}
-
-.feed-category h2 {
+/* Only category headings have separators; research headings use blog typography. */
+.feed-category { margin-bottom: 30px; }
+.post-content .feed-category-title {
   border-bottom: 1px solid #e8e8e8;
-  padding-bottom: 5px;
+  padding-bottom: 10px;
+  font-size: 24px;
+}
+
+/* One compact picker, with selections outside the scrollable results. */
+.category-picker { margin-bottom: 20px; }
+.picker-count { margin-bottom: 10px; }
+.selected-categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  margin: 0 0 15px;
+}
+.selected-categories li {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 4px 8px;
+  border: 1px solid #e8e8e8;
+  border-radius: 3px;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.selected-categories button {
+  border: 0;
+  background: transparent;
+  color: #1756a9;
+  cursor: pointer;
+  font-size: 20px;
+  min-width: 32px;
+  min-height: 32px;
+}
+.picker-panel { border: 1px solid #e8e8e8; border-radius: 3px; }
+.picker-panel summary { padding: 12px 15px; cursor: pointer; color: #1756a9; }
+.picker-panel[open] summary { border-bottom: 1px solid #e8e8e8; }
+.picker-filters { display: flex; gap: 15px; padding: 15px 15px 0; }
+.picker-filters > div { flex: 1; min-width: 0; }
+.picker-filters label { display: block; margin-bottom: 5px; }
+.picker-filters input, .picker-filters select {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #e8e8e8;
+  border-radius: 3px;
+  background: #fff;
+  color: #111;
+  min-height: 42px;
+}
+.picker-panel > .picker-note { margin: 10px 15px; }
+.picker-results {
+  max-height: 360px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0 15px 10px;
+}
+.archive-group { border: 0; padding: 0; margin: 10px 0 15px; min-width: 0; }
+.archive-group legend { font-weight: 600; padding: 0; margin-bottom: 5px; }
+.category-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid #e8e8e8;
+  cursor: pointer;
+}
+.category-option input { margin: 5px 0 0; flex-shrink: 0; }
+.category-option small { margin-left: 5px; }
+.category-option:has(input:disabled) { color: #828282; cursor: not-allowed; }
+@media screen and (max-width: 600px) {
+  .picker-filters { flex-direction: column; }
+  .picker-results { max-height: 320px; }
+  .site-nav .nav-trigger {
+    display: block;
+    position: absolute;
+    opacity: 0;
+    width: 36px;
+    height: 36px;
+    right: 0;
+    margin: 0;
+  }
+  .site-nav:focus-within { outline: 2px solid #1756a9; }
+  .site-nav { z-index: 1; }
 }

@@ -11,6 +11,18 @@ from app.db import init_db
 from app.routes import router as routes_router
 
 
+class _PageSessionMiddleware(SessionMiddleware):
+    """Keep static responses from replacing newer page session cookies."""
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] == "http" and (
+            scope["path"] in ("/static", "/favicon.ico") or scope["path"].startswith("/static/")
+        ):
+            await self.app(scope, receive, send)
+        else:
+            await super().__call__(scope, receive, send)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     init_db()
@@ -20,7 +32,7 @@ async def lifespan(app: FastAPI):
 def create_app() -> FastAPI:
     app = FastAPI(title="PaperPulse", lifespan=lifespan)
     app.add_middleware(
-        SessionMiddleware,
+        _PageSessionMiddleware,
         secret_key=settings.session_secret,
         https_only=settings.cookie_secure,
         same_site="lax",

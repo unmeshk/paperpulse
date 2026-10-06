@@ -1,5 +1,135 @@
 # Worklog
 
+## Session: 2026-10-05 (Feed review findings fixed)
+
+- Fixed Astra review's introduced CTA regression: visited sign-in buttons keep
+  white text rather than inheriting the theme's dark-blue visited-link color.
+- Fixed the preexisting CSRF race: static CSS/JS and favicon responses no longer
+  rewrite signed session cookies. Includes missing-asset responses; authenticated
+  dynamic pages retain the original session and CSRF behavior.
+- Added four deterministic concurrency regressions using real login sessions,
+  delayed asset responses, new form tokens, and persisted category saves.
+  All four reproduce 403 with the original middleware; fixed suite **54 passed**.
+- Chrome browser suite passed without the former `networkidle` workaround.
+  Added forced visited-state screenshot comparison and a negative control that
+  detects the old dark text. Existing desktop/mobile and saving checks pass.
+- Updated the design tracker with completed review fixes and evidence.
+  Changes remain local; no deployment or production account changes.
+
+## Session: 2026-10-05 (Personalized feed design implemented)
+
+- Implemented the approved shared picker in onboarding and settings: searchable
+  names/codes, readable subject filter, bounded scrolling, visible removable
+  selections, selection count/limits, explicit saving, and native disclosure.
+- Matched blog header/sidebar/footer geometry and navigation. Moved reader
+  identity into settings; site title and shared links use the configured blog URL.
+- Matched feed archive month/date markup and daily article title/date/content
+  styles. Category dividers no longer affect every generated theme heading.
+- Aligned onboarding, settings, login, and anonymous landing-page styles;
+  added visible keyboard focus and a keyboard-operable mobile menu.
+- App tests: **50 passed**. Local Chrome browser suite passed against isolated
+  SQLite/content and a synthetic account using the real session/auth lookup.
+  Verified both save flows, search/filter/limits/removal/persistence, keyboard
+  operation, mobile scrolling, and JavaScript-disabled saving.
+- Rendered blog/feed visual metrics match at 1280/768/600/390px. Screenshots
+  reviewed for desktop/mobile; no horizontal overflow or JavaScript errors.
+- In-app browser JavaScript tool was unavailable. Used installed Playwright
+  and local Chrome with approved execution permissions as the fallback.
+- Checklist and detailed evidence completed in
+  [PERSONALIZED_FEED_DESIGN.md](PERSONALIZED_FEED_DESIGN.md); reusable local
+  preview/browser checks live under app/tests. No runtime dependencies added.
+- Changes remain local and uncommitted. No merge, deployment, production account
+  edits, or Google OAuth round-trip performed. Existing unrelated work preserved.
+
+## Session: 2026-10-05 (Personalized feed design approved)
+
+- Owner selected personalized feed design as the resumed product workstream.
+- Approved visual consistency with the main blog across the app shell, feed
+  archive, daily feed, onboarding, and settings.
+- Approved a shared searchable checkbox picker with a collapsible scrollable
+  panel, visible removable selections, a five-category count/limit, and an
+  optional subject filter.
+- Goal, full design choices, and implementation/validation checklist live in
+  [PERSONALIZED_FEED_DESIGN.md](PERSONALIZED_FEED_DESIGN.md).
+- This session records the approved plan only; implementation has not started.
+
+## Session: 2026-10-05 (Migration closed; product work resumed)
+
+- Owner confirmed the Hetzner move is complete and requested closing migration
+  work. This supersedes the migration follow-up priorities recorded below.
+- Production hosting is Hetzner. Migration is no longer the active workstream.
+  This close-out records owner confirmation, not new server-side verification
+  of each historical checklist item. No resources were deleted in this session.
+- Resume the pre-migration product context: Phase 1 implementation and the
+  personalized feed archive shipped in July (PRs #45–#52). Last recorded launch
+  follow-ups were OAuth production status, scheduled archive accumulation,
+  duplicate production user rows, and the privacy contact alias.
+- Phase 2 remains the next major release: feedback-driven feed improvement.
+  See ROADMAP.md; choosing feedback granularity and ranking behavior precedes
+  implementation. Historical launch follow-ups are not newly verified here.
+- Local baseline: API tests 29 passed; app tests 50 passed. Current checkout is
+  `docs/worklog-phase1-closeout`, with existing local changes preserved.
+
+## Session: 2026-10-04/05 (DigitalOcean to Hetzner cutover) — PR #53 MERGED
+
+### Completed
+- Moved production hosting to Hetzner in Helsinki, preserving domains, Google
+  OAuth, sessions, accounts, category selections, and content history.
+- Prepared the existing Docker Compose stack and restricted CI deployment
+  access. Enforced key-only SSH; verified firewall attachment and provider backups.
+- Transferred all 561 public posts and 339 feed files, certificates, and secrets
+  over SSH. Used SQLite's backup API for consistent staging and final DB copies.
+  Verified matching archive manifests/DB checksums, integrity, and foreign keys.
+- Rehearsed HTTPS, authenticated feed/settings/archive reads, isolated DB restore,
+  and actual reboot recovery. Owner verified browser traffic reached Hetzner and
+  completed Google sign-in before cutover.
+- **PR #53** added web-service restart policies, checked daily SQLite backups
+  with seven-day local retention, a web-only deploy command, updated hosting/privacy
+  text, and operations guidance. API tests: 30 passed; app tests: 50 passed.
+  GitHub test and container-build jobs passed.
+- Added an owner approval gate to GitHub's production environment, disabled
+  administrator bypass, and retained existing deployment branch restrictions.
+- Owner lowered DNS TTLs to 300 in **NixiHost's Zone Editor**, then switched both
+  site A records to Hetzner. Verified both authoritative nameservers and a public
+  resolver; no stale AAAA records found.
+- Final sync briefly stopped both apps and restored the final DO backup into a
+  clean Hetzner DB directory. Both sites restarted; Hetzner is the sole writer.
+- Switched GitHub deployment target/host-key secrets and verified an actual CI
+  deployment on Hetzner, including checkout and running image revision.
+- Enabled only Hetzner's publishing and DB-backup timers; installed renewal cron.
+  Both certificate-renewal dry-runs, explicit nginx reload, HTTPS, health checks,
+  post-cutover authenticated reads, and live privacy text verified.
+- Kept DO's app/blog running without forwarding, per owner preference. Old app
+  serves reads; account writes/sign-in callbacks are blocked. DO publishing,
+  deployment command, and certificate-renewal cron disabled. Previous configs
+  preserved privately for rollback. No paid resources deleted.
+
+### Deployment issue and decisions
+- PR #53 was initially merged and its gated deployment approved before target
+  secrets changed, so it deployed to DO. This briefly published Hetzner privacy
+  wording there. Restored accurate DO wording, froze deploys again, then switched
+  targets and verified the later deployment on Hetzner. Step names such as
+  "deploy on droplet" do not identify the actual target; verify host state.
+- Corrected the earlier overly strict four-hour DNS wait: cached old-host traffic
+  is safe when the old app cannot independently accept writes. Owner chose an
+  immediate cutover with both websites online and no forwarding.
+- After Hetzner accepts writes, rollback requires a fresh backup and reverse-sync
+  of current state; switching DNS back to the stale DO database is insufficient.
+- Keep credentials, personal data, and host-specific inventory out of public
+  worklogs/PRs. Detailed migration inventory remains local and untracked.
+
+### Next session priorities
+- Verify the first Hetzner publishing run on **October 5 at 6:02am Eastern**:
+  check actual post/feed files, Jekyll refresh, and logs, not only exit status.
+- Verify the next provider backup contains final live state. Checked local DB
+  backups are already working; the last observed provider backup preceded final sync.
+- Observe 48–72 hours of stable operation, then restore normal DNS TTL.
+- Remove temporary Mac preview hostname overrides if still present.
+- Remove stale rehearsal/migration data within seven days; cleanup is not yet
+  automatic. Review old-host DB copies and provider backup/snapshot retention.
+- Retire DO only after acceptance checks and separate owner deletion approval.
+  Update older README/deployment runbooks that still describe DO hosting.
+
 ## Session: 2026-07-18 (M5: first real per-category run verified + stale-latest root cause)
 
 ### Worked on
