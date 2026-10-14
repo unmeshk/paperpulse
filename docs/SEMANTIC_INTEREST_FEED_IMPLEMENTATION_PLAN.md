@@ -1,6 +1,6 @@
 # Semantic interest feeds — implementation plan
 
-Status: implementation plan prepared; no implementation or deployment performed.
+Status: milestone 0 implemented locally with offline verification; operational activation pending.
 Date: 2026-10-06.
 
 Owner-approved review revisions incorporated: shared accounting before paid
@@ -134,6 +134,103 @@ boundary and the authoritative day's opening balance is established.
 
 **Validation:** deterministic provider responses, real ledger files and controlled
 restart/date/failure scenarios. No live calls needed for accounting correctness.
+
+### Milestone 0 implementation evidence — 2026-10-13
+
+- `api/model_budget.py`: explicit initialization, nonblocking pipeline lock,
+  atomically replaced and fsynced ledger, integer nanodollar accounting, daily
+  reservations and totals, persistent quota counters/cooldowns, and an evaluation gate.
+  No app imports or SQLite dependency. Contexts reject cross-thread/process reuse.
+- `api/model_calls.py`: the common text generation boundary for public, category,
+  and future evaluation callers. SDK retries and automatic tool calling are disabled.
+  Three explicit attempts maximum, each with a separate durable reservation;
+  HTTP timeouts are 60 seconds and quota waits are bounded to 120 seconds
+  per attempt. Unknown usage retains the maximum reservation after restart.
+- Token counting includes the full prompt and system instruction through the
+  Developer API's `generateContentRequest` count endpoint, plus a 32-token framing
+  margin. The generation output cap includes thinking; reconciliation charges both
+  visible output and reported thoughts. Standard text prices rechecked 2026-10-13:
+  [$0.25/M input and $1.50/M output](https://ai.google.dev/gemini-api/docs/pricing#gemini-3.1-flash-lite).
+  [Output-cap semantics](https://ai.google.dev/gemini-api/docs/thinking#token-limits-and-max_output_tokens)
+  and [full-request token counting](https://ai.google.dev/api/tokens#request-body)
+  checked the same day. No discounts, grounding, tools, media or explicit caches assumed.
+- SDK 2.7.0 transport tests exercise actual serialized count/generation requests,
+  disabled hidden retries, provider errors and usage parsing without network access.
+  Filesystem/process tests cover crashes, reservation/reconciliation write failures,
+  concurrent processes, corrupt/missing state, midnight/DST and quota resets.
+- Existing public/category callers share one context held across the full pipeline.
+  Duplicate invocations skip work. Accounting failures exit nonzero and completed
+  batch text can publish without another paid combine. Cross-run artifact checkpoints
+  and explicit partial-content presentation remain milestone 3 work.
+- The completion-reserve argument exists and is tested; its amount remains zero
+  until milestone 1 measurements calibrate it. Requests use 80% of explicitly supplied
+  project quotas, with persistent provider feedback for other project usage.
+- Verification: `PYTHONPATH=. .venv/bin/python -m pytest api/tests -q`:
+  **69 passed**; app suite **54 passed**; `docker compose -f docker-compose.prod.yml config --quiet`
+  passed. Production cutover, actual account quota verification and paid
+  evaluation are not performed. The operational milestone checkbox below remains open.
+
+### Milestone 0 accounting initialization and cutover
+
+This is a reviewable procedure, not evidence of deployment. Do not merge this
+release without preparing initialization: the new pipeline deliberately refuses
+to run against an absent ledger. Reconcile installed Hetzner Compose/deploy/timer
+configuration first; do not replace newer host configuration with this checkout's
+older operational files. Only the API's `GEMINI_BUDGET_DIR` mount setting changes here.
+
+1. Stop the publishing timer and wait for all old pipeline and paid evaluation
+   processes to finish. They do not honor the new lock. Prevent old-image invocations
+   during and after cutover. Record the production image and matching configuration.
+2. Confirm the deployed key's project, current standard prices and actual RPM/TPM/RPD
+   limits in the provider console. The ledger pins this release's model/prices;
+   a pricing change requires a reviewed code/ledger migration, not clearing state.
+3. Deploy the reviewed API with the shared host directory
+   `/var/lib/paperpulse/db/model-budget` mounted as `/data/db/model-budget` through
+   the existing DB volume. Set `GEMINI_BUDGET_DIR=/data/db/model-budget` for every
+   production and paid-evaluation invocation. Ensure the scheduled image matches.
+4. Initialize once with verified same-day opening spend, or a future New York date
+   with zero opening spend if previous usage cannot be established. For a future
+   start, keep all old paid workers stopped until that day. Never seed zero merely
+   because this ledger is new. The following variables must be populated with
+   reviewed values; this command uses the selected release image, not an arbitrary latest:
+
+   ```sh
+   docker compose -f docker-compose.prod.yml run --rm --no-deps api \
+     python -m api.model_budget initialize \
+     --start-day "$ACCOUNTING_START_DAY" --opening-spend-usd "$VERIFIED_OPENING_SPEND_USD" \
+     --rpm "$VERIFIED_RPM" --tpm "$VERIFIED_TPM" --rpd "$VERIFIED_RPD" \
+     --untracked-workers-stopped
+   ```
+
+5. Inspect `python -m api.model_budget status` in the same API container environment.
+   The initializer refuses to overwrite any ledger. For local offline tests, use
+   test fixtures; do not point them at production accounting. Any live local
+   experiment still needs the authoritative host ledger and shared lock.
+6. At/after the start date, restore the timer and verify a controlled production
+   invocation or its first scheduled run: public/category artifacts, journal status,
+   ledger spend/reservations and quota counters. Confirm every Gemini generation
+   uses this boundary and no old processes/images remain. No paid test is implicit
+   in the initialization command.
+7. Only then enable future paid evaluation through
+   `python -m api.model_budget enable-evaluation --production-controls-verified`
+   in that same container environment. This records an operator attestation; it
+   does not inspect remote deployment state. Evaluation callers must pass
+   `purpose="evaluation"` and run on the host's `ModelBudget` context with isolated
+   output. This milestone supplies the boundary, not milestone 1's evaluation runner.
+
+Budget days use request-dispatch date in America/New_York. Responses arriving after
+midnight settle the original reservation; retries reserve on their own dispatch day.
+Provider daily request counters/reset use America/Los_Angeles. Successful usage releases
+unused reservation; timeouts, unknown usage and interrupted calls retain it. The `calls`
+counter includes unbilled count-token requests conservatively for request pacing.
+An over-bound provider usage report records actual spend and halts future paid work.
+
+Back up the ledger along with its persistent volume. Never delete/reinitialize it,
+restore an older spend snapshot, manually refund uncertain reservations, or select
+a fresh path to resume spending. Missing/corrupt state requires verified accounting
+recovery; the worker fails closed. If rollback would restore an unaccounted API,
+disable publishing/evaluation instead and retain the ledger until a compatible
+release is restored. This milestone does not migrate the app schema or archive.
 
 ## 1. Evaluate the simplest matcher and capacity
 
@@ -490,6 +587,7 @@ also include batch sizes, input/output usage, dollars, runtime and delivered pap
 Update source documents when evidence changes a design decision.
 
 - [ ] 0. Shared call boundary and $15/day accounting active before paid evaluation.
+  Local implementation and offline checks complete; host activation remains pending.
 - [ ] 1. Evaluation, human gate decision and capacity baseline recorded.
 - [ ] 2. Persistence, frozen-run lifecycle and migration-safe deployment verified.
 - [ ] 3. Shared retrieval and safe generation verified.

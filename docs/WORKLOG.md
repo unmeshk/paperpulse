@@ -1,5 +1,23 @@
 # Worklog
 
+## Session: 2026-10-13 (Semantic feed milestone 0 implementation)
+
+- Added a shared, SQLite-independent Gemini ledger and exclusive pipeline lock.
+  Reserve maximum charges durably before each attempt; reconcile reported input,
+  visible output and thinking usage; retain ambiguous reservations after restart.
+- Routed public/category generation through one SDK boundary. Removed fixed
+  inter-batch sleeps; added quota pacing, provider cooldown/daily-quota handling,
+  bounded timeouts/retries, and explicit evaluation activation.
+- Added one-time initialization with verified opening spend/project quotas.
+  Missing/corrupt accounting prevents calls; production Compose points to the
+  existing durable DB mount. No automatic reset or alternate fallback allowance.
+- API checks: **69 passed**, including real SDK fake-transport requests, filesystem
+  failures, process crashes/concurrency, date boundaries, and pipeline outputs.
+  App checks: **54 passed**; production Compose configuration validates.
+  No paid Gemini calls or production changes. Operational activation remains open;
+  runbook and evidence are in `SEMANTIC_INTEREST_FEED_IMPLEMENTATION_PLAN.md`.
+
+
 ## Session: 2026-10-06 (Semantic interest feed planning)
 
 - Read the repository and captured the approved semantic-interest feed behavior

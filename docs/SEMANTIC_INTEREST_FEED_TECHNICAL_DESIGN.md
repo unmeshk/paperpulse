@@ -4,6 +4,12 @@ Status: proposed architecture; documentation only, no implementation authorizati
 Date: 2026-10-06.
 Product contract: [Semantic interest feed specification](SEMANTIC_INTEREST_FEED_SPEC.md).
 
+Implementation update, 2026-10-13: milestone 0 accounting is implemented locally
+and verified offline under subsequent owner authorization; production activation
+remains pending. Follow the [implementation plan](SEMANTIC_INTEREST_FEED_IMPLEMENTATION_PLAN.md)
+for current sequencing: shared accounting precedes paid evaluation. Semantic
+matching, migrations and archive changes below remain proposed work.
+
 Review disposition: owner approved review recommendations 2–7 (delivery-aware
 scheduling, explicit generation completeness, public-path isolation, frozen run
 versions, less unnecessary work/cleanup, and whole-feed evaluation). These are

@@ -32,13 +32,14 @@ Set `PROJECT_ENV=dev` for development mode (uses cached files) or `PROJECT_ENV=p
 **Pipeline (run once daily via systemd timer):**
 1. `ArxivClient.retrieve_daily_results()` — fetches today's papers from arXiv RSS feeds (`rss.arxiv.org/rss/{category}`), one request per category, deduplicates across categories, filters to the most recent pubDate only
 2. `FileHandler` — in dev mode, caches paper list to `papers-YYYY-MM-DD.pkl` in `PROJECT_DIR`
-3. `Agent.identify_important_papers()` — batches papers, calls Gemini (`gemini-3.1-flash-lite`) to produce a thematic markdown summary with inline `[Title](url)` links; sleeps 30s between batches to respect free-tier rate limits
+3. `Agent.identify_important_papers()` — batches papers and calls Gemini (`gemini-3.1-flash-lite`) through shared budget accounting and quota pacing to produce thematic markdown with inline `[Title](url)` links
 4. `create_blogpost()` — writes Jekyll markdown to `blog/_posts/YYYY-MM-DD-daily-summary.markdown`
 
 **Key env vars (`api/.env`):**
 - `GEMINI_API_KEY` — Gemini API key
 - `PROJECT_DIR` — absolute path to repo root (where pkl files are saved)
 - `PROJECT_ENV` — `dev` or `prod`
+- `GEMINI_BUDGET_DIR` — absolute persistent directory for the shared ledger and pipeline lock; explicit initialization required (see milestone 0 runbook in `docs/SEMANTIC_INTEREST_FEED_IMPLEMENTATION_PLAN.md`)
 
 **RSS categories:** `cs.LG`, `cs.AI`, `cs.CL`, `cs.CV`, `stat.ML`
 
