@@ -10,6 +10,7 @@ from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+from api.model_budget import BudgetError
 from api.settings import FIXED_PUBLIC_CATEGORIES
 
 logger = logging.getLogger(__name__)
@@ -77,6 +78,8 @@ def generate_category_blurbs(papers_by_category, agent, content_dir, date):
             continue
         try:
             blurb = agent.identify_important_papers(papers)
+        except BudgetError:
+            raise
         except Exception as e:
             logger.error(f"Blurb generation failed for {slug}: {e}")
             continue
@@ -85,5 +88,7 @@ def generate_category_blurbs(papers_by_category, agent, content_dir, date):
         day_dir.mkdir(parents=True, exist_ok=True)
         (day_dir / f"{slug}.md").write_text(blurb, encoding="utf-8")
         written.append(slug)
+        if getattr(agent, "stop_error", None) is not None:
+            raise agent.stop_error
     logger.info(f"Wrote {len(written)} category blurbs for {date}: {written}")
     return written

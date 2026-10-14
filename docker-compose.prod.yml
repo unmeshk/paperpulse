@@ -24,6 +24,7 @@ services:
       LOG_DIR: /app/logs
       CONTENT_DIR: /data/content
       APP_DB_PATH: /data/db/paperpulse.sqlite
+      GEMINI_BUDGET_DIR: /data/db/model-budget
     secrets:
       - gemini_api_key
     networks:

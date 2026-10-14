@@ -22,8 +22,16 @@ def arxiv_client():
     return ArxivClient()
 
 @pytest.fixture
-def llm_agent():
-    return Agent(gemini_api_key="dummy_key")
+def llm_agent(tmp_path, monkeypatch):
+    from api.model_budget import initialize
+    from zoneinfo import ZoneInfo
+
+    monkeypatch.setenv("GEMINI_BUDGET_DIR", str(tmp_path))
+    day = datetime.now(ZoneInfo("America/New_York")).date().isoformat()
+    initialize(tmp_path, day, 0, rpm=4000, tpm=4_000_000, rpd=150_000)
+    agent = Agent(gemini_api_key="dummy_key")
+    yield agent
+    agent.client.close()
 
 @pytest.fixture
 def file_handler():
@@ -134,8 +142,14 @@ class TestArxivClient:
 # Agent Tests
 class TestAgent:
     def test_identify_important_papers(self, llm_agent):
-        mock_response = Mock()
-        mock_response.text = "Summary content"
+        from google.genai import types
+
+        mock_response = types.GenerateContentResponse(
+            candidates=[types.Candidate(content=types.Content(parts=[types.Part(text="Summary content")]),
+                                        finish_reason="STOP")],
+            usage_metadata=types.GenerateContentResponseUsageMetadata(
+                prompt_token_count=100, candidates_token_count=20, total_token_count=120),
+        )
 
         papers = [
             {
@@ -146,7 +160,11 @@ class TestAgent:
             }
         ]
 
-        with patch.object(llm_agent.client.models, 'generate_content', return_value=mock_response):
+        with (
+            patch.object(llm_agent.client.models, 'generate_content', return_value=mock_response),
+            patch.object(llm_agent.client.models, 'count_tokens',
+                         return_value=types.CountTokensResponse(total_tokens=100)),
+        ):
             summary = llm_agent.identify_important_papers(papers)
         assert summary == "Summary content"
 

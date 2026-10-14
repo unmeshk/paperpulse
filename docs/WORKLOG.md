@@ -1,5 +1,42 @@
 # Worklog
 
+## Session: 2026-10-13 (Semantic feed milestone 0 implementation)
+
+- Prepared `feat/semantic-budget` from current main after the original draft
+  conflicted with the already-merged UI work. Preserved the original branch and
+  main's migration, restart, deployment and backup changes.
+- Added a shared, SQLite-independent Gemini ledger and exclusive pipeline lock.
+  Reserve maximum charges durably before each attempt; reconcile reported input,
+  visible output and thinking usage; retain ambiguous reservations after restart.
+- Routed public/category generation through one SDK boundary. Removed fixed
+  inter-batch sleeps; added quota pacing, provider cooldown/daily-quota handling,
+  bounded timeouts/retries, and explicit evaluation activation.
+- Added one-time initialization with verified opening spend/project quotas.
+  Missing/corrupt accounting prevents calls; production Compose points to the
+  existing durable DB mount. No automatic reset or alternate fallback allowance.
+- API checks: **70 passed**, including real SDK fake-transport requests, filesystem
+  failures, process crashes/concurrency, date boundaries, and pipeline outputs.
+  App checks: **54 passed**; production Compose configuration validates.
+  No paid Gemini calls or production changes. Operational activation remains open;
+  runbook and evidence are in `SEMANTIC_INTEREST_FEED_IMPLEMENTATION_PLAN.md`.
+
+
+## Session: 2026-10-06 (Semantic interest feed planning)
+
+- Read the repository and captured the approved semantic-interest feed behavior
+  in `SEMANTIC_INTEREST_FEED_SPEC.md` and implementation architecture in
+  `SEMANTIC_INTEREST_FEED_TECHNICAL_DESIGN.md`.
+- Recorded limits of three categories and five optional phrases, audience of
+  10–20 readers, anonymous phrase suggestions, preserved daily feeds, focused
+  reusable scopes, and the USD $15 daily Gemini ceiling.
+- Reviewed and revised the technical design for delivery-aware scheduling,
+  explicit failure states, deployment compatibility and full-feed evaluation.
+- Added `SEMANTIC_INTEREST_FEED_IMPLEMENTATION_PLAN.md` with evaluation-first
+  milestones, cost accounting, persistence, shared processing, migration,
+  validation and rollout/rollback steps.
+- No application code, paid model calls, deployment or production data changed.
+  Documentation whitespace, links and milestone ordering were checked.
+
 ## Session: 2026-10-05 (Feed review findings fixed)
 
 - Fixed Astra review's introduced CTA regression: visited sign-in buttons keep
