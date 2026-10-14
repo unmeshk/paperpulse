@@ -1,41 +1,34 @@
 {% extends "base.html" %}
 {% block title %}Settings — PaperPulse{% endblock %}
 {% block content %}
-  <h1>Settings</h1>
+  <header class="post-header">
+    <h1 class="post-title">Settings</h1>
+    <p class="post-meta">Signed in as {{ user.email }}</p>
+  </header>
 
   <h2>Your categories</h2>
   <p>Update the arXiv categories in your daily feed (pick up to 5).</p>
 
-  <input type="search" id="category-search" placeholder="Search categories…" autocomplete="off">
-
   <form method="post" action="/settings">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-    {% for archive, cats in grouped %}
-      <fieldset class="archive-group" data-archive="{{ archive }}">
-        <legend>{{ archive }}</legend>
-        {% for c in cats %}
-          <label class="category-option" data-search="{{ (c.slug ~ ' ' ~ c.display_name)|lower }}">
-            <input type="checkbox" name="slugs" value="{{ c.slug }}" {% if c.slug in selected %}checked{% endif %}>
-            {{ c.slug }} — {{ c.display_name }}
-          </label><br>
-        {% endfor %}
-      </fieldset>
-    {% endfor %}
-    <button type="submit">Save changes</button>
+    {% set picker_open = false %}
+    {% include "category_picker.html" %}
+    <button type="submit" data-save-categories>Save changes</button>
   </form>
 
-  <hr>
-
-  <h2>Delete account</h2>
-  <p>Permanently deletes your account and all its data (including your category selections), and signs you out. This cannot be undone.</p>
-  <form method="post" action="/settings/delete-account">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-    <label class="delete-confirm">
-      <input type="checkbox" id="delete-confirm-box" name="confirm" value="yes">
-      I understand this permanently deletes my account and all its data.
-    </label>
-    <button type="submit" id="delete-account-button" class="button-danger" disabled>Delete my account</button>
-  </form>
+  <section class="account-deletion" aria-labelledby="delete-heading">
+    <h2 id="delete-heading">Delete account</h2>
+    <p>Permanently deletes your account and all its data (including your category selections),
+      and signs you out. This cannot be undone.</p>
+    <form method="post" action="/settings/delete-account">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <label class="delete-confirm">
+        <input type="checkbox" id="delete-confirm-box" name="confirm" value="yes">
+        I understand this permanently deletes my account and all its data.
+      </label>
+      <button type="submit" id="delete-account-button" class="button-danger" disabled>Delete my account</button>
+    </form>
+  </section>
   <script>
     (function () {
       var box = document.getElementById("delete-confirm-box");
@@ -46,22 +39,4 @@
     })();
   </script>
 
-  <script>
-    (function () {
-      var search = document.getElementById("category-search");
-      if (!search) return;
-      search.addEventListener("input", function () {
-        var q = search.value.trim().toLowerCase();
-        document.querySelectorAll(".archive-group").forEach(function (group) {
-          var anyVisible = false;
-          group.querySelectorAll(".category-option").forEach(function (opt) {
-            var match = !q || opt.dataset.search.indexOf(q) !== -1;
-            opt.style.display = match ? "" : "none";
-            if (match) anyVisible = true;
-          });
-          group.style.display = anyVisible ? "" : "none";
-        });
-      });
-    })();
-  </script>
 {% endblock %}

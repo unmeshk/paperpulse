@@ -1,14 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
   {% if auth_error %}
-    <p>Auth error: {{ auth_error }}</p>
+    <p role="alert">Could not sign in. Please try again.</p>
   {% endif %}
-  {% if user %}
-    <h1>Hello, {{ user.display_name or user.email }}</h1>
-    <p>Signed in as {{ user.email }}.</p>
-    <p>Next: category picker (not built yet).</p>
-  {% else %}
-    <h1>PaperPulse</h1>
-    <p>Personalized arXiv summaries. <a href="/login">Sign in</a> to get started.</p>
-  {% endif %}
+  <h1 class="post-title">Your daily ArXiv pulse</h1>
+  <p class="site-description">Research summarized into digestible themes, from the categories you choose.</p>
+  <p><a class="button-link" href="/login">Sign in with Google</a></p>
 {% endblock %}

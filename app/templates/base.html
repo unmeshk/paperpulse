@@ -6,14 +6,16 @@
   <title>{% block title %}PaperPulse{% endblock %}</title>
   <meta name="robots" content="noindex">
   <link rel="stylesheet" href="/static/main.css">
+  <link rel="stylesheet" href="/static/blog.css">
   <link rel="stylesheet" href="/static/app.css">
+  <script src="/static/category-picker.js" defer></script>
 </head>
 <body>
   <header class="site-header" role="banner">
     <div class="wrapper">
-      <a class="site-title" rel="author" href="/">Paperpulse</a>
-      <nav class="site-nav">
-        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+      <a class="site-title" rel="author" href="{{ blog_url }}/">Paperpulse</a>
+      <nav class="site-nav" aria-label="Account">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" aria-label="Toggle navigation" />
         <label for="nav-trigger">
           <span class="menu-icon">
             <svg viewBox="0 0 18 15" width="18px" height="15px">
@@ -23,7 +25,6 @@
         </label>
         <div class="trigger">
           {% if user %}
-            <span class="nav-user">{{ user.email }}</span>
             <a class="page-link" href="/feed">Feed</a>
             <a class="page-link" href="/settings">Settings</a>
             <a class="page-link" href="/auth/logout">Sign out</a>
@@ -37,9 +38,9 @@
   <div class="layout-wrap">
     <aside class="site-sidebar" aria-label="Site">
       <nav>
-        <a class="page-link" href="https://paperpulse.ukurup.com/about/">About</a>
-        <a class="page-link" href="https://paperpulse.ukurup.com/whatsnew/">What's New</a>
-        <a class="page-link" href="https://coff.ee/unmeshk" target="_blank">Buy me a coffee</a>
+        <a class="page-link" href="{{ blog_url }}/about/">About</a>
+        <a class="page-link" href="{{ blog_url }}/whatsnew/">What's New</a>
+        <a class="page-link" href="https://coff.ee/unmeshk" target="_blank" rel="noopener noreferrer">Buy me a coffee</a>
       </nav>
     </aside>
 
@@ -52,7 +53,7 @@
       <div class="footer-col-wrapper">
         <div class="footer-col footer-col-1">
           <p>Your daily summary of ML papers on ArXiV</p>
-          <p><a href="https://paperpulse.ukurup.com/privacy/">Privacy Policy</a></p>
+          <p><a href="{{ blog_url }}/privacy/">Privacy Policy</a></p>
         </div>
       </div>
     </div>

@@ -1,5 +1,16 @@
 # Roadmap
 
+Active product work: [personalized feed design](PERSONALIZED_FEED_DESIGN.md).
+Owner approved matching the main blog design and replacing the long category
+list with a searchable, collapsible checkbox picker on 2026-10-05. The linked
+document records completed local implementation and browser validation. Changes
+are ready for review; deployment remains separate.
+
+Production hosting moved to Hetzner; owner confirmed migration complete on
+2026-10-05. Product work has resumed. Phase 1 implementation and the feed archive
+are shipped; remaining launch follow-ups below reflect their last recorded
+status. Phase 2 is the next major product release.
+
 ## Phase 1 — In progress
 Daily personalized feed via Google login + curated cs.* category selection. See `PHASE1_SPEC.md` for the full scope.
 
