@@ -1,0 +1,144 @@
+{
+  "checked_on": "2026-10-14",
+  "kind": "offline_input_enumeration_not_model_measurements",
+  "dataset": {
+    "papers": 1643,
+    "pairs": 128,
+    "interests": 8,
+    "reviewed_pairs": 0,
+    "splits": {
+      "calibration": 61,
+      "heldout": 67
+    },
+    "sources": [
+      {
+        "category": "cs.CL",
+        "day": "2026-10-14",
+        "status": "complete",
+        "papers": 642
+      },
+      {
+        "category": "stat.ML",
+        "day": "2026-10-14",
+        "status": "complete",
+        "papers": 181
+      },
+      {
+        "category": "cs.CV",
+        "day": "2026-10-14",
+        "status": "complete",
+        "papers": 742
+      }
+    ]
+  },
+  "raw_snapshots_verified": true,
+  "capacity": {
+    "assumptions": [
+      "cold matching/summary caches",
+      "all accepted pairs require distinct summaries",
+      "whole candidate pool eligible per interest",
+      "pacing uses reserved token bounds",
+      "scope cold-start surcharge reported separately",
+      "no unmeasured retry discount"
+    ],
+    "samples": {
+      "scope": null,
+      "match": null,
+      "summary": null
+    },
+    "batch_size": 25,
+    "whole_day_acceptance_rates": [],
+    "effective_quota_limits": null,
+    "scenarios": [
+      {
+        "candidate_pool": "cs.CL",
+        "papers_per_interest": 642,
+        "interests": 60,
+        "matching_batches": {
+          "5": 7740,
+          "15": 2760,
+          "25": 2700
+        },
+        "projection": null
+      },
+      {
+        "candidate_pool": "cs.CL",
+        "papers_per_interest": 642,
+        "interests": 100,
+        "matching_batches": {
+          "5": 12900,
+          "15": 4600,
+          "25": 4500
+        },
+        "projection": null
+      },
+      {
+        "candidate_pool": "stat.ML",
+        "papers_per_interest": 181,
+        "interests": 60,
+        "matching_batches": {
+          "5": 2220,
+          "15": 780,
+          "25": 720
+        },
+        "projection": null
+      },
+      {
+        "candidate_pool": "stat.ML",
+        "papers_per_interest": 181,
+        "interests": 100,
+        "matching_batches": {
+          "5": 3700,
+          "15": 1300,
+          "25": 1200
+        },
+        "projection": null
+      },
+      {
+        "candidate_pool": "cs.CV",
+        "papers_per_interest": 742,
+        "interests": 60,
+        "matching_batches": {
+          "5": 8940,
+          "15": 3300,
+          "25": 3300
+        },
+        "projection": null
+      },
+      {
+        "candidate_pool": "cs.CV",
+        "papers_per_interest": 742,
+        "interests": 100,
+        "matching_batches": {
+          "5": 14900,
+          "15": 5500,
+          "25": 5500
+        },
+        "projection": null
+      },
+      {
+        "candidate_pool": "union_of_three_categories",
+        "papers_per_interest": 1521,
+        "interests": 60,
+        "matching_batches": {
+          "5": 18300,
+          "15": 6540,
+          "25": 6540
+        },
+        "projection": null
+      },
+      {
+        "candidate_pool": "union_of_three_categories",
+        "papers_per_interest": 1521,
+        "interests": 100,
+        "matching_batches": {
+          "5": 30500,
+          "15": 10900,
+          "25": 10900
+        },
+        "projection": null
+      }
+    ],
+    "recommendation": "pending_live_measurements"
+  }
+}

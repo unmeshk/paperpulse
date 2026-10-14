@@ -1,6 +1,6 @@
 # Semantic interest feeds — implementation plan
 
-Status: milestone 0 implemented locally with offline verification; operational activation pending.
+Status: milestone 0 implemented locally; milestone 1 offline preparation implemented. Operational activation and human/live evaluation pending.
 Date: 2026-10-06.
 
 Owner-approved review revisions incorporated: shared accounting before paid
@@ -285,6 +285,66 @@ confirms the relevance interpretation and resulting gate decision. If a target
 fails, tune on calibration data and retest on fresh held-out examples; do not
 silently relax the criterion. Revise the technical design before introducing a
 different architecture. Later integrated measurements must reconfirm this gate.
+
+### Milestone 1 preparation evidence — 2026-10-14
+
+- Owner instruction: production accounting has **not** been activated; prepare
+  offline evaluation. No paid calls, production writes, deployment or schema changes.
+- `api/evaluation/dataset.json`: **128 candidate pairs, eight interests**;
+  **61 calibration / 67 held-out pairs**. Canonical paper identities, including
+  different input revisions, cannot leak across splits. All **zero human-reviewed
+  labels** remain explicitly pending. Candidate nominations include speculative
+  decoding, related verification/inference methods, broad/ambiguous alignment,
+  incidental literal wording, nonliteral method candidates and unrelated distractors.
+  Human review must confirm actual case coverage; nominations are not ground truth.
+- Archived October 14 raw RSS snapshots and their hashes verify complete latest-day
+  sets: `cs.CL` **642**, `stat.ML` **181**, `cs.CV` **742** inputs; their deduplicated
+  union contains **1,521**. No category membership is invented for the curated
+  June cache. Whole-day sets exclude calibration paper identities.
+- `api/semantic.py` prototypes only focused scopes, exact-ID categorical matching
+  and shared generic summaries. Initial bounds are 25 papers / 24,000 serialized
+  paper-input characters; no silent abstract truncation. Local validators check
+  output fields/enums/bounds, duplicate JSON keys, complete ID coverage and exact
+  supporting excerpts. Frozen baseline version: `semantic-baseline-v1`.
+- `api/evaluate_semantic.py` provides isolated, opt-in execution through milestone
+  0's authoritative lock/ledger, content-addressed response reuse, human CSV review,
+  frozen rubric/targets, and separate calibration/held-out/whole-day reports.
+  SDK telemetry records attempts, pacing-inclusive latency, input/output/thinking
+  tokens, known costs and uncertain reservations. Evaluated predictions never fill
+  human labels. Missing decisions/summaries count as delivery failures.
+- `api/semantic_capacity.py` projects 60/100-interest workloads from real measured
+  calls, verified quotas and measured existing production overhead. Pending inputs
+  yield **null dollars/runtime**, never an invented forecast. It separates cold
+  scopes, observed whole-day prevalence, an all-accepted summary upper bound,
+  completion reservation and owner-selected window/finalization buffer. Real-model
+  measurements and the supplied **4000 RPM / 4M TPM / 150000 RPD** project limits
+  are **unverified**.
+- Input-only capacity: at initial bounds, the three complete sets need **45 / 12 /
+  55** matching batches per interest; their union needs **109**. At 60/100 interests
+  that union projects **6,540 / 10,900** matching batches before scopes/summaries.
+  These are enumeration counts, not measured latency or proof of affordability.
+  Saved input evidence: `api/evaluation/offline-baseline.json`.
+- `api/evaluation/README.md` contains runnable preparation, review, host-only live
+  evaluation and gate commands. A human review packet was generated locally under
+  `/private/tmp/paperpulse-semantic-review-2026-10-14`; regenerate it from the durable
+  dataset next session. Successful model-side schema compatibility remains unverified.
+- Offline behavior verification: **78 API tests passed** on 2026-10-14, including
+  actual SDK HTTP serialization against an in-process transport, real ledger files,
+  cached restarts, blocked evaluation, validation failures, review preservation,
+  no-match days, missing-summary recall penalties and strict owner gate checks.
+  These deterministic checks establish control flow, **not relevance quality**.
+- Follow-up audit: canonical identity must match the arXiv URL; report scoring
+  rejects changed interest phrases as well as changed paper inputs; human label
+  import verifies the reviewed phrase/title/URL/abstract against the frozen dataset.
+  All **78 API tests still pass**, including regressions for changed review text
+  and attempts to score an old scope against a renamed interest.
+
+**Milestone 1 completion remains open.** Required evidence: at least 100 genuinely
+human-reviewed pairs; owner-approved rubric and targets before held-out scoring;
+real generated scopes/outputs and reviewed complete-day results; provider project
+quotas; token/thinking/latency/cost measurements; 60/100-interest completion windows,
+selected batch bound/reserve; and explicit owner gate decision. No quality score,
+unsupported-claim count, $5 forecast or acceptable delivery window is claimed.
 
 ## 2. Add persistence, frozen runs and explicit migrations
 

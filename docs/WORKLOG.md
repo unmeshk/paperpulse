@@ -1,5 +1,85 @@
 # Worklog
 
+## Handoff: 2026-10-14 — resume semantic feed milestone 1 next session
+
+- Current branch: `feat/semantic-evaluation-main`, based on main commit `f8e2f7e`
+  (milestone 0 / PR #56 merged). At handoff, milestone 1 changes were uncommitted
+  and unpushed; owner subsequently requested committing and pushing this branch.
+  Earlier evaluation/budget branches and unrelated local files remain preserved.
+- Offline preparation is implemented: structured scope/match/summary prototypes,
+  isolated evaluation runner, response caching and usage telemetry, human review
+  packets/import, capacity projections and an explicit owner gate.
+- Durable dataset: `api/evaluation/dataset.json`, with 128 candidate pairs across
+  eight interests (61 calibration / 67 held-out), plus three complete archived RSS
+  sets. All authoritative human labels remain empty. Source hashes/membership and
+  canonical paper splits were verified. See `api/evaluation/offline-baseline.json`.
+- Latest verification: **78 API tests passed** on October 14; `git diff --check`
+  passed. Tests establish accounting/control-flow/review integrity, not semantic
+  accuracy. No paid Gemini calls, production writes or deployment were performed.
+- Goal was marked **blocked**, not complete. Merge clears the code dependency;
+  it does not prove production accounting cutover. Owner previously confirmed
+  activation was pending and requested offline preparation. After the merge,
+  production ledger initialization, verified opening spend/project quotas,
+  successful production generation and evaluation enablement remain unconfirmed.
+  Owner rubric/target approval, human labels and live measurements are also pending.
+
+Next session:
+
+1. Read `quickstart.md`, inspect branch/worktree, then read milestone 1 evidence
+   in `docs/SEMANTIC_INTEREST_FEED_IMPLEMENTATION_PLAN.md` and the runnable workflow
+   in `api/evaluation/README.md`. Preserve the implementation and any new local work.
+2. Confirm actual production accounting readiness using milestone 0's cutover
+   runbook. Do not infer activation from the merge or CI. No merge/deployment or
+   paid-run authorization should be inferred from this handoff.
+3. Obtain owner approval for the labeling rubric and proposed precision/recall
+   targets (90% / 80%), and complete genuine human review. Local packets are under
+   `/private/tmp/paperpulse-semantic-review-2026-10-14`; regenerate from the durable
+   dataset if missing. Never substitute evaluated-model predictions for labels.
+4. Once accounting is operational and live evaluation is authorized, use the
+   production host's authoritative ledger/lock with isolated outputs. Measure
+   calibration, untouched held-out cases and complete daily sets; review generated
+   scopes/explanations/summaries. Record tokens/thinking, invalid responses, costs,
+   latency, verified quotas and measured public/category overhead.
+5. Project 60/100-interest capacity, choose batch bounds/completion reserve and
+   an owner-accepted delivery window, then record the explicit owner gate decision
+   in the implementation plan. Milestone 1 remains open until that evidence exists.
+
+## Session: 2026-10-14 (Semantic feed milestone 1 offline preparation)
+
+- Owner confirmed milestone 0 merged. Fetch verified `origin/main` at `f8e2f7e`
+  (PR #56), identical in content to the previous budget branch baseline.
+  Carried uncommitted evaluation changes onto `feat/semantic-evaluation-main`
+  directly from main; preserved earlier branch pointers and all local files.
+  Production ledger initialization/evaluation activation remains unverified.
+
+- Created `feat/semantic-evaluation` from the preserved milestone 0 branch.
+  At session start PR #56 was a draft; owner later merged it as recorded above.
+  No agent merge/deploy performed. Owner confirmed accounting
+  activation is pending and requested offline preparation.
+- Added isolated structured scope/match/summary prototypes and evaluation CLI.
+  Live calls require explicit opt-in and milestone 0's enabled shared ledger.
+  Successful responses are cached by complete model/prompt/input contract; invalid
+  or interrupted work stays explicit. Public feeds and app schema are untouched.
+- Prepared 128 unlabeled candidate pairs across eight interests, split 61/67 by
+  canonical paper identity. Archived three complete October 14 RSS snapshots:
+  642 cs.CL, 181 stat.ML, 742 cs.CV candidates; 1,521 unique inputs in their union.
+  Raw snapshot/membership verification passes. Human review is still required.
+- Added review packets/import, owner-approved rubric and exact output review,
+  separate held-out/whole-day quality and missing-delivery reporting, usage/latency
+  telemetry and capacity estimates gated on real measurements and verified quotas.
+  Initial 25-paper/24,000-character bounds produce 45/12/55 batches per interest;
+  no dollars/runtime estimate is fabricated from these offline counts.
+- API suite: **78 passed**. Tests use real SDK fake-HTTP serialization, ledger and
+  artifact files; they prove controls, not semantic accuracy. No paid calls or
+  production data changes. Full milestone 1 remains open for accounting activation,
+  genuine human labels, live measurements and explicit owner gate decision.
+- Reproducible workflow: `api/evaluation/README.md`. Detailed evidence and remaining
+  requirements: milestone 1 section in `SEMANTIC_INTEREST_FEED_IMPLEMENTATION_PLAN.md`.
+- Follow-up audit tightened source identity and review integrity: canonical IDs
+  match source URLs, imported CSV source text must match frozen inputs, and reports
+  reject renamed interest phrases. API suite remains **78 passed**. Owner rubric
+  approval was requested; human labels and live measurements remain outstanding.
+
 ## Session: 2026-10-13 (Semantic feed milestone 0 implementation)
 
 - Prepared `feat/semantic-budget` from current main after the original draft

@@ -1,6 +1,6 @@
 # PaperPulse repository quickstart
 
-Last checked: 2026-10-13. This is an orientation map, not authorization to implement plans or deploy.
+Last checked: 2026-10-14. This is an orientation map, not authorization to implement plans or deploy.
 
 ## Start here
 
@@ -9,10 +9,13 @@ Last checked: 2026-10-13. This is an orientation map, not authorization to imple
 3. Read the latest entries in [docs/WORKLOG.md](docs/WORKLOG.md), then the relevant design below.
 4. Check actual code before relying on older README or deployment instructions.
 
-Current implementation branch: `feat/semantic-budget`, based on current `main`.
+Current work branch: `feat/semantic-evaluation-main`, based on `origin/main` at `f8e2f7e`.
+Milestone 0 merged through PR #56; its API/app/build CI passed on October 14.
+The previous evaluation/budget branches are preserved; milestone 1 work carried forward.
 The original `docs/semantic-interest-feed` branch and its commits are preserved.
 UI/session fixes and preview tooling landed in main through PR #54. Milestone 0
-budget implementation awaits review/activation. Local generated data and scratch
+budget implementation is merged; production accounting activation remains unverified. Milestone 1 offline tooling/data are
+versioned on the evaluation branch. Local generated data and scratch
 files remain outside version control. Recheck the working tree each session.
 
 ## Current architecture
@@ -72,7 +75,8 @@ PROJECT_ENV=dev PYTHONPATH=. .venv/bin/python -m api.main
   `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`, `SESSION_SECRET`.
   Optional: `DB_PATH`, `CONTENT_DIR`, `COOKIE_SECURE`, `BLOG_URL`, `INDICATOR_COOKIE_DOMAIN`.
 - Both components support Docker secret files under `/run/secrets/`. Never copy secret values into documentation.
-- Fresh baseline on 2026-10-13: **70 API tests and 54 app tests passed**; production Compose validates. No live OAuth, browser,
+- Fresh API verification on 2026-10-14: **78 tests passed**, including evaluation controls and archived RSS membership.
+  Historical baseline on 2026-10-13: **70 API tests and 54 app tests passed**; production Compose validates. No live OAuth, browser,
   paid Gemini, or production verification was performed in that check.
 - Local browser preview/check tooling: [preview_design.py](app/tests/preview_design.py) and
   [browser_design.cjs](app/tests/browser_design.cjs). Read their setup before use; browser evidence in the
@@ -90,7 +94,14 @@ PROJECT_ENV=dev PYTHONPATH=. .venv/bin/python -m api.main
   These describe one to three categories, up to five optional interest phrases, shared semantic processing,
   immutable daily archives, and a $15/day total Gemini ceiling. Milestone 0 accounting is implemented locally;
   production cutover and evaluation activation remain pending. Semantic matching and immutable feeds are not
-  implemented. Next milestone after accounting activation: relevance/capacity evaluation.
+  implemented. Milestone 1's isolated [runner and review workflow](api/evaluation/README.md)
+  now includes 128 candidate pairs across eight interests, calibration/held-out splits,
+  three complete archived RSS sets, structured validation, cached responses and measured-capacity/gate tooling.
+  Human labels, owner rubric approval, live relevance/token/latency/cost measurements and the gate decision
+  remain pending. Owner requested offline preparation while production accounting is inactive.
+  No paid evaluation or production change has occurred. Read the plan's milestone 1 evidence before continuing.
+  Session ended with the goal blocked on operational accounting and human/live evidence;
+  use the latest [worklog handoff](docs/WORKLOG.md) to resume next session.
 - [ROADMAP.md](docs/ROADMAP.md) records broader product direction, including the future feedback learning loop.
   Semantic-interest planning in the October 6 worklog is newer than the roadmap's active-work introduction.
 

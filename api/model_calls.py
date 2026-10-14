@@ -4,6 +4,7 @@ import json
 import logging
 import math
 import re
+import time
 
 from google import genai
 from google.genai import errors, types
@@ -77,7 +78,8 @@ def _usage(response):
     return prompt, candidates + thoughts
 
 
-def generate_text(client, budget, prompt, max_tokens=5000, *, purpose="production", keep_nanodollars=0):
+def generate_text(client, budget, prompt, max_tokens=5000, *, purpose="production", keep_nanodollars=0,
+                  response_schema=None, telemetry=None):
     """Count, reserve, dispatch and reconcile each explicit model attempt.
 
     Args:
@@ -87,6 +89,8 @@ def generate_text(client, budget, prompt, max_tokens=5000, *, purpose="productio
         max_tokens: Output cap including thinking tokens.
         purpose: Production or explicitly enabled evaluation.
         keep_nanodollars: Budget left untouched for later summary work.
+        response_schema: Optional JSON schema for structured text output.
+        telemetry: Optional list receiving attempt timing and billable usage, without prompt text.
     Returns:
         Nonempty text from a completed response.
     """
@@ -96,9 +100,19 @@ def generate_text(client, budget, prompt, max_tokens=5000, *, purpose="productio
     options = types.HttpOptions(timeout=GEMINI_TIMEOUT_MS, retry_options=types.HttpRetryOptions(attempts=1))
     contents = [{"role": "user", "parts": [{"text": prompt}]}]
     system = {"role": "user", "parts": [{"text": SYSTEM_INSTRUCTION}]}
+    structured = {} if response_schema is None else {
+        "response_mime_type": "application/json", "response_json_schema": response_schema,
+    }
+    request = {"model": f"models/{GEMINI_MODEL}", "contents": contents, "systemInstruction": system}
+    if response_schema is not None:
+        request["generationConfig"] = {"responseMimeType": "application/json", "responseJsonSchema": response_schema}
     input_tokens = None
     last_error = None
     for attempt in range(GEMINI_MAX_ATTEMPTS):
+        record = {"attempt": attempt + 1, "status": "not_dispatched"}
+        started = time.monotonic()
+        if telemetry is not None:
+            telemetry.append(record)
         try:
             if input_tokens is None:
                 budget.count_request(purpose)
@@ -109,9 +123,7 @@ def generate_text(client, budget, prompt, max_tokens=5000, *, purpose="productio
                     model=GEMINI_MODEL, contents=None,
                     config=types.CountTokensConfig(http_options=types.HttpOptions(
                         timeout=GEMINI_TIMEOUT_MS, retry_options=types.HttpRetryOptions(attempts=1),
-                        extra_body={"generateContentRequest": {
-                            "model": f"models/{GEMINI_MODEL}", "contents": contents, "systemInstruction": system,
-                        }},
+                        extra_body={"generateContentRequest": request},
                     )),
                 )
                 if type(counted.total_tokens) is not int or counted.total_tokens < 1:
@@ -121,16 +133,23 @@ def generate_text(client, budget, prompt, max_tokens=5000, *, purpose="productio
             reservation = budget.reserve(
                 input_tokens, max_tokens, purpose=purpose, keep_nanodollars=keep_nanodollars,
             )
+            record.update(status="uncertain", input_bound=input_tokens, output_bound=max_tokens,
+                          reservation=list(reservation))
             response = client.models.generate_content(
                 model=GEMINI_MODEL, contents=contents,
                 config=types.GenerateContentConfig(
                     http_options=options, system_instruction=SYSTEM_INSTRUCTION,
                     temperature=0.1, max_output_tokens=max_tokens, candidate_count=1,
                     automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
+                    **structured,
                 ),
             )
             prompt_tokens, output_tokens = _usage(response)
+            record.update(input_tokens=prompt_tokens, output_tokens=output_tokens,
+                          thinking_tokens=response.usage_metadata.thoughts_token_count or 0)
             budget.reconcile(reservation, prompt_tokens, output_tokens)
+            record["reconciled"] = True
+            record["status"] = "invalid"
             candidates = response.candidates or []
             if len(candidates) != 1 or candidates[0].finish_reason != types.FinishReason.STOP:
                 raise InvalidModelResponse("Gemini response did not complete")
@@ -139,6 +158,7 @@ def generate_text(client, budget, prompt, max_tokens=5000, *, purpose="productio
                 raise InvalidModelResponse("Gemini returned empty text")
             logger.info("Gemini accounted: purpose=%s input=%d output_including_thoughts=%d",
                         purpose, prompt_tokens, output_tokens)
+            record["status"] = "success"
             return text
         except errors.APIError as err:
             # A failed request's reservation stays charged at its maximum: even
@@ -161,6 +181,8 @@ def generate_text(client, budget, prompt, max_tokens=5000, *, purpose="productio
             # Usage already reconciled for valid but empty/truncated responses.
             last_error = InvalidModelResponse("Invalid Gemini response")
             budget.provider_delay(2 ** attempt)
+        finally:
+            record["seconds"] = time.monotonic() - started
         logger.warning("Gemini attempt %d/%d failed: %s", attempt + 1, GEMINI_MAX_ATTEMPTS,
                        type(last_error).__name__)
     raise last_error
