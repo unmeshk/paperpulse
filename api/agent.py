@@ -1,19 +1,19 @@
-import os
-import time
 import logging
 
-from google import genai
-from google.genai import types
-
-from api.settings import SUMMARY_PROMPT, COMBINE_PROMPT
+from api.model_budget import BudgetError, ModelBudget
+from api.model_calls import create_client, generate_text
+from api.settings import SUMMARY_PROMPT, COMBINE_PROMPT, budget_directory
 
 logger = logging.getLogger(__name__)
 
 
 
 class Agent:
-    def __init__(self, gemini_api_key):
-        self.client = genai.Client(api_key=gemini_api_key)
+    def __init__(self, gemini_api_key, budget=None, purpose="production"):
+        self.client = create_client(gemini_api_key)
+        self.budget = budget
+        self.purpose = purpose
+        self.stop_error = None
 
     def _combine_paper_info(self, paper):
         """
@@ -61,20 +61,18 @@ class Agent:
         return batches
 
     def _call_llm(self, prompt, max_tokens=5000):
+        if self.stop_error is not None:
+            raise self.stop_error
+        if self.budget is not None:
+            return generate_text(self.client, self.budget, prompt, max_tokens, purpose=self.purpose)
+        # Direct callers (including future evaluation tooling) use the same
+        # configured durable ledger; no automatic or in-memory allowance.
         try:
-            response = self.client.models.generate_content(
-                model='gemini-3.1-flash-lite',
-                contents=prompt,
-                config=types.GenerateContentConfig(
-                    system_instruction='You are a helpful assistant.',
-                    temperature=0.1,
-                    max_output_tokens=max_tokens,
-                )
-            )
-            return response.text
-        except Exception as e:
-            logger.error(f"LLM API call failed: {str(e)}")
-            raise
+            directory = budget_directory()
+        except ValueError as err:
+            raise BudgetError(str(err)) from err
+        with ModelBudget(directory) as budget:
+            return generate_text(self.client, budget, prompt, max_tokens, purpose=self.purpose)
 
     def identify_important_papers(self, papers):
         """
@@ -111,19 +109,28 @@ class Agent:
                 batch_summary = self._call_llm(prompt)
                 intermediate_summaries.append(batch_summary)
                 logger.info(f"Successfully processed batch {i}")
+            except BudgetError as err:
+                self.stop_error = err
+                break
             except Exception as e:
                 logger.error(f"Failed to process batch {i}: {str(e)}")
                 continue
 
-            if i < len(batches):
-                time.sleep(30)
         
         # If we have multiple summaries, combine them
-        if len(intermediate_summaries) > 1:
+        if self.stop_error is not None:
+            if not intermediate_summaries:
+                raise self.stop_error
+            # Preserve already completed summaries without another paid combine.
+            final_summary = "\n\n".join(intermediate_summaries)
+        elif len(intermediate_summaries) > 1:
             combine_prompt = COMBINE_PROMPT + "\n\n".join(intermediate_summaries)
             
             try:
                 final_summary = self._call_llm(combine_prompt)
+            except BudgetError as err:
+                self.stop_error = err
+                final_summary = "\n\n".join(intermediate_summaries)
             except Exception as e:
                 logger.error(f"Failed to combine summaries: {str(e)}")
                 # Fall back to concatenation if combination fails

@@ -21,7 +21,8 @@ from dotenv import load_dotenv
 from api.arxiv_client import ArxivClient
 from api.agent import Agent
 from api.file_handler import FileHandler
-from api.settings import RSS_CATEGORIES, get_secret
+from api.model_budget import BudgetError, ModelBudget, PipelineBusy
+from api.settings import RSS_CATEGORIES, budget_directory, get_secret
 
 from api.webs import create_blogpost
 
@@ -41,6 +42,22 @@ logger.setLevel(logging.INFO)
 
 
 def main():
+    """Run one pipeline under the shared lock; accounting failures exit nonzero."""
+    load_dotenv()
+    try:
+        with ModelBudget(budget_directory()) as budget:
+            budget.check_ready()
+            _run_pipeline(budget)
+        return 0
+    except PipelineBusy:
+        logger.info("Pipeline already running; skipping duplicate invocation")
+        return 0
+    except (BudgetError, ValueError) as err:
+        logger.error("Pipeline stopped: %s", err)
+        return 1
+
+
+def _run_pipeline(budget):
     """
     Main function that orchestrates the retrieval and summarization process.
     """
@@ -51,7 +68,7 @@ def main():
 
     # initalize
     arxiv_client = ArxivClient(RSS_CATEGORIES)
-    llm_agent = Agent(get_secret("gemini_api_key"))
+    llm_agent = Agent(get_secret("gemini_api_key"), budget=budget)
     file_handler = FileHandler(os.getenv("PROJECT_DIR"))
     papers = None
 
@@ -77,7 +94,12 @@ def main():
         else:
             logger.info(f'Retrieved: {len(papers)} papers')
             summary = llm_agent.identify_important_papers(papers)
-            create_blogpost(summary, len(papers))
+            if summary and summary.strip():
+                create_blogpost(summary, len(papers))
+            if llm_agent.stop_error is not None:
+                raise llm_agent.stop_error
+    except BudgetError:
+        raise
     except Exception as e:
         print(f'Exception: {e}')
 
@@ -94,9 +116,11 @@ def main():
             generate_category_blurbs(papers_by_category, llm_agent, CONTENT_DIR, today_ny())
         else:
             logger.info('CONTENT_DIR not set; skipping per-category blurbs')
+    except BudgetError:
+        raise
     except Exception as e:
         logger.error(f'Per-category blurb generation failed: {e}')
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
 

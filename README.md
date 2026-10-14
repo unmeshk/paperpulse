@@ -32,9 +32,16 @@ Create a `.env` file in the `api/` directory with the following variables:
 GEMINI_API_KEY=[your-gemini-api-key]
 PROJECT_ENV=dev  # or 'prod' for production
 PROJECT_DIR=[absolute-path-to-project-root]
+GEMINI_BUDGET_DIR=[absolute-path-to-persistent-accounting-directory]
 ```
 
 In `dev` mode, when `main.py` is run, the retrieved paper list is saved to `papers-<today's date>.pkl` in `PROJECT_DIR`. On subsequent runs the cached file is used instead of re-fetching from arXiv.
+
+Paper caches do not disable Gemini calls. The pipeline now requires an explicitly initialized
+shared $15/day accounting ledger and takes an exclusive pipeline lock. Missing or invalid accounting
+stops paid calls. Before first use, follow the
+[milestone 0 initialization and cutover runbook](docs/SEMANTIC_INTEREST_FEED_IMPLEMENTATION_PLAN.md#milestone-0-accounting-initialization-and-cutover).
+Production and paid evaluation must use the same durable ledger; a local ledger is not an additional allowance.
 
 ## Usage
 

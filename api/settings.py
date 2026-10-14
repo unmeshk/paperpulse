@@ -73,3 +73,22 @@ FIXED_PUBLIC_CATEGORIES = ['cs.LG', 'cs.AI', 'cs.CL', 'cs.CV', 'stat.ML']
 # per-category feed blurbs are written. Both set via env in prod; empty locally.
 APP_DB_PATH = os.getenv("APP_DB_PATH", "")
 CONTENT_DIR = os.getenv("CONTENT_DIR", "")
+
+# Standard text pricing, verified 2026-10-13:
+# https://ai.google.dev/gemini-api/docs/pricing#gemini-3.1-flash-lite
+# Integer nanodollars per token avoid floating-point budget drift. Output
+# includes thinking tokens; no tools, paid grounding, or explicit caches used.
+GEMINI_MODEL = "gemini-3.1-flash-lite"
+GEMINI_INPUT_NANODOLLARS = 250
+GEMINI_OUTPUT_NANODOLLARS = 1500
+GEMINI_DAILY_NANODOLLARS = 15_000_000_000
+GEMINI_TIMEOUT_MS = 60_000
+GEMINI_MAX_ATTEMPTS = 3
+
+
+def budget_directory():
+    """Return the explicitly configured durable accounting directory."""
+    value = os.getenv("GEMINI_BUDGET_DIR", "")
+    if not value or not Path(value).is_absolute():
+        raise ValueError("GEMINI_BUDGET_DIR must be an absolute persistent directory")
+    return Path(value)
