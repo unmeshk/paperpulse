@@ -41,6 +41,11 @@ files remain outside version control. Recheck the working tree each session.
 
 ## Local commands and configuration
 
+Authlib security update (2026-11-03): this branch pins 1.9.1 to address Dependabot
+alerts #31–#38. Fresh checks: 54 app tests and 70 API tests passed; `pip check`
+reported no broken requirements. Authlib emits an upstream httpx integration
+deprecation warning. No live Google OAuth or production deployment was verified.
+
 Run from the repository root. Existing environments are `.venv/` for the pipeline and `app/.venv/` for the app;
 dependencies live in [api/requirements.txt](api/requirements.txt) and [app/requirements.txt](app/requirements.txt).
 
